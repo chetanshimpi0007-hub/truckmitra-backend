@@ -1,0 +1,11 @@
+// src/main/java/com/truckmitra/dto/request/auth/ForgotPasswordRequest.java
+package com.truckmitra.dto.request.auth;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+public record ForgotPasswordRequest(
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
+    String email
+) {}

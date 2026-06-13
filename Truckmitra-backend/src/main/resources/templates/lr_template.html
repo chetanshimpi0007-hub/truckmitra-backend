@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Lorry Receipt</title>
+    <style>
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; margin: 0; padding: 0; }
+        .container { width: 100%; max-width: 800px; margin: 0 auto; padding: 40px; border: 1px solid #eee; }
+        .header { display: flex; justify-content: space-between; border-bottom: 3px solid #10b981; padding-bottom: 20px; }
+        .brand { font-size: 28px; font-weight: 800; color: #064e3b; }
+        .lr-info { text-align: right; }
+        .lr-number { font-size: 20px; font-weight: 900; color: #10b981; }
+        .section { margin-top: 25px; }
+        .section-title { font-size: 12px; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #f3f4f6; padding-bottom: 5px; margin-bottom: 15px; }
+        .grid { display: flex; flex-wrap: wrap; margin: -10px; }
+        .col { width: 50%; padding: 10px; box-sizing: border-box; }
+        .label { font-size: 10px; color: #6b7280; font-weight: 700; text-transform: uppercase; }
+        .value { font-size: 14px; font-weight: 700; color: #111827; }
+        .footer { margin-top: 50px; text-align: center; border-top: 1px solid #eee; padding-top: 20px; color: #9ca3af; font-size: 10px; }
+        .qr-section { margin-top: 30px; text-align: center; }
+        .qr-code { width: 120px; height: 120px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="brand">TruckMitra Logistics</div>
+            <div class="lr-info">
+                <div class="label">Lorry Receipt #</div>
+                <div class="lr-number" th:text="${lr.lrNumber}">TM-LR-2024-001</div>
+                <div class="label" th:text="${#temporals.format(lr.generatedAt, 'dd MMM yyyy HH:mm')}">Date</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Reference Info</div>
+            <div class="grid">
+                <div class="col">
+                    <div class="label">Trip ID</div>
+                    <div class="value" th:text="${trip.id}">Trip ID</div>
+                </div>
+                <div class="col">
+                    <div class="label">Tracking Reference</div>
+                    <div class="value" th:text="${trip.tripNumber}">Trip Number</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Party Details</div>
+            <div class="grid">
+                <div class="col">
+                    <div class="label">Consignor (Shipper)</div>
+                    <div class="value" th:text="${shipper.companyName != null ? shipper.companyName : shipper.user.fullName}">Shipper Name</div>
+                </div>
+                <div class="col">
+                    <div class="label">Consignee</div>
+                    <div class="value" th:text="${load.destination}">Destination</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Trip &amp; Material Info</div>
+            <div class="grid">
+                <div class="col">
+                    <div class="label">Source Address</div>
+                    <div class="value" th:text="${load.source}">Source</div>
+                </div>
+                <div class="col">
+                    <div class="label">Destination Address</div>
+                    <div class="value" th:text="${load.destination}">Destination</div>
+                </div>
+                <div class="col">
+                    <div class="label">Material Type</div>
+                    <div class="value" th:text="${load.materialType}">General</div>
+                </div>
+                <div class="col">
+                    <div class="label">Weight</div>
+                    <div class="value" th:text="${load.weight + ' Tons'}">10 Tons</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Vehicle &amp; Driver</div>
+            <div class="grid">
+                <div class="col">
+                    <div class="label">Vehicle Number</div>
+                    <div class="value" th:text="${vehicle.vehicleNumber}">HR 38 AB 1234</div>
+                </div>
+                <div class="col">
+                    <div class="label">Vehicle Type</div>
+                    <div class="value" th:text="${vehicle.vehicleType}">Tata Ace</div>
+                </div>
+                <div class="col">
+                    <div class="label">Driver Name</div>
+                    <div class="value" th:text="${driver.fullName}">John Doe</div>
+                </div>
+                <div class="col">
+                    <div class="label">Driver Mobile</div>
+                    <div class="value" th:text="${driver.mobile}">+91 9876543210</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Costs &amp; Estimate</div>
+            <div class="grid">
+                <div class="col">
+                    <div class="label">Distance</div>
+                    <div class="value" th:text="${trip.distance != null ? #numbers.formatDecimal(trip.distance, 1, 1) + ' km' : 'N/A'}">0 km</div>
+                </div>
+                <div class="col">
+                    <div class="label">Est. Travel Time</div>
+                    <div class="value" th:text="${trip.distance != null ? #numbers.formatDecimal(trip.distance / 50.0, 1, 1) + ' Hours' : 'N/A'}">0 Hours</div>
+                </div>
+                <div class="col">
+                    <div class="label">Toll Charges</div>
+                    <div class="value" th:text="${trip.totalTollCost != null ? 'INR ' + #numbers.formatDecimal(trip.totalTollCost, 1, 2) : 'INR 0.00'}">INR 0.00</div>
+                </div>
+                <div class="col">
+                    <div class="label">Freight Amount</div>
+                    <div class="value" th:text="${trip.freightAmount != null ? 'INR ' + #numbers.formatDecimal(trip.freightAmount, 1, 2) : 'INR 0.00'}">INR 0.00</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="qr-section">
+            <img th:src="${lr.qrCodeUrl}" class="qr-code" alt="QR Verification"/>
+            <div class="label">Scan to Verify Authenticity</div>
+        </div>
+
+        <div class="footer">
+            <p>This is a computer generated document. No signature is required.</p>
+            <p>Generated by TruckMitra Enterprise Logistics Platform</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+public class CheckDB {
+    public static void main(String[] args) {
+        try {
+            Connection conn = DriverManager.getConnection("jdbc:h2:file:./data/truckmitra", "SA", "");
+            Statement stmt = conn.createStatement();
+            
+            System.out.println("--- DRIVERS ---");
+            ResultSet rs = stmt.executeQuery("SELECT u.id, u.fullName, d.vehicleNumber FROM users u JOIN drivers d ON u.id = d.user_id WHERE u.role = 'DRIVER' ORDER BY u.id DESC LIMIT 5");
+            while(rs.next()) {
+                System.out.println("ID: " + rs.getLong("id") + ", Name: " + rs.getString("fullName") + ", VehicleNumber: " + rs.getString("vehicleNumber"));
+            }
+            
+            System.out.println("\n--- VEHICLES ---");
+            rs = stmt.executeQuery("SELECT id, vehicleNumber, driver_id, transporter_id FROM vehicles ORDER BY id DESC LIMIT 5");
+            while(rs.next()) {
+                System.out.println("ID: " + rs.getLong("id") + ", VehicleNumber: " + rs.getString("vehicleNumber") + ", DriverID: " + rs.getLong("driver_id") + ", TransporterID: " + rs.getLong("transporter_id"));
+            }
+            
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}

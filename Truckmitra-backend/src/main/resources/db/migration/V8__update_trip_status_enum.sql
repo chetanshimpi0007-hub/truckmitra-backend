@@ -1,0 +1,1 @@
+ALTER TABLE trips ALTER COLUMN status VARCHAR(50);
