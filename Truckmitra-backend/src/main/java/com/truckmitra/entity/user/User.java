@@ -37,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
            @Index(name = "idx_mobile", columnList = "mobile"),
            @Index(name = "idx_email", columnList = "email"),
            @Index(name = "idx_role", columnList = "role"),
-           @Index(name = "idx_status", columnList = "accountStatus")
+           @Index(name = "idx_user_status", columnList = "accountStatus")
        })
 @Inheritance(strategy = InheritanceType.JOINED)
 @SQLDelete(sql = "UPDATE users SET is_deleted = true, deleted_at = NOW() WHERE id = ?")

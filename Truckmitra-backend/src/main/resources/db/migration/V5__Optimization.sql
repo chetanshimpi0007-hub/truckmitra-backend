@@ -10,6 +10,6 @@ CREATE INDEX IF NOT EXISTS idx_audit_user_id ON audit_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_logs(action);
 
 -- Chat Messages Indexes (chat_messages created in V1 by Flyway)
-CREATE INDEX IF NOT EXISTS idx_chat_from_user ON chat_messages(from_user);
-CREATE INDEX IF NOT EXISTS idx_chat_to_user ON chat_messages(to_user);
+CREATE INDEX IF NOT EXISTS idx_chat_sender_id ON chat_messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_chat_receiver_id ON chat_messages(receiver_id);
 CREATE INDEX IF NOT EXISTS idx_chat_timestamp ON chat_messages(timestamp);

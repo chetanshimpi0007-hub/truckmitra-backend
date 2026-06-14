@@ -22,8 +22,8 @@ import java.time.LocalDateTime;
 @Table(name = "notification_logs", 
        indexes = {
            @Index(name = "idx_notif_log_user_id", columnList = "userId"),
-           @Index(name = "idx_status", columnList = "status"),
-           @Index(name = "idx_created_at", columnList = "createdAt")
+           @Index(name = "idx_notification_status", columnList = "status"),
+           @Index(name = "idx_created_at", columnList = "created_at")
        })
 public class NotificationLog extends BaseEntity {
     

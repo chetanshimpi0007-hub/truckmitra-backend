@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
            @Index(name = "idx_trip_id", columnList = "tripId"),
            @Index(name = "idx_transaction_date", columnList = "transactionDate"),
            @Index(name = "idx_transaction_type", columnList = "transactionType"),
-           @Index(name = "idx_status", columnList = "status")
+           @Index(name = "idx_transaction_status", columnList = "status")
        })
 public class Transaction extends BaseEntity {
 
