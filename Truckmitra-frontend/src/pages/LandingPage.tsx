@@ -12,6 +12,7 @@ import {
   HiPhone,
   HiUser
 } from 'react-icons/hi';
+import { LogisticsHero } from '../Components/illustrations/LogisticsHero';
 
 const fadeInUp: any = {
   initial: { opacity: 0, y: 40 },
@@ -33,11 +34,7 @@ const LandingPage: React.FC = () => {
       {/* 1. HERO SECTION */}
       <section className="relative min-h-[90vh] flex items-center pt-20">
         <div className="absolute inset-0 z-0">
-          <img 
-            src="/assets/marketing/login-hero.png" 
-            alt="TruckMitra Hero" 
-            className="w-full h-full object-cover opacity-30 mix-blend-screen"
-          />
+          {/* Removed login-hero.png per visual identity requirement */}
           <div className="absolute inset-0 bg-gradient-to-b from-slate-900/50 via-slate-900/80 to-slate-900"></div>
           <div className="absolute inset-0 bg-blue-900/20 mix-blend-overlay"></div>
         </div>
@@ -84,13 +81,12 @@ const LandingPage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <motion.img 
-                src="/assets/marketing/mobile-app.png" 
-                alt="Driver App" 
-                className="w-full max-w-md mx-auto drop-shadow-2xl"
+              <motion.div
                 animate={{ y: [0, -15, 0] }}
                 transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-              />
+              >
+                <LogisticsHero className="w-full max-w-md mx-auto drop-shadow-2xl" />
+              </motion.div>
               {/* Decorative Blur */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-500/20 blur-[100px] rounded-full -z-10"></div>
             </motion.div>

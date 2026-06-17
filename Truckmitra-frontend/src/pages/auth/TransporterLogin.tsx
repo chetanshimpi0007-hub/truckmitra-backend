@@ -7,7 +7,9 @@ import {
   HiArrowRight,
   HiCheckCircle,
   HiUser,
-  HiChevronLeft
+  HiChevronLeft,
+  HiEye,
+  HiEyeOff
 } from 'react-icons/hi';
 import { toast } from 'react-hot-toast';
 import { AccountStatus } from '../../interfaces/auth.interface';
@@ -16,6 +18,7 @@ import AuthLayout from '../../Components/layouts/AuthLayout';
 const TransporterLogin: React.FC = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -91,13 +94,20 @@ const TransporterLogin: React.FC = () => {
               <HiLockClosed className="w-5 h-5" />
             </div>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="block w-full pl-11 pr-4 py-4 bg-gray-50 border-2 border-gray-50 rounded-2xl focus:bg-white focus:border-orange-600 focus:outline-none transition-all placeholder:text-gray-400 text-gray-800 font-medium"
+              className="block w-full pl-11 pr-12 py-4 bg-gray-50 border-2 border-gray-50 rounded-2xl focus:bg-white focus:border-orange-600 focus:outline-none transition-all placeholder:text-gray-400 text-gray-800 font-medium"
               placeholder="••••••••"
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-orange-600 transition-colors"
+            >
+              {showPassword ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
+            </button>
           </div>
         </div>
 

@@ -17,10 +17,14 @@ import VoiceAssistant from '../../Components/common/VoiceAssistant';
 import LiveMap from '../../Components/common/LiveMap';
 import DriverSelectionModal from '../../Components/loads/DriverSelectionModal';
 import TransporterOverview from '../../Components/dashboard/TransporterOverview';
+import ProfileHeader from '../../Components/dashboard/ProfileHeader';
 import FleetManagement from '../../Components/dashboard/FleetManagement';
 import AnalyticsDashboard from '../../Components/dashboard/AnalyticsDashboard';
 import LiveTrackingCenter from '../../Components/common/LiveTrackingCenter';
 import DeliveryVerificationCenter from '../../Components/loads/DeliveryVerificationCenter';
+import { ProfitEstimatorWidget } from '../../Components/dashboard/ProfitEstimatorWidget';
+import { BusinessHealthWidget } from '../../Components/dashboard/BusinessHealthWidget';
+import BillingDashboard from '../billing/BillingDashboard';
 
 /* ─── STATUS PILL ────────────────────────────────────────────── */
 const STATUS_CFG: Record<string, string> = {
@@ -200,9 +204,9 @@ const TransporterDashboard: React.FC = () => {
     }
   };
 
-  const handleAssignFleet = async (tripId: number, driverId: number, vehicleId: number) => {
+  const handleAssignFleet = async (tripId: number, driverId: number, vehicleId: number, driverAmount: number) => {
     try {
-      await protectedApi.post('/api/trips/assign-fleet', null, { params: { tripId, driverId, vehicleId } });
+      await protectedApi.post('/api/trips/assign-fleet', null, { params: { tripId, driverId, vehicleId, driverAmount } });
       toast.success('Fleet assigned! Driver notified via email.');
       fetchData();
     } catch (err: any) {
@@ -250,8 +254,12 @@ const TransporterDashboard: React.FC = () => {
     walletBalance:   wallet?.currentBalance || 0,
   };
 
-  const totalEarnings = trips.filter(t => t.status === 'COMPLETED')
-    .reduce((s, t) => s + (t.load?.budget || 0), 0);
+  const completedTripsArr = trips.filter(t => t.status === 'COMPLETED' || t.status === 'DELIVERED');
+  const totalRevenue = completedTripsArr.reduce((s, t) => s + (t.shipperAmount || t.freightAmount || 0), 0);
+  const totalDriverPayment = completedTripsArr.reduce((s, t) => s + (t.driverAmount || 0), 0);
+  const totalProfitMargin = totalRevenue - totalDriverPayment;
+
+  const totalEarnings = totalProfitMargin;
 
   const winRate = myBids.length > 0
     ? Math.round((stats.wonTenders / myBids.length) * 100)
@@ -318,26 +326,29 @@ const TransporterDashboard: React.FC = () => {
 
       {/* ─── MAIN */}
       <main className="flex-1 overflow-y-auto">
-        <header className="bg-white px-10 py-6 flex items-center justify-between border-b border-slate-200 sticky top-0 z-10">
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 capitalize">
-              {activeMenu === 'tenders' ? 'Open Tenders' : activeMenu.replace(/-/g, ' ')}
-            </h1>
-            <p className="text-slate-500 text-sm font-medium">Transporter Control Panel</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <NotificationDropdown />
-            <button onClick={() => navigate('/transporter/loads/create')}
-              className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-black text-sm shadow-md hover:bg-slate-900 transition-all flex items-center space-x-2">
-              <HiDocumentText className="w-5 h-5" />
-              <span>Post Load</span>
-            </button>
-            <button onClick={fetchData}
-              className="p-2 text-slate-400 hover:text-emerald-500 transition-all rounded-xl hover:bg-emerald-50">
-              <HiRefresh className={`w-6 h-6 ${loading ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-        </header>
+        <ProfileHeader
+          user={transporterProfile || user}
+          roleBadgeText="Fleet Owner"
+          roleBadgeClasses="bg-emerald-50 text-emerald-600 border-emerald-100"
+          welcomeMessage={`Welcome back, ${user?.fullName?.split(' ')[0] || 'Transporter'}`}
+          stats={[
+            { label: 'Fleet', value: stats.totalVehicles, icon: <HiTruck /> },
+            { label: 'Drivers', value: stats.totalDrivers, icon: <HiUser /> },
+            { label: 'Active Trips', value: stats.ongoingTrips, icon: <HiLocationMarker /> },
+            { label: 'Wallet', value: `₹${stats.walletBalance}`, icon: <HiCurrencyDollar /> }
+          ]}
+        >
+          <NotificationDropdown />
+          <button onClick={() => navigate('/transporter/loads/create')}
+            className="px-4 py-2 bg-emerald-600 text-white rounded-xl font-black text-sm shadow-md hover:bg-slate-900 transition-all flex items-center space-x-2 shrink-0">
+            <HiDocumentText className="w-5 h-5" />
+            <span className="hidden sm:inline">Post Load</span>
+          </button>
+          <button onClick={fetchData}
+            className="p-2 text-slate-400 hover:text-emerald-500 transition-all rounded-xl hover:bg-emerald-50 shrink-0">
+            <HiRefresh className={`w-6 h-6 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </ProfileHeader>
 
         <div className="p-10">
           {loading ? (
@@ -348,7 +359,8 @@ const TransporterDashboard: React.FC = () => {
             <>
               {/* ══ OVERVIEW ═════════════════════════════════════ */}
               {activeMenu === 'overview' && (
-                <div className="animate-fadeIn">
+                <div className="animate-fadeIn space-y-6">
+                  <BusinessHealthWidget />
                   <TransporterOverview 
                     stats={stats} 
                     trips={trips} 
@@ -490,7 +502,7 @@ const TransporterDashboard: React.FC = () => {
                                   <td className="px-6 py-5">
                                     {bid.status === 'ACCEPTED' && relatedTrip && !relatedTrip.driver && (
                                       <AssignFleetModal
-                                        tripId={relatedTrip.id}
+                                        trip={relatedTrip}
                                         drivers={drivers.filter(d => !d.isOnTrip)}
                                         vehicles={vehicles}
                                         onAssign={handleAssignFleet}
@@ -601,7 +613,7 @@ const TransporterDashboard: React.FC = () => {
                                 </div>
                                 <div className="flex items-center space-x-3">
                                   <AssignFleetModal 
-                                    tripId={trip.id} 
+                                    trip={trip} 
                                     drivers={drivers.filter(d => !d.isOnTrip)} 
                                     vehicles={vehicles.filter(v => v.isAvailable)} 
                                     onAssign={handleAssignFleet} 
@@ -786,36 +798,8 @@ const TransporterDashboard: React.FC = () => {
 
               {/* ══ FINANCIAL / EARNINGS ═════════════════════════ */}
               {activeMenu === 'financial' && (
-                <div className="space-y-8 animate-fadeIn max-w-4xl">
-                  <div className="bg-gradient-to-r from-emerald-600 to-teal-500 rounded-3xl p-10 text-white">
-                    <p className="text-emerald-100 text-sm font-bold uppercase tracking-widest mb-2">Total Earnings</p>
-                    <p className="text-5xl font-black">₹{totalEarnings.toLocaleString('en-IN')}</p>
-                    <p className="text-emerald-200 text-sm mt-2">{stats.completedTrips} completed trips</p>
-                  </div>
-                  <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
-                    <h3 className="text-xl font-black mb-6">Completed Trips Revenue</h3>
-                    {trips.filter(t => t.status === 'COMPLETED').length === 0 ? (
-                      <EmptyState icon={<HiCurrencyDollar />} message="No completed trips yet." />
-                    ) : (
-                      <div className="space-y-3">
-                        {trips.filter(t => t.status === 'COMPLETED').map(t => (
-                          <div key={t.id} className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                            <div>
-                              <div className="font-bold text-slate-900">{t.load?.source} → {t.load?.destination}</div>
-                              <div className="text-xs text-slate-400 font-medium">{t.load?.materialType} · Trip #{t.id}</div>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                              <div className="text-xl font-black text-emerald-600">₹{t.load?.budget?.toLocaleString()}</div>
-                              <button onClick={() => handleDownloadPdf(t.id)}
-                                className="p-2 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-600 text-slate-400 rounded-xl transition">
-                                <HiDownload className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                <div className="animate-fadeIn max-w-6xl mx-auto">
+                  <BillingDashboard rolePath="/transporter" />
                 </div>
               )}
 
@@ -864,6 +848,7 @@ const TransporterDashboard: React.FC = () => {
         {assignDriverLoadId && (
           <DriverSelectionModal 
             loadId={assignDriverLoadId}
+            shipperAmount={myLoads.find(l => l.id === assignDriverLoadId)?.budget || 0}
             onClose={() => setAssignDriverLoadId(null)}
             onSuccess={() => {
               setAssignDriverLoadId(null);
@@ -1179,12 +1164,13 @@ const SettingRow = ({ label, value }: any) => (
 );
 
 const AssignFleetModal: React.FC<{
-  tripId: number; drivers: any[]; vehicles: any[];
-  onAssign: (tripId: number, driverId: number, vehicleId: number) => void;
-}> = ({ tripId, drivers, vehicles, onAssign }) => {
+  trip: any; drivers: any[]; vehicles: any[];
+  onAssign: (tripId: number, driverId: number, vehicleId: number, driverAmount: number) => void;
+}> = ({ trip, drivers, vehicles, onAssign }) => {
   const [open, setOpen] = useState(false);
   const [driverId, setDriverId] = useState<number | ''>('');
   const [vehicleId, setVehicleId] = useState<number | ''>('');
+  const [driverAmount, setDriverAmount] = useState<number | ''>('');
   const [helperMessage, setHelperMessage] = useState<string>('');
   const [driverVehicles, setDriverVehicles] = useState<any[]>([]);
 
@@ -1228,9 +1214,23 @@ const AssignFleetModal: React.FC<{
             </button>
             <h3 className="text-2xl font-black text-slate-900 mb-2">Assign Fleet</h3>
             <p className="text-slate-500 text-sm font-medium mb-8">
-              Assign a driver and vehicle for Trip #{tripId}.
+              Assign a driver and vehicle for Trip #{trip.id}.
             </p>
-            <div className="space-y-4 mb-10">
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Driver Payment Amount (₹)</label>
+                <input type="number" value={driverAmount} onChange={e => setDriverAmount(e.target.value === '' ? '' : Number(e.target.value))}
+                  placeholder={`Shipper Amount: ₹${trip.freightAmount}`}
+                  className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-emerald-500 outline-none font-bold text-slate-900" />
+                {driverAmount !== '' && (
+                  <p className="text-xs font-bold mt-1 text-slate-500">
+                    Transporter Margin: <span className="text-emerald-600">₹{(trip.freightAmount - Number(driverAmount)).toLocaleString('en-IN')}</span>
+                  </p>
+                )}
+              </div>
+              <div className="mb-4">
+                <ProfitEstimatorWidget tripId={trip.id} />
+              </div>
               <div>
                 <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Driver</label>
                 <select value={driverId} onChange={handleDriverChange}
@@ -1250,8 +1250,14 @@ const AssignFleetModal: React.FC<{
               </div>
             </div>
             <button
-              disabled={driverId === '' || vehicleId === ''}
-              onClick={() => { onAssign(tripId, Number(driverId), Number(vehicleId)); setOpen(false); }}
+              disabled={
+                driverId === '' || 
+                vehicleId === '' || 
+                driverAmount === '' || 
+                Number(driverAmount) <= 0 || 
+                Number(driverAmount) > trip.freightAmount
+              }
+              onClick={() => { onAssign(trip.id, Number(driverId), Number(vehicleId), Number(driverAmount)); setOpen(false); }}
               className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-emerald-600 transition-all disabled:opacity-50 disabled:hover:bg-slate-900">
               Confirm Assignment
             </button>

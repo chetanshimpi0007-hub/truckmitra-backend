@@ -74,6 +74,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 // ROLE BASED ENDPOINTS
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/testdb/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
                 .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/shipper/**", "/shipper/**").hasRole("SHIPPER")
                 .requestMatchers("/api/transporter/**", "/transporter/**").hasRole("TRANSPORTER")
@@ -81,6 +84,12 @@ public class SecurityConfig {
 
                 // ALL OTHER APIs require authentication
                 .anyRequest().authenticated()
+            )
+
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized - Please login");
+                })
             )
 
             .sessionManagement(session ->
@@ -102,7 +111,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        config.setAllowedOriginPatterns(Arrays.asList("*"));
 config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 config.setAllowedHeaders(Arrays.asList("*"));
 config.setAllowCredentials(true);

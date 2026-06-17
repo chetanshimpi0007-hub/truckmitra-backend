@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/auth.hook';
 import { Role } from '../../interfaces/auth.interface';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Register: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -37,6 +38,7 @@ const Register: React.FC = () => {
     experienceInYears: '',
   });
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const { register: registerUser, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -295,14 +297,23 @@ const Register: React.FC = () => {
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Password *</label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          required
-        />
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 pr-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-blue-600 z-10 mt-1"
+          >
+            {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+          </button>
+        </div>
         <p className="mt-1 text-xs text-gray-500">Minimum 6 characters</p>
       </div>
     </div>

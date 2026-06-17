@@ -64,7 +64,9 @@ public class AdminUserController {
         log.info("Fetching dashboard statistics");
         
         long registeredCount = userRepository.countByAccountStatus(AccountStatus.REGISTERED);
-        long pendingCount = userRepository.countByAccountStatus(AccountStatus.PENDING_VERIFICATION);
+        long pendingCount = userRepository.countByAccountStatus(AccountStatus.PENDING_VERIFICATION) +
+                            userRepository.countByAccountStatus(AccountStatus.REGISTERED) +
+                            userRepository.countByAccountStatus(AccountStatus.PROFILE_COMPLETED);
         long verifiedCount = userRepository.countByAccountStatus(AccountStatus.VERIFIED);
         long rejectedCount = userRepository.countByAccountStatus(AccountStatus.REJECTED);
         long suspendedCount = userRepository.countByAccountStatus(AccountStatus.SUSPENDED);
@@ -99,6 +101,44 @@ public class AdminUserController {
     public ResponseEntity<ApiResponse<UserDetailResponse>> getUserDetails(@PathVariable Long userId) {
         UserDetailResponse userDetails = adminUserService.getUserDetails(userId);
         return ResponseEntity.ok(ApiResponse.success("User details fetched successfully", userDetails));
+    }
+
+    @GetMapping("/{userId}/snapshot")
+    public ResponseEntity<ApiResponse<com.truckmitra.dto.response.admin.UserFinancialSnapshotDto>> getUserFinancialSnapshot(@PathVariable Long userId) {
+        com.truckmitra.dto.response.admin.UserFinancialSnapshotDto snapshot = adminUserService.getUserFinancialSnapshot(userId);
+        return ResponseEntity.ok(ApiResponse.success("User financial snapshot fetched successfully", snapshot));
+    }
+
+    @GetMapping("/{userId}/trips")
+    public ResponseEntity<ApiResponse<Page<com.truckmitra.entity.load.Trip>>> getUserTrips(
+            @PathVariable Long userId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        Page<com.truckmitra.entity.load.Trip> trips = adminUserService.getUserTrips(userId, pageable);
+        return ResponseEntity.ok(ApiResponse.success("User trips fetched successfully", trips));
+    }
+
+    @GetMapping("/{userId}/payments")
+    public ResponseEntity<ApiResponse<Page<com.truckmitra.dto.response.wallet.TransactionResponse>>> getUserPayments(
+            @PathVariable Long userId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        Page<com.truckmitra.dto.response.wallet.TransactionResponse> transactions = adminUserService.getUserPayments(userId, pageable);
+        return ResponseEntity.ok(ApiResponse.success("User payments fetched successfully", transactions));
+    }
+
+    @GetMapping("/{userId}/timeline")
+    public ResponseEntity<ApiResponse<Page<com.truckmitra.entity.AuditLog>>> getUserTimeline(
+            @PathVariable Long userId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        Page<com.truckmitra.entity.AuditLog> timeline = adminUserService.getUserTimeline(userId, pageable);
+        return ResponseEntity.ok(ApiResponse.success("User timeline fetched successfully", timeline));
+    }
+
+    @GetMapping("/{userId}/invoices")
+    public ResponseEntity<ApiResponse<Page<com.truckmitra.entity.load.Trip>>> getUserInvoices(
+            @PathVariable Long userId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        Page<com.truckmitra.entity.load.Trip> invoices = adminUserService.getUserInvoices(userId, pageable);
+        return ResponseEntity.ok(ApiResponse.success("User invoices fetched successfully", invoices));
     }
 
     @GetMapping

@@ -43,6 +43,18 @@ public class NotificationController {
         return ResponseEntity.ok(ApiResponse.success("Notifications fetched successfully", notifications));
     }
 
+    @GetMapping
+    @Operation(summary = "Get current user's notifications")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Page<NotificationResponse>>> getMyNotifications(
+            @PageableDefault(size = 20) Pageable pageable, org.springframework.security.core.Authentication authentication) {
+        // extract userId from authentication
+        // using CustomUserDetails
+        com.truckmitra.security.CustomUserDetails userDetails = (com.truckmitra.security.CustomUserDetails) authentication.getPrincipal();
+        Page<NotificationResponse> notifications = notificationService.getUserNotifications(userDetails.getId(), pageable);
+        return ResponseEntity.ok(ApiResponse.success("Notifications fetched successfully", notifications));
+    }
+
     @GetMapping("/{notificationId}")
     @Operation(summary = "Get notification status by ID")
     @PreAuthorize("hasAnyRole('ADMIN', 'SHIPPER', 'TRANSPORTER', 'DRIVER')")

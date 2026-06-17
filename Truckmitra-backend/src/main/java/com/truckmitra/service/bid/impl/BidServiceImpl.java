@@ -11,6 +11,8 @@ import com.truckmitra.repository.auth.UserRepository;
 import com.truckmitra.repository.load.BidRepository;
 import com.truckmitra.service.BidService;
 import com.truckmitra.service.NotificationService;
+import com.truckmitra.service.wallet.WalletService;
+import com.truckmitra.dto.request.wallet.EscrowRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,8 @@ public class BidServiceImpl implements BidService {
     private final com.truckmitra.service.TripService tripService;
     private final com.truckmitra.service.common.SubscriptionService subscriptionService;
     private final UserRepository userRepository;
+    private final com.truckmitra.service.common.AuditService auditService;
+    private final WalletService walletService;
 
     @Override
     @Transactional
@@ -93,6 +97,19 @@ public class BidServiceImpl implements BidService {
     public Bid acceptBid(Long bidId) {
         Bid bid = bidRepository.findById(bidId)
                 .orElseThrow(() -> new RuntimeException("Bid not found"));
+
+        Load load = bid.getLoad();
+        if (load.getShipper() != null) {
+            EscrowRequest escrowRequest = new EscrowRequest(null, bid.getAmount(), "HOLD");
+
+            if (walletService.hasSufficientBalance(load.getShipper().getId(), "SHIPPER", bid.getAmount())) {
+                walletService.holdInEscrow(load.getShipper().getId(), escrowRequest);
+            } else {
+                // Log warning and proceed without escrow for post-paid/legacy shippers
+                System.err.println("Warning: Escrow hold skipped for Shipper " + load.getShipper().getId() + " due to insufficient balance. Proceeding with bid acceptance as post-paid/legacy.");
+            }
+        }
+
         bid.setStatus(BidStatus.ACCEPTED);
         Bid accepted = bidRepository.save(bid);
 
@@ -115,7 +132,6 @@ public class BidServiceImpl implements BidService {
         }
 
         // Update load: assign winning transporter + mark ASSIGNED
-        Load load = accepted.getLoad();
         load.setTransporter(accepted.getTransporter());
         load.setStatus(com.truckmitra.entity.common.enums.LoadStatus.ASSIGNED);
         loadRepository.save(load);
@@ -149,6 +165,11 @@ public class BidServiceImpl implements BidService {
         try {
             tripService.createInitialTrip(load.getId(), accepted.getId());
         } catch (Exception ignored) {}
+
+        // Log Audit
+        if (load.getShipper() != null) {
+            auditService.log("LOAD_ACCEPTED", "BUSINESS", "Shipper " + load.getShipper().getFullName() + " accepted bid from Transporter " + accepted.getTransporter().getFullName() + " for Load #" + load.getId(), load.getShipper().getId());
+        }
 
         return accepted;
     }

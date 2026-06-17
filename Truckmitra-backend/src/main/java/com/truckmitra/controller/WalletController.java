@@ -27,7 +27,12 @@ public class WalletController {
         User user = userRepository.findByMobile(userDetails.getUsername())
                 .orElseGet(() -> userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found")));
 
-        WalletResponse wallet = walletService.getWallet(user.getId(), user.getRole().name());
+        WalletResponse wallet;
+        try {
+            wallet = walletService.getWallet(user.getId(), user.getRole().name());
+        } catch (com.truckmitra.exception.ResourceNotFoundException e) {
+            wallet = walletService.createWallet(user.getId(), user.getRole().name());
+        }
         return ResponseEntity.ok(ApiResponse.success("Wallet fetched successfully", wallet));
     }
 

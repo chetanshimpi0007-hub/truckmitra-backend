@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/auth.hook';
+import { useProfile } from '../../hooks/useProfile';
 import { 
   HiChartBar, 
   HiTruck, 
@@ -24,12 +25,16 @@ import {
   HiDocumentText,
   HiDownload,
   HiDocumentDownload,
+  HiCash,
 } from 'react-icons/hi';
 import { toast } from 'react-hot-toast';
 import { protectedApi } from '../../services/api/protectedAndPublicAPI';
 import LiveMap from '../../Components/common/LiveMap';
-import ChatWidget from '../../Components/common/ChatWidget';
 import NotificationDropdown from '../../Components/common/NotificationDropdown';
+import BillingDashboard from '../billing/BillingDashboard';
+import ChatWidget from '../../Components/common/ChatWidget';
+import ProfileHeader from '../../Components/dashboard/ProfileHeader';
+import { EmptyState } from '../../Components/illustrations/EmptyState';
 
 /* ── Types ─────────────────────────────────────────────────────────────────── */
 interface BidDto {
@@ -66,8 +71,9 @@ interface LoadRow {
 
 const ShipperDashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const { shipperProfile } = useProfile();
   const navigate = useNavigate();
-  const [activeMenu, setActiveMenu] = useState<'overview' | 'add-transporter' | 'bids' | 'tracking'>('overview');
+  const [activeMenu, setActiveMenu] = useState<'overview' | 'add-transporter' | 'bids' | 'tracking' | 'billing'>('overview');
   const [transporterSearch, setTransporterSearch] = useState('');
   const [transporters, setTransporters] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -77,6 +83,7 @@ const ShipperDashboard: React.FC = () => {
   const [showBidsModal, setShowBidsModal] = useState(false);
   const [bidsLoading, setBidsLoading] = useState(false);
   const [activeTrips, setActiveTrips] = useState<any[]>([]);
+  const [completedTrips, setCompletedTrips] = useState<any[]>([]);
   const [chatRecipient, setChatRecipient] = useState<{id: number, fullName: string} | null>(null);
   const [acceptingBidId, setAcceptingBidId] = useState<number | null>(null);
 
@@ -101,9 +108,21 @@ const ShipperDashboard: React.FC = () => {
     if (user && user.role !== 'SHIPPER') navigate('/dashboard');
   }, [user, navigate]);
 
-  useEffect(() => { fetchLoads(); }, []);
+  useEffect(() => { 
+    fetchLoads(); 
+    fetchShipperTrips();
+  }, []);
 
   /* ── Data fetch ──────────────────────────────────────────────────────────── */
+  const fetchShipperTrips = async () => {
+    try {
+      const response = await protectedApi.get('/api/trips/shipper');
+      const allTrips = response.data || [];
+      const completed = allTrips.filter((t: any) => t.status === 'COMPLETED' || t.status === 'DELIVERED');
+      setCompletedTrips(completed);
+    } catch { /* silent */ }
+  };
+
   const fetchLoads = async () => {
     try {
       const response = await protectedApi.get('/api/loads/shipper');
@@ -235,9 +254,9 @@ const ShipperDashboard: React.FC = () => {
     if (!transporterSearch) return;
     setLoading(true);
     try {
-      const response = await protectedApi.get(`/api/admin/users?role=TRANSPORTER&search=${transporterSearch}`);
-      setTransporters(response.data.content || []);
-      if ((response.data.content || []).length === 0) toast.error('No transporters found');
+      const response = await protectedApi.get(`/api/search/transporters?query=${transporterSearch}`);
+      setTransporters(response.data || []);
+      if ((response.data || []).length === 0) toast.error('No transporters found');
     } catch {
       toast.error('Error searching transporters');
     } finally {
@@ -283,8 +302,10 @@ const ShipperDashboard: React.FC = () => {
 
   /* ── Derived stats ───────────────────────────────────────────────────────── */
   const totalBids    = loads.reduce((s, l) => s + (l.bidCount ?? 0), 0);
-  const pendingLoads = loads.filter(l => l.status === 'PENDING').length;
-  const assignedLoads = loads.filter(l => l.status === 'ASSIGNED').length;
+  const pendingLoads = loads.filter(l => l.status === 'PENDING' || l.status === 'DRAFT' || l.status === 'PENDING_ACCEPTANCE').length;
+  const assignedLoads = loads.filter(l => ['ASSIGNED', 'DRIVER_ASSIGNMENT_PENDING', 'ACCEPTED'].includes(l.status)).length;
+  const activeLoads = loads.filter(l => !['COMPLETED', 'DELIVERED', 'CANCELLED', 'REJECTED'].includes(l.status)).length;
+  const totalSpend = completedTrips.reduce((s, t) => s + (t.shipperAmount || t.freightAmount || 0), 0);
 
   /* ── Sub-components ─────────────────────────────────────────────────────── */
   const Sidebar = () => (
@@ -299,6 +320,7 @@ const ShipperDashboard: React.FC = () => {
         <SidebarLink icon={<HiLocationMarker />} label="Live Tracking"     active={activeMenu === 'tracking'}        onClick={() => setActiveMenu('tracking')} />
         <SidebarLink icon={<HiUserAdd />}        label="Add Transporter"   active={activeMenu === 'add-transporter'} onClick={() => setActiveMenu('add-transporter')} />
         <SidebarLink icon={<HiTag />}            label="Post New Load"     active={activeMenu === 'bids'}            onClick={() => setActiveMenu('bids')} />
+        <SidebarLink icon={<HiCash />}           label="Billing & Invoices" active={activeMenu === 'billing'}        onClick={() => setActiveMenu('billing')} />
       </nav>
       <div className="p-4 border-t border-slate-200 bg-white">
         <button onClick={() => { logout(); navigate('/login'); }}
@@ -324,24 +346,23 @@ const ShipperDashboard: React.FC = () => {
       <Sidebar />
       <main className="flex-1 overflow-y-auto">
         {/* Header */}
-        <header className="bg-white px-10 py-6 flex items-center justify-between border-b border-slate-200 sticky top-0 z-10">
-          <div>
-            <h1 className="text-2xl font-black tracking-tight text-slate-900 capitalize">
-              {activeMenu.replace(/-/g, ' ')}
-            </h1>
-            <p className="text-slate-500 text-sm font-medium">Shipper Control Center</p>
-          </div>
-          <div className="flex items-center space-x-6">
-            <NotificationDropdown />
-            <div className="flex flex-col items-end">
-              <span className="text-sm font-black text-slate-900">{user?.fullName}</span>
-              <span className="text-[10px] font-black uppercase text-indigo-600 tracking-widest bg-indigo-50 px-2 py-0.5 rounded-full">Verified Shipper</span>
-            </div>
-            <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-400 border-2 border-white shadow-sm">
-              <HiShoppingCart className="w-6 h-6" />
-            </div>
-          </div>
-        </header>
+        <ProfileHeader
+          user={shipperProfile || user}
+          roleBadgeText="Verified Shipper"
+          roleBadgeClasses="bg-indigo-50 text-indigo-600 border-indigo-100"
+          welcomeMessage={`Welcome back, ${user?.fullName?.split(' ')[0] || 'Shipper'}`}
+          stats={[
+            { label: 'Active Loads', value: activeLoads, icon: <HiTruck /> },
+            { label: 'Completed', value: completedTrips.length, icon: <HiCheckCircle /> },
+            { label: 'Total Bids', value: totalBids, icon: <HiTag /> },
+            { label: 'Total Spend', value: `₹${totalSpend.toLocaleString('en-IN')}`, icon: <HiShoppingCart /> }
+          ]}
+        >
+          <NotificationDropdown />
+          <button onClick={fetchLoads} className="p-2 text-slate-400 hover:text-indigo-500 transition rounded-xl hover:bg-indigo-50">
+            <HiRefresh className={`w-6 h-6 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </ProfileHeader>
 
         <div className="p-10">
 
@@ -351,9 +372,9 @@ const ShipperDashboard: React.FC = () => {
 
               {/* Stat Cards */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <StatCard label="Active Loads"   value={pendingLoads}  icon={<HiTruck />}       color="bg-indigo-600" />
-                <StatCard label="Assigned Trips" value={assignedLoads} icon={<HiClock />}        color="bg-amber-500" />
-                <StatCard label="Total Posted"   value={loads.length}  icon={<HiCheckCircle />}  color="bg-emerald-500" />
+                <StatCard label="Active Loads"   value={activeLoads}  icon={<HiTruck />}       color="bg-indigo-600" />
+                <StatCard label="Completed Loads" value={completedTrips.length} icon={<HiCheckCircle />}  color="bg-emerald-500" />
+                <StatCard label="Total Spend (₹)"  value={totalSpend.toLocaleString('en-IN')}     icon={<HiShoppingCart />}           color="bg-amber-500" />
                 <StatCard label="Total Bids In"  value={totalBids}     icon={<HiTag />}           color="bg-violet-600" />
               </div>
 
@@ -383,7 +404,7 @@ const ShipperDashboard: React.FC = () => {
                       {loads.length === 0 ? (
                         <tr><td colSpan={5} className="px-6 py-16 text-center">
                           <div className="flex flex-col items-center space-y-3">
-                            <HiTruck className="w-12 h-12 text-slate-200" />
+                            <EmptyState type="loads" className="w-32 h-32 mx-auto" />
                             <p className="text-slate-400 font-bold">No loads posted yet.</p>
                             <button onClick={() => setActiveMenu('bids')}
                               className="px-6 py-2 bg-indigo-600 text-white text-sm rounded-xl font-bold hover:bg-indigo-700 transition">
@@ -438,6 +459,52 @@ const ShipperDashboard: React.FC = () => {
                               )}
                             </div>
                           </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Completed History Table */}
+              <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm border-b-4">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h3 className="text-xl font-black">Completed Delivery History</h3>
+                    <p className="text-slate-400 text-sm mt-1">Review your successfully delivered loads</p>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        <th className="px-6 py-4 rounded-l-2xl">Trip No.</th>
+                        <th className="px-6 py-4">Transporter</th>
+                        <th className="px-6 py-4">Driver</th>
+                        <th className="px-6 py-4">Final Amount</th>
+                        <th className="px-6 py-4">Delivery Date</th>
+                        <th className="px-6 py-4">POD Status</th>
+                        <th className="px-6 py-4 rounded-r-2xl">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {completedTrips.length === 0 ? (
+                        <tr><td colSpan={7} className="px-6 py-10 text-center text-slate-500 font-bold">No completed trips yet.</td></tr>
+                      ) : completedTrips.map(trip => (
+                        <tr key={trip.id} className="hover:bg-slate-50/60 transition-colors">
+                          <td className="px-6 py-4 font-black text-slate-900 text-sm">{trip.tripNumber}</td>
+                          <td className="px-6 py-4 font-medium text-slate-700 text-sm">{trip.transporter?.companyName || trip.transporter?.fullName || 'N/A'}</td>
+                          <td className="px-6 py-4 font-medium text-slate-700 text-sm">{trip.driver?.fullName || 'N/A'}</td>
+                          <td className="px-6 py-4 font-black text-indigo-600 text-sm">₹{trip.shipperAmount || trip.freightAmount}</td>
+                          <td className="px-6 py-4 font-medium text-slate-500 text-sm">
+                            {trip.completedAt ? new Date(trip.completedAt).toLocaleDateString() : 'N/A'}
+                          </td>
+                          <td className="px-6 py-4">
+                            {trip.podUrl ? (
+                              <a href={trip.podUrl} target="_blank" rel="noreferrer" className="text-indigo-600 font-bold hover:underline">View POD</a>
+                            ) : <span className="text-slate-400 font-medium text-sm">Pending</span>}
+                          </td>
+                          <td className="px-6 py-4"><StatusPill status={trip.status} /></td>
                         </tr>
                       ))}
                     </tbody>
@@ -758,6 +825,12 @@ const ShipperDashboard: React.FC = () => {
                   }))}
                 />
               </div>
+            </div>
+          )}
+
+          {activeMenu === 'billing' && (
+            <div className="animate-fadeIn max-w-6xl mx-auto">
+              <BillingDashboard rolePath="/shipper" />
             </div>
           )}
 

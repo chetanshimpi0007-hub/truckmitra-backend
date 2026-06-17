@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
  
-@Service
+@Service("commonBillingServiceImpl")
 @RequiredArgsConstructor
 public class BillingServiceImpl implements BillingService {
  

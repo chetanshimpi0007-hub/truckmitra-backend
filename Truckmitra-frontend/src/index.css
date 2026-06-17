@@ -5,22 +5,25 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 transition-colors duration-500 ease-in-out;
+    @apply bg-[#F4F7FB] text-[#0A192F] font-sans antialiased selection:bg-accent/20 selection:text-accent;
   }
   .dark body {
-    @apply bg-[#0B0F19] text-slate-100;
+    @apply bg-[#061021] text-slate-100;
   }
   
   /* Custom Scrollbar for premium feel */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+    @apply bg-slate-300 dark:bg-slate-700 rounded-full border-2 border-transparent bg-clip-padding;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400 dark:bg-slate-600;
   }
 }
 

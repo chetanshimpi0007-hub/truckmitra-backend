@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/auth.hook';
 import { FcGoogle } from 'react-icons/fc';
-import { FaFacebook } from 'react-icons/fa';
+import { FaFacebook, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { GoogleLogin } from '@react-oauth/google';
 import { AccountStatus } from '../../interfaces/auth.interface';
 import toast from 'react-hot-toast';
@@ -18,6 +18,7 @@ const Login: React.FC = () => {
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const { login, sendOtp, verifyOtp, loginWithGoogle, loginWithFacebook, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -114,7 +115,7 @@ const handlePostLogin = (result: any) => {
   // Navigate based on account status
   switch (user.accountStatus) {
     case AccountStatus.REGISTERED:
-      toast.success('Please complete your profile to continue.');
+      toast.success('Complete your profile and upload required documents to continue.', { duration: 5000 });
       navigate('/profile');
       break;
 
@@ -221,14 +222,23 @@ const handlePostLogin = (result: any) => {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">Password</label>
-        <input
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          placeholder="••••••••"
-        />
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder="••••••••"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-blue-600 z-10 mt-1"
+          >
+            {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
       <button
         type="submit"

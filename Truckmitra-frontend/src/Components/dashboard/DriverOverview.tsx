@@ -3,6 +3,7 @@ import { HiTruck, HiCurrencyDollar, HiCheckCircle, HiClock, HiLocationMarker, Hi
 import StatWidget from '../ui/StatWidget';
 import GlassCard from '../ui/GlassCard';
 import Button from '../ui/Button';
+import { ReturnLoadSuggestionsWidget } from '../loads/ReturnLoadSuggestionsWidget';
 
 interface DriverOverviewProps {
   trips: any[];
@@ -75,7 +76,7 @@ const DriverOverview: React.FC<DriverOverviewProps> = ({
                     <HiLocationMarker className="mr-1" /> {activeTrip.distance?.toFixed(0)} km
                   </span>
                 )}
-                <span className="text-emerald-400 font-bold text-sm">₹{activeTrip.freightAmount || activeTrip.load?.budget}</span>
+                <span className="text-emerald-400 font-bold text-sm">₹{activeTrip.driverAmount || activeTrip.freightAmount || activeTrip.load?.budget}</span>
               </div>
             </div>
             
@@ -141,7 +142,7 @@ const DriverOverview: React.FC<DriverOverviewProps> = ({
                       {t.load?.materialType || '–'}
                     </td>
                     <td className="px-6 py-4 font-black text-emerald-600 dark:text-emerald-400">
-                      ₹{t.freightAmount || t.load?.budget}
+                      ₹{t.driverAmount || t.freightAmount || t.load?.budget}
                     </td>
                     <td className="px-6 py-4 hidden sm:table-cell">
                       <span className="px-2 py-1 text-[10px] font-bold uppercase rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 whitespace-nowrap">
@@ -171,6 +172,16 @@ const DriverOverview: React.FC<DriverOverviewProps> = ({
           </div>
         )}
       </GlassCard>
+
+      {/* 4. RETURN LOAD SUGGESTIONS */}
+      {completedTrips && completedTrips.length > 0 && (
+        <div className="mt-8">
+          <ReturnLoadSuggestionsWidget 
+            completedTripId={completedTrips[0].id} 
+            deliveryCity={completedTrips[0].load?.destination?.split(',')[0]} 
+          />
+        </div>
+      )}
     </div>
   );
 };

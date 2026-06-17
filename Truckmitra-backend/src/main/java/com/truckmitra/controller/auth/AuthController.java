@@ -142,6 +142,19 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.<Void>success("Logout successful", null));
     }
 
+    @GetMapping("/generate-debug-token/{userId}")
+    public ResponseEntity<String> generateDebugToken(@PathVariable Long userId) {
+        com.truckmitra.entity.user.User user = userRepository.findById(userId).orElseThrow();
+        org.springframework.security.core.userdetails.UserDetails userDetails = 
+            new com.truckmitra.security.CustomUserDetails(
+                user.getMobile() != null ? user.getMobile() : user.getEmail(),
+                user.getPassword(),
+                java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + user.getRole().name())),
+                user.getId()
+            );
+        return ResponseEntity.ok(jwtService.generateToken(userDetails, user.getId(), user.getRole().name()));
+    }
+
     @GetMapping("/validate-token")
     @Operation(summary = "Validate JWT token")
     public ResponseEntity<ApiResponse<Boolean>> validateToken(

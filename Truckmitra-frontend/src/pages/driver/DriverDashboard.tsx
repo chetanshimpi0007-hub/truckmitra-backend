@@ -17,6 +17,8 @@ import {
 import NotificationDropdown from '../../Components/common/NotificationDropdown';
 import LRPreview from '../../Components/common/LRPreview';
 import DriverOverview from '../../Components/dashboard/DriverOverview';
+import ProfileHeader from '../../Components/dashboard/ProfileHeader';
+import BillingDashboard from '../billing/BillingDashboard';
 
 /* ─────────────────────────────────────────────────────────────
    TRIP STEP ORDER
@@ -433,7 +435,7 @@ const DriverDashboard: React.FC = () => {
   };
 
   const completedTrips = trips.filter(t => t.status === 'COMPLETED');
-  const totalEarnings  = completedTrips.reduce((s, t) => s + (t.freightAmount || t.load?.budget || 0), 0);
+  const totalEarnings  = completedTrips.reduce((s, t) => s + (t.driverAmount || t.freightAmount || t.load?.budget || 0), 0);
 
   /* ── RENDER */
   return (
@@ -514,18 +516,23 @@ const DriverDashboard: React.FC = () => {
 
       {/* ─── MAIN */}
       <main className="flex-1 overflow-y-auto">
-        <header className="bg-white px-10 py-6 flex items-center justify-between border-b border-slate-200 sticky top-0 z-10">
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 capitalize">{activeMenu.replace(/-/g, ' ')}</h1>
-            <p className="text-slate-500 text-sm font-medium">Driver Control Panel</p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <NotificationDropdown />
-            <button onClick={fetchTrips} className="p-2 text-slate-400 hover:text-emerald-500 transition rounded-xl hover:bg-emerald-50">
-              <HiRefresh className={`w-6 h-6 ${loading ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-        </header>
+        <ProfileHeader
+          user={user}
+          roleBadgeText="Verified Driver"
+          roleBadgeClasses="bg-emerald-50 text-emerald-600 border-emerald-100"
+          welcomeMessage={`Welcome back, ${user?.fullName?.split(' ')[0] || 'Driver'}`}
+          stats={[
+            { label: 'Assigned', value: trips.filter(t => t.status === 'ASSIGNED').length, icon: <HiTruck /> },
+            { label: 'Completed', value: completedTrips.length, icon: <HiCheckCircle /> },
+            { label: 'Rating', value: '4.9 ★', icon: <HiBadgeCheck /> },
+            { label: 'Earnings', value: `₹${totalEarnings}`, icon: <HiCurrencyDollar /> }
+          ]}
+        >
+          <NotificationDropdown />
+          <button onClick={fetchTrips} className="p-2 text-slate-400 hover:text-emerald-500 transition rounded-xl hover:bg-emerald-50">
+            <HiRefresh className={`w-6 h-6 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </ProfileHeader>
 
         <div className="p-10">
 
@@ -580,7 +587,7 @@ const DriverDashboard: React.FC = () => {
                       <InfoChip label="Material"  value={activeTrip.load?.materialType || 'General'} />
                       <InfoChip label="Weight"    value={`${activeTrip.load?.weight || '–'} Tons`} />
                       <InfoChip label="Distance"  value={`${activeTrip.distance?.toFixed(0) || '–'} km`} />
-                      <InfoChip label="Freight"   value={`₹${activeTrip.freightAmount || activeTrip.load?.budget || '–'}`} />
+                      <InfoChip label="Freight"   value={`₹${activeTrip.driverAmount || activeTrip.freightAmount || activeTrip.load?.budget || '–'}`} />
                     </div>
 
                     {/* Route Intelligence */}
@@ -1157,72 +1164,8 @@ const DriverDashboard: React.FC = () => {
 
           {/* ══ FINANCIAL ════════════════════════════════════ */}
           {activeMenu === 'financial' && (
-            <div className="space-y-8 max-w-4xl">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <StatCard label="Total Earned"    value={`₹${totalEarnings.toLocaleString()}`}
-                  icon={<HiCurrencyDollar />} color="bg-emerald-500" />
-                <StatCard label="Completed Trips" value={completedTrips.length}
-                  icon={<HiCheckCircle />}    color="bg-indigo-600" />
-                <StatCard label="Avg per Trip"    value={completedTrips.length ? `₹${Math.round(totalEarnings / completedTrips.length).toLocaleString()}` : '₹0'}
-                  icon={<HiChartBar />}       color="bg-amber-500" />
-              </div>
-
-              <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
-                <h3 className="text-xl font-black mb-6">Trip History / Completed Trips</h3>
-                {completedTrips.length === 0 ? (
-                  <EmptyState icon={<HiCheckCircle />} message="No completed trips yet." />
-                ) : (
-                  <div className="space-y-4">
-                    {completedTrips.map((t: any) => (
-                      <div key={t.id} className="flex flex-col p-5 rounded-2xl border border-slate-100 hover:border-emerald-200 hover:shadow-md bg-emerald-50/10 transition-all space-y-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <div className="font-black text-slate-900 text-lg">{t.load?.source} → {t.load?.destination}</div>
-                            <div className="flex items-center flex-wrap gap-2 mt-1.5">
-                              <span className="text-xs font-bold text-slate-400">Trip #{t.id}</span>
-                              {t.vehicle?.vehicleNumber && (
-                                <span className="text-xs font-bold text-slate-500 flex items-center space-x-1">
-                                  <HiTruck className="w-3 h-3" />
-                                  <span>{t.vehicle.vehicleNumber}</span>
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-xs text-slate-500 mt-2 font-bold flex items-center space-x-2">
-                              <span>Completed: {t.completedAt ? new Date(t.completedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}</span>
-                            </div>
-                          </div>
-                          <div className="text-xl font-black text-emerald-600">₹{(t.freightAmount || t.load?.budget || 0).toLocaleString()}</div>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100">
-                          {/* LR Actions */}
-                          <div className="flex space-x-1">
-                            <button onClick={() => t.assignmentPdfUrl ? window.open(t.assignmentPdfUrl, '_blank') : downloadAssignmentPdf(t.id)} className="px-3 py-2 bg-blue-50 text-blue-600 rounded-xl font-bold text-xs hover:bg-blue-600 hover:text-white transition-all border border-blue-100">View LR</button>
-                            <button onClick={() => downloadAssignmentPdf(t.id)} className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all border border-blue-100" title="Download LR"><HiDownload className="w-4 h-4" /></button>
-                          </div>
-                          {/* POD Actions */}
-                          {t.podUrl && (
-                            <div className="flex space-x-1">
-                              <button onClick={() => window.open(t.podUrl, '_blank')} className="px-3 py-2 bg-amber-50 text-amber-600 rounded-xl font-bold text-xs hover:bg-amber-600 hover:text-white transition-all border border-amber-100">View POD</button>
-                              <button onClick={() => {
-                                const a = document.createElement('a');
-                                a.href = t.podUrl;
-                                a.target = '_blank';
-                                a.download = `POD_Trip_${t.id}`;
-                                a.click();
-                              }} className="p-2 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-600 hover:text-white transition-all border border-amber-100" title="Download POD"><HiDownload className="w-4 h-4" /></button>
-                            </div>
-                          )}
-                          {/* Invoice Actions */}
-                          <div className="flex space-x-1">
-                            <button onClick={() => (t.finalInvoicePdfUrl || t.tripPdfUrl) ? window.open(t.finalInvoicePdfUrl || t.tripPdfUrl, '_blank') : downloadFinalInvoice(t.id)} className="px-3 py-2 bg-emerald-50 text-emerald-600 rounded-xl font-bold text-xs hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100">View Invoice</button>
-                            <button onClick={() => downloadFinalInvoice(t.id)} className="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100" title="Download Invoice"><HiDownload className="w-4 h-4" /></button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+            <div className="animate-fadeIn max-w-6xl mx-auto">
+              <BillingDashboard rolePath="/driver" />
             </div>
           )}
 

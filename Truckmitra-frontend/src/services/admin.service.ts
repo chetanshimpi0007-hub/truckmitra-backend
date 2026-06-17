@@ -99,6 +99,46 @@ class AdminService {
   }
 
   /**
+   * Get user financial snapshot by ID
+   */
+  async getUserFinancialSnapshot(userId: number) {
+    const response = await protectedApi.get(`/api/admin/users/${userId}/snapshot`);
+    return response.data;
+  }
+
+  /**
+   * Get user trips by ID with pagination
+   */
+  async getUserTrips(userId: number, page = 0, size = 10) {
+    const response = await protectedApi.get(`/api/admin/users/${userId}/trips?page=${page}&size=${size}`);
+    return response.data;
+  }
+
+  /**
+   * Get user payments by ID with pagination
+   */
+  async getUserPayments(userId: number, page = 0, size = 10) {
+    const response = await protectedApi.get(`/api/admin/users/${userId}/payments?page=${page}&size=${size}`);
+    return response.data;
+  }
+
+  /**
+   * Get user timeline by ID with pagination
+   */
+  async getUserTimeline(userId: number, page = 0, size = 10) {
+    const response = await protectedApi.get(`/api/admin/users/${userId}/timeline?page=${page}&size=${size}`);
+    return response.data;
+  }
+
+  /**
+   * Get user invoices by ID with pagination
+   */
+  async getUserInvoices(userId: number, page = 0, size = 10) {
+    const response = await protectedApi.get(`/api/admin/users/${userId}/invoices?page=${page}&size=${size}`);
+    return response.data;
+  }
+
+  /**
    * Get all users with filters
    */
   async getAllUsers(params?: {

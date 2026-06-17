@@ -41,24 +41,24 @@ module.exports = {
         },
       },
       colors: {
-        brand: '#4F46E5',
-        secondary: '#10B981',
-        accent: '#06B6D4',
-        success: '#22C55E',
-        warning: '#F59E0B',
-        danger: '#EF4444',
+        brand: '#0A192F',     // Deep Blue SaaS
+        secondary: '#FFFFFF', // White
+        accent: '#F97316',    // Orange (logistics actions)
+        success: '#10B981',   // Green
+        warning: '#F59E0B',   // Amber
+        danger: '#EF4444',    // Red
         primary: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4F46E5', // Brand Primary
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-          950: '#1e1b4b',
+          50: '#F0F4F8',
+          100: '#D9E2EC',
+          200: '#BCCCDC',
+          300: '#9FB3C8',
+          400: '#829AB1',
+          500: '#627D98',
+          600: '#486581',
+          700: '#334E68',
+          800: '#243B53',
+          900: '#102A43',     // Deep SaaS Blue
+          950: '#0A192F',
         },
       },
       spacing: {

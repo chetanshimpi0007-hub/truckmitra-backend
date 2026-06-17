@@ -45,6 +45,8 @@ public interface WalletService {
 
     Page<TransactionResponse> getWalletTransactions(Long walletId, Pageable pageable);
 
+    Page<TransactionResponse> getAllTransactions(Pageable pageable);
+
     TransactionResponse getTransaction(String transactionId);
 
     BigDecimal getBalance(Long userId, String userRole);

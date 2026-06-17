@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/auth.hook';
 import { useAdmin } from '../../hooks/admin.hook';
 import { 
@@ -26,21 +26,40 @@ import {
   HiChevronRight,
   HiDownload,
   HiTruck,
-  HiShoppingCart
+  HiShoppingCart,
+  HiLockClosed,
+  HiLockOpen,
+  HiRefresh
 } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 import adminService from '../../services/admin.service';
 import { protectedApi } from '../../services/api/protectedAndPublicAPI';
 import LiveMap from '../../Components/common/LiveMap';
 import NotificationDropdown from '../../Components/common/NotificationDropdown';
+import AdminActivityDashboard from './AdminActivityDashboard';
+import { EmptyState } from '../../Components/illustrations/EmptyState';
+import BillingDashboard from '../billing/BillingDashboard';
+import { AdminUser360 } from './AdminUser360';
+import ProfileHeader from '../../Components/dashboard/ProfileHeader';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+// ... other imports
+// (Note: Since I'm using replace_file_content, I'll just find the exact places)
 
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeMenu, setActiveMenu] = useState<'overview' | 'users' | 'kyc' | 'financials' | 'settings' | 'tracking' | 'trips'>('overview');
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+
+  const [activeMenu, setActiveMenu] = useState<'overview' | 'activity' | 'users' | 'kyc' | 'financials' | 'settings' | 'tracking' | 'trips'>(
+    location.pathname.includes('/users') ? 'users' : 'overview'
+  );
   const [kycTab, setKycTab] = useState<'DRIVER' | 'SHIPPER' | 'TRANSPORTER'>('DRIVER');
   const [searchTerm, setSearchTerm] = useState('');
-  
+  const [userStatusFilter, setUserStatusFilter] = useState<'ALL' | 'PENDING_VERIFICATION' | 'VERIFIED' | 'REJECTED' | 'SUSPENDED'>(
+    searchParams.get('status') === 'pending' ? 'PENDING_VERIFICATION' : 'ALL'
+  );
   // Modal states
   const [showUserModal, setShowUserModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -49,6 +68,7 @@ const AdminDashboard: React.FC = () => {
   const [activeTrips, setActiveTrips] = useState<any[]>([]);
   const [allTrips, setAllTrips]       = useState<any[]>([]);
   const [tripsLoading, setTripsLoading] = useState(false);
+  const [viewing360UserId, setViewing360UserId] = useState<number | null>(null);
 
   const { 
     stats: userStats, 
@@ -61,6 +81,8 @@ const AdminDashboard: React.FC = () => {
     getUserDetails,
     verifyUser,
     rejectUser,
+    suspendUser,
+    activateUser,
     clearSelectedUser
   } = useAdmin();
 
@@ -93,11 +115,11 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     if (activeMenu === 'users') {
-      getUsers({ search: searchTerm });
+      getUsers({ search: searchTerm, status: userStatusFilter === 'ALL' ? undefined : userStatusFilter });
     } else if (activeMenu === 'kyc') {
       getUsers({ role: kycTab });
     }
-  }, [activeMenu, kycTab, searchTerm]);
+  }, [activeMenu, kycTab, searchTerm, userStatusFilter]);
   
   const fetchAllTrips = async () => {
     setTripsLoading(true);
@@ -162,7 +184,7 @@ const AdminDashboard: React.FC = () => {
 
   const refreshData = () => {
     getStats();
-    if (activeMenu === 'users') getUsers({ search: searchTerm });
+    if (activeMenu === 'users') getUsers({ search: searchTerm, status: userStatusFilter === 'ALL' ? undefined : userStatusFilter });
     if (activeMenu === 'kyc') getUsers({ role: kycTab });
   };
 
@@ -176,8 +198,9 @@ const AdminDashboard: React.FC = () => {
       </div>
       
       <nav className="flex-1 mt-6 px-4 space-y-2">
-        <SidebarLink icon={<HiChartBar />} label="Overview" active={activeMenu === 'overview'} onClick={() => setActiveMenu('overview')} />
-        <SidebarLink icon={<HiUsers />} label="User Management" active={activeMenu === 'users'} onClick={() => setActiveMenu('users')} />
+        <SidebarLink icon={<HiChartBar />} label="Overview" active={activeMenu === 'overview'} onClick={() => {setActiveMenu('overview'); setViewing360UserId(null);}} />
+        <SidebarLink icon={<HiChartBar />} label="Activity Monitoring" active={activeMenu === 'activity'} onClick={() => {setActiveMenu('activity'); setViewing360UserId(null);}} />
+        <SidebarLink icon={<HiUsers />} label="User Management" active={activeMenu === 'users'} onClick={() => {setActiveMenu('users'); setViewing360UserId(null);}} />
         <SidebarLink icon={<HiIdentification />} label="KYC Verification" active={activeMenu === 'kyc'} onClick={() => setActiveMenu('kyc')} />
         <SidebarLink icon={<HiTruck />} label="Live Fleet Tracking" active={activeMenu === 'tracking'} onClick={() => setActiveMenu('tracking')} />
         <SidebarLink icon={<HiDocumentText />} label="Trip Verifications" active={activeMenu === 'trips'} onClick={() => setActiveMenu('trips')} />
@@ -215,22 +238,23 @@ const AdminDashboard: React.FC = () => {
       
       <main className="flex-1 overflow-y-auto">
         {/* Top Header */}
-        <header className="bg-white px-10 py-6 flex items-center justify-between border-b border-slate-200 sticky top-0 z-10">
-          <div>
-            <h1 className="text-2xl font-black tracking-tight text-slate-900 capitalize">{activeMenu.replace('-', ' ')}</h1>
-            <p className="text-slate-500 text-sm font-medium">Platform control center and monitoring</p>
-          </div>
-          <div className="flex items-center space-x-6">
-            <NotificationDropdown />
-            <div className="flex flex-col items-end">
-              <span className="text-sm font-black text-slate-900">{user?.fullName || 'Administrator'}</span>
-              <span className="text-[10px] font-black uppercase text-indigo-600 tracking-widest bg-indigo-50 px-2 py-0.5 rounded-full">Super Admin</span>
-            </div>
-            <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 border border-slate-200 shadow-sm border-b-2">
-              <HiUserCircle className="w-8 h-8" />
-            </div>
-          </div>
-        </header>
+        <ProfileHeader
+          user={user}
+          roleBadgeText="Super Admin"
+          roleBadgeClasses="bg-indigo-50 text-indigo-600 border-indigo-100"
+          welcomeMessage={`Welcome back, ${user?.fullName?.split(' ')[0] || 'Admin'}`}
+          stats={[
+            { label: 'Total Users', value: platformAnalytics?.totalUsers || 0, icon: <HiUsers /> },
+            { label: 'Total Loads', value: platformAnalytics?.totalLoads || 0, icon: <HiShoppingCart /> },
+            { label: 'Recent Revenue', value: `₹${(platformAnalytics?.revenueTrends?.[platformAnalytics?.revenueTrends?.length - 1] || 0).toLocaleString('en-IN')}`, icon: <HiCash /> },
+            { label: 'Pending Approvals', value: pendingUsers.length, icon: <HiExclamationCircle /> }
+          ]}
+        >
+          <NotificationDropdown />
+          <button onClick={refreshData} className="p-2 text-slate-400 hover:text-indigo-500 transition rounded-xl hover:bg-indigo-50">
+            <HiRefresh className="w-6 h-6" />
+          </button>
+        </ProfileHeader>
 
         <div className="p-10">
           {/* Overview Section */}
@@ -249,21 +273,22 @@ const AdminDashboard: React.FC = () => {
                     <h3 className="text-xl font-black">Revenue Analytics</h3>
                     <span className="text-[10px] font-black uppercase text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Last 6 Months</span>
                   </div>
-                  <div className="h-64 flex items-end justify-between px-4 space-x-2">
-                    {platformAnalytics?.revenueTrends?.map((val: number, i: number) => (
-                      <div key={i} className="flex-1 flex flex-col items-center group">
-                        <div className="w-full bg-slate-50 rounded-t-xl relative overflow-hidden h-full flex items-end">
-                            <div 
-                              className="w-full bg-indigo-600 rounded-t-xl transition-all duration-1000 ease-out group-hover:bg-indigo-500"
-                              style={{ height: `${(val / Math.max(...platformAnalytics.revenueTrends, 1)) * 100}%` }}
-                            />
-                            <div className="absolute top-0 left-0 w-full text-center opacity-0 group-hover:opacity-100 transition-opacity translate-y-[-20px]">
-                                <span className="text-[10px] font-black bg-slate-900 text-white px-2 py-1 rounded-lg">₹{val}</span>
-                            </div>
-                        </div>
-                        <span className="mt-4 text-[10px] font-black text-slate-400">MON {i+1}</span>
-                      </div>
-                    ))}
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={(platformAnalytics?.revenueTrends || []).map((val: number, i: number) => ({ name: `Mon ${i+1}`, revenue: val }))}>
+                        <defs>
+                          <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
+                        <YAxis axisLine={false} tickLine={false} tickFormatter={(val) => `₹${val/1000}k`} tick={{fill: '#64748b'}} />
+                        <Tooltip formatter={(value: any) => [`₹${value.toLocaleString()}`, 'Revenue']} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                        <Area type="monotone" dataKey="revenue" stroke="#4F46E5" strokeWidth={4} fill="url(#colorRev)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
 
@@ -272,27 +297,49 @@ const AdminDashboard: React.FC = () => {
                     <h3 className="text-xl font-black">Platform Load Volume</h3>
                     <span className="text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Growth Rate</span>
                   </div>
-                  <div className="h-64 flex items-end justify-between px-4 space-x-2">
-                    {platformAnalytics?.loadVolumes?.map((val: number, i: number) => (
-                      <div key={i} className="flex-1 flex flex-col items-center group">
-                        <div className="w-full bg-slate-50 rounded-t-xl relative overflow-hidden h-full flex items-end">
-                            <div 
-                              className="w-full bg-emerald-500 rounded-t-xl transition-all duration-1000 ease-out group-hover:bg-emerald-400 shadow-lg shadow-emerald-200"
-                              style={{ height: `${(val / Math.max(...platformAnalytics.loadVolumes, 1)) * 100}%` }}
-                            />
-                        </div>
-                        <span className="mt-4 text-[10px] font-black text-slate-400">WK {i+1}</span>
-                      </div>
-                    ))}
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={(platformAnalytics?.loadVolumes || []).map((val: number, i: number) => ({ name: `Wk ${i+1}`, volume: val }))}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
+                        <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
+                        <Tooltip formatter={(value: any) => [`${value} Loads`, 'Volume']} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} cursor={{fill: '#f1f5f9'}} />
+                        <Bar dataKey="volume" fill="#10B981" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
+          {/* Activity Monitoring Section */}
+          {activeMenu === 'activity' && (
+            <AdminActivityDashboard />
+          )}
+
           {/* User Management Section */}
-          {activeMenu === 'users' && (
+          {activeMenu === 'users' && viewing360UserId ? (
+            <AdminUser360 userId={viewing360UserId} onBack={() => setViewing360UserId(null)} />
+          ) : activeMenu === 'users' && !viewing360UserId && (
             <div className="animate-fadeIn">
+               {/* Status Filters */}
+               <div className="mb-6 bg-white p-2 rounded-2xl border border-slate-200 flex flex-wrap gap-2 w-fit">
+                  {['ALL', 'PENDING_VERIFICATION', 'VERIFIED', 'REJECTED', 'SUSPENDED'].map(status => (
+                     <button 
+                      key={status}
+                      onClick={() => setUserStatusFilter(status as any)}
+                      className={`px-6 py-2.5 rounded-xl text-xs font-black tracking-wide transition-all ${
+                        userStatusFilter === status 
+                          ? 'bg-slate-900 text-white shadow-md' 
+                          : 'text-slate-500 hover:bg-slate-100'
+                      }`}
+                     >
+                       {status.replace('_', ' ')}
+                     </button>
+                  ))}
+               </div>
+
                <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="relative group flex-1 max-w-md">
                     <HiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
@@ -310,7 +357,15 @@ const AdminDashboard: React.FC = () => {
                </div>
                <UserTable 
                  users={allUsers} 
-                 onView={(u: any) => { getUserDetails(u.id); setShowUserModal(true); }}
+                 onView={(u: any) => setViewing360UserId(u.id)}
+                 onApprove={(u: any) => { verifyUser(u.id).then(refreshData); }}
+                 onReject={(u: any) => { setActionUserId(u.id); setShowRejectModal(true); }}
+                 onSuspend={(u: any) => {
+                   if (window.confirm(`Are you sure you want to suspend ${u.fullName}?`)) {
+                     suspendUser(u.id, { reason: 'Suspended by admin' }).then(refreshData);
+                   }
+                 }}
+                 onActivate={(u: any) => { activateUser(u.id).then(refreshData); }}
                />
             </div>
           )}
@@ -437,7 +492,7 @@ const AdminDashboard: React.FC = () => {
                   </div>
                 ) : allTrips.length === 0 ? (
                   <div className="py-16 text-center">
-                    <HiTruck className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                    <EmptyState type="trips" className="w-32 h-32 mx-auto mb-4" />
                     <p className="text-slate-400 font-bold">No trips found on platform.</p>
                   </div>
                 ) : (
@@ -473,8 +528,12 @@ const AdminDashboard: React.FC = () => {
             </div>
           )}
 
+          {activeMenu === 'financials' && (
+              <BillingDashboard rolePath="" />
+          )}
+
           {/* Placeholders */}
-          {['financials', 'settings'].includes(activeMenu) && (
+          {['settings'].includes(activeMenu) && (
             <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm">
                 <div className="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center text-slate-300 mb-6 border-b-4 border-slate-200">
                    {activeMenu === 'financials' ? <HiCash className="w-12 h-12" /> : <HiCog className="w-12 h-12" /> }
@@ -626,25 +685,27 @@ const StatCard = ({ label, value, icon, color }: any) => (
   </div>
 );
 
-const UserTable = ({ users, onView }: any) => (
-  <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-    <table className="w-full text-left border-collapse">
+const UserTable = ({ users, onView, onApprove, onReject, onSuspend, onActivate }: any) => (
+  <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-x-auto">
+    <table className="w-full text-left border-collapse min-w-[1000px]">
        <thead>
          <tr className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">
-            <th className="px-8 py-5">User Profile</th>
-            <th className="px-8 py-5">Contact Info</th>
-            <th className="px-8 py-5">Platform Role</th>
-            <th className="px-8 py-5">Status</th>
-            <th className="px-8 py-5 text-right">Actions</th>
+            <th className="px-6 py-5">User Profile</th>
+            <th className="px-6 py-5">Contact Info</th>
+            <th className="px-6 py-5">Company / Agency</th>
+            <th className="px-6 py-5">Platform Role</th>
+            <th className="px-6 py-5">Registered</th>
+            <th className="px-6 py-5">Approval & Status</th>
+            <th className="px-6 py-5 text-right">Actions</th>
          </tr>
        </thead>
        <tbody className="divide-y divide-slate-50">
           {users.map((u: any) => (
             <tr key={u.id} className="hover:bg-indigo-50/30 transition-colors group">
-               <td className="px-8 py-5">
+               <td className="px-6 py-5">
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-bold border-2 border-white shadow-sm overflow-hidden">
-                       {u.profileImageUrl ? <img src={u.profileImageUrl} alt="" /> : <HiUserCircle className="w-8 h-8" />}
+                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-bold border-2 border-white shadow-sm overflow-hidden flex-shrink-0">
+                       {u.profileImageUrl ? <img src={u.profileImageUrl} alt="" className="w-full h-full object-cover" /> : <HiUserCircle className="w-8 h-8" />}
                     </div>
                     <div>
                        <div className="text-sm font-black text-slate-900">{u.fullName}</div>
@@ -652,20 +713,63 @@ const UserTable = ({ users, onView }: any) => (
                     </div>
                   </div>
                </td>
-               <td className="px-8 py-5">
+               <td className="px-6 py-5">
                   <div className="text-sm font-medium text-slate-700">{u.email}</div>
                   <div className="text-xs text-slate-400 font-bold">{u.mobile}</div>
                </td>
-               <td className="px-8 py-5">
+               <td className="px-6 py-5">
+                  <div className="text-sm font-bold text-slate-700">
+                    {u.companyName || u.agencyName || <span className="text-slate-300 italic">N/A</span>}
+                  </div>
+               </td>
+               <td className="px-6 py-5">
                   <RoleBadge role={u.role} />
                </td>
-               <td className="px-8 py-5">
-                  <StatusPill status={u.accountStatus} />
+               <td className="px-6 py-5 text-sm font-medium text-slate-500">
+                  {new Date(u.registeredAt).toLocaleDateString()}
                </td>
-               <td className="px-8 py-5 text-right">
-                  <button onClick={() => onView(u)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-white rounded-xl transition-all shadow-none hover:shadow-lg">
-                    <HiEye className="w-5 h-5" />
-                  </button>
+               <td className="px-6 py-5">
+                  <div className="flex flex-col space-y-2">
+                    <StatusPill status={u.accountStatus} />
+                    {u.accountStatus === 'VERIFIED' && (
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase border tracking-tight bg-emerald-50 text-emerald-600 border-emerald-100 w-fit">
+                        Active
+                      </span>
+                    )}
+                    {u.accountStatus === 'SUSPENDED' && (
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase border tracking-tight bg-rose-50 text-rose-600 border-rose-100 w-fit">
+                        Inactive
+                      </span>
+                    )}
+                  </div>
+               </td>
+               <td className="px-6 py-5 text-right">
+                  <div className="flex items-center justify-end space-x-2">
+                    <button onClick={() => onView(u)} title="View User 360" className="p-2 text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-xl transition-all font-bold text-sm flex items-center gap-1 shadow-sm border border-primary-100">
+                      <HiEye className="w-4 h-4" /> View 360
+                    </button>
+                    
+                    {(u.accountStatus === 'PENDING_VERIFICATION' || u.accountStatus === 'REGISTERED' || u.accountStatus === 'PROFILE_COMPLETED') && (
+                      <>
+                        <button onClick={() => onApprove(u)} title="Approve" className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
+                          <HiCheck className="w-5 h-5" />
+                        </button>
+                        <button onClick={() => onReject(u)} title="Reject" className="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-all">
+                          <HiX className="w-5 h-5" />
+                        </button>
+                      </>
+                    )}
+                    {u.accountStatus === 'VERIFIED' && (
+                      <button onClick={() => onSuspend(u)} title="Suspend" className="p-2 text-warning hover:bg-warning/10 rounded-xl transition-all">
+                        <HiBan className="w-5 h-5" />
+                      </button>
+                    )}
+                    {u.accountStatus === 'SUSPENDED' && (
+                      <button onClick={() => onActivate(u)} title="Activate" className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
+                        <HiCheckCircle className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
                </td>
             </tr>
           ))}

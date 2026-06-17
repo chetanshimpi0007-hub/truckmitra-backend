@@ -11,7 +11,9 @@ import {
   HiKey,
   HiOutlineClock,
   HiShieldCheck,
-  HiArrowRight
+  HiArrowRight,
+  HiEye,
+  HiEyeOff
 } from 'react-icons/hi';
 
 const ForgotPassword: React.FC = () => {
@@ -23,6 +25,8 @@ const ForgotPassword: React.FC = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1); // 1: Email, 2: OTP Verify, 3: New Password
   const [timer, setTimer] = useState(300);
   const [isActive, setIsActive] = useState(false);
@@ -455,13 +459,20 @@ const ForgotPassword: React.FC = () => {
                   </div>
                   <input
                     id="newPassword"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
-                    className="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                    className="appearance-none block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
                     placeholder="••••••••"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-indigo-600 transition-colors"
+                  >
+                    {showPassword ? <HiEyeOff className="h-5 w-5" /> : <HiEye className="h-5 w-5" />}
+                  </button>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
               </div>
@@ -477,17 +488,24 @@ const ForgotPassword: React.FC = () => {
                   </div>
                   <input
                     id="confirmPassword"
-                    type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    className={`appearance-none block w-full pl-10 pr-3 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ${
+                    className={`appearance-none block w-full pl-10 pr-10 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ${
                       newPassword && confirmPassword && newPassword !== confirmPassword
                         ? 'border-red-300 bg-red-50'
                         : 'border-gray-300'
                     }`}
                     placeholder="••••••••"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-indigo-600 transition-colors"
+                  >
+                    {showConfirmPassword ? <HiEyeOff className="h-5 w-5" /> : <HiEye className="h-5 w-5" />}
+                  </button>
                 </div>
                 {newPassword && confirmPassword && newPassword !== confirmPassword && (
                   <p className="text-xs text-red-600 mt-1">Passwords do not match</p>

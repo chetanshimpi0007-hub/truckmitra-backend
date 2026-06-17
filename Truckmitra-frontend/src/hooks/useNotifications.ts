@@ -8,6 +8,11 @@ export const useNotifications = (pollIntervalMs = 30000) => {
   const intervalRef = useRef<NodeJS.Timer | null>(null);
 
   const fetchNotifications = useCallback(async () => {
+    // Only fetch if token exists
+    if (!localStorage.getItem('accessToken') && !localStorage.getItem('token')) {
+      return;
+    }
+    
     try {
       const res = await notificationService.getAll();
       const data: Notification[] = res.data?.data || res.data || [];

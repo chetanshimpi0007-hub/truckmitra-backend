@@ -25,6 +25,7 @@ public class LoadServiceImpl implements LoadService {
     private final ShipperRepository shipperRepository;
     private final TransporterRepository transporterRepository;
     private final com.truckmitra.service.common.SubscriptionService subscriptionService;
+    private final com.truckmitra.service.common.AuditService auditService;
 
     @Override
     @Transactional
@@ -49,22 +50,45 @@ public class LoadServiceImpl implements LoadService {
             loadBuilder.shipper(shipper);
             loadBuilder.isBiddingEnabled(request.getIsBiddingEnabled());
             
-            Load load = loadBuilder.build();
-            if (request.getTransporterId() != null) {
+            com.truckmitra.entity.common.enums.AssignmentType type = request.getAssignmentType() != null 
+                ? request.getAssignmentType() : com.truckmitra.entity.common.enums.AssignmentType.OPEN_MARKET;
+            loadBuilder.assignmentType(type);
+            
+            if (type == com.truckmitra.entity.common.enums.AssignmentType.DIRECT_TRANSPORTER) {
+                if (request.getTransporterId() == null) {
+                    throw new RuntimeException("Transporter ID is required for direct assignment");
+                }
                 Transporter transporter = transporterRepository.findById(request.getTransporterId())
                         .orElseThrow(() -> new RuntimeException("Transporter not found"));
-                load.setTransporter(transporter);
-                load.setStatus(LoadStatus.ASSIGNED);
+                if (transporter.getIsVerified() == null || !transporter.getIsVerified()) {
+                    throw new RuntimeException("Selected transporter is not verified");
+                }
+                loadBuilder.status(LoadStatus.PENDING_ACCEPTANCE);
+                loadBuilder.transporter(transporter);
+                Load savedLoad = loadRepository.save(loadBuilder.build());
+                auditService.logAction("LOAD_CREATED", "Shipper " + shipper.getFullName() + " created Load #" + savedLoad.getId() + " directly for Transporter " + transporter.getFullName(), user);
+                return savedLoad;
+            } else {
+                Load load = loadBuilder.build();
+                if (request.getTransporterId() != null) {
+                    Transporter transporter = transporterRepository.findById(request.getTransporterId())
+                            .orElseThrow(() -> new RuntimeException("Transporter not found"));
+                    load.setTransporter(transporter);
+                    load.setStatus(LoadStatus.ASSIGNED);
+                }
+                Load savedLoad = loadRepository.save(load);
+                auditService.logAction("LOAD_CREATED", "Shipper " + shipper.getFullName() + " created Load #" + savedLoad.getId(), user);
+                return savedLoad;
             }
-            return loadRepository.save(load);
         } else if (user.getRole() == com.truckmitra.entity.common.enums.Role.TRANSPORTER) {
             Transporter transporter = transporterRepository.findById(user.getId())
                     .orElseThrow(() -> new RuntimeException("Transporter profile not found"));
             loadBuilder.transporter(transporter);
             loadBuilder.isBiddingEnabled(false);
             
-            Load load = loadBuilder.build();
-            return loadRepository.save(load);
+            Load savedLoad = loadRepository.save(loadBuilder.build());
+            auditService.logAction("LOAD_CREATED", "Transporter " + transporter.getFullName() + " created Load #" + savedLoad.getId(), user);
+            return savedLoad;
         }
         
         throw new RuntimeException("Invalid role for creating a load");
@@ -108,6 +132,38 @@ public class LoadServiceImpl implements LoadService {
     @Override
     public List<Load> getLoadsByStatusAndBidding(LoadStatus status, Boolean isBiddingEnabled) {
         return loadRepository.findByStatusAndIsBiddingEnabled(status, isBiddingEnabled);
+    }
+
+    @Override
+    @Transactional
+    public Load acceptDirectLoad(Long loadId, Long transporterId) {
+        Load load = getLoadById(loadId);
+        if (load.getTransporter() == null || !load.getTransporter().getId().equals(transporterId)) {
+            throw new RuntimeException("Unauthorized to accept this load");
+        }
+        if (load.getStatus() != LoadStatus.PENDING_ACCEPTANCE) {
+            throw new RuntimeException("Load is not pending acceptance");
+        }
+        load.setStatus(LoadStatus.ACCEPTED);
+        Load savedLoad = loadRepository.save(load);
+        auditService.log("LOAD_ACCEPTED", "BUSINESS", "Transporter " + load.getTransporter().getFullName() + " accepted Load #" + savedLoad.getId(), transporterId);
+        return savedLoad;
+    }
+
+    @Override
+    @Transactional
+    public Load rejectDirectLoad(Long loadId, Long transporterId) {
+        Load load = getLoadById(loadId);
+        if (load.getTransporter() == null || !load.getTransporter().getId().equals(transporterId)) {
+            throw new RuntimeException("Unauthorized to reject this load");
+        }
+        if (load.getStatus() != LoadStatus.PENDING_ACCEPTANCE) {
+            throw new RuntimeException("Load is not pending acceptance");
+        }
+        load.setStatus(LoadStatus.REJECTED);
+        Load savedLoad = loadRepository.save(load);
+        auditService.log("LOAD_REJECTED", "BUSINESS", "Transporter " + load.getTransporter().getFullName() + " rejected Load #" + savedLoad.getId(), transporterId);
+        return savedLoad;
     }
 
     @Override

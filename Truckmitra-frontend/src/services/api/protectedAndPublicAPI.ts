@@ -101,7 +101,9 @@ protectedApi.interceptors.response.use(
         if (!refreshToken) {
           // No refresh token, redirect to login
           TokenStorage.clearTokens();
-          window.location.href = '/login';
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
           return Promise.reject(error);
         }
         
@@ -127,7 +129,9 @@ protectedApi.interceptors.response.use(
       } catch (refreshError) {
         console.error('❌ Token refresh failed:', refreshError);
         TokenStorage.clearTokens();
-        window.location.href = '/login';
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }

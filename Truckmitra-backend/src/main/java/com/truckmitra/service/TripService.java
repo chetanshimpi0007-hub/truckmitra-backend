@@ -11,10 +11,10 @@ public interface TripService {
     Trip getTripById(Long id);
     Trip getTripByLoadId(Long loadId);
     Trip createInitialTrip(Long loadId, Long bidId);
-    Trip assignDirectTransporterLoad(Long loadId, Long driverId, Long vehicleId);
+    Trip assignDirectTransporterLoad(Long loadId, Long driverId, Long vehicleId, java.math.BigDecimal driverAmount);
     Trip assignVehicle(Long tripId, Long vehicleId);
-    Trip assignDriver(Long tripId, Long driverId);
-    Trip assignFleet(Long tripId, Long driverId, Long vehicleId);
+    Trip assignDriver(Long tripId, Long driverId, java.math.BigDecimal driverAmount);
+    Trip assignFleet(Long tripId, Long driverId, Long vehicleId, java.math.BigDecimal driverAmount);
     Trip startTrip(Long tripId);
     Trip pauseTrip(Long tripId);
     Trip resumeTrip(Long tripId);
@@ -27,6 +27,7 @@ public interface TripService {
     Trip updateTripStatus(Long tripId, String status);
     List<Trip> getDriverTrips(Long driverId);
     List<Trip> getTransporterTrips(Long transporterId);
+    List<Trip> getShipperTrips(Long shipperId);
     void updateLocation(Long tripId, Double lat, Double lng, Double speed);
     List<com.truckmitra.entity.load.TripLocation> getTrackingHistory(Long tripId);
 

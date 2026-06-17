@@ -34,6 +34,7 @@ export interface DriverProfile {
   fullName: string;
   mobile: string;
   email: string;
+  profileImageUrl?: string;
   
   // Profile fields
   aadharNumber?: string;
@@ -62,6 +63,7 @@ export interface TransporterProfile {
   fullName: string;
   mobile: string;
   email: string;
+  profileImageUrl?: string;
   
   // Registration fields
   agencyName: string;
@@ -94,6 +96,7 @@ export interface ShipperProfile {
   fullName: string;
   mobile: string;
   email: string;
+  profileImageUrl?: string;
   
   // Registration fields
   companyName: string;

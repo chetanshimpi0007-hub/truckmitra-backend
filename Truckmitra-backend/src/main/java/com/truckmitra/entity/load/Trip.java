@@ -67,6 +67,8 @@ public class Trip extends BaseEntity {
     private String destination;
     private Double distance;
     private java.math.BigDecimal freightAmount;
+    private java.math.BigDecimal shipperAmount;
+    private java.math.BigDecimal driverAmount;
 
     private LocalDateTime pickupDate;
     private LocalDateTime deliveryDate;

@@ -7,6 +7,8 @@ import { HiTruck, HiCurrencyDollar, HiCheckCircle, HiClock, HiDocumentText, HiUs
 import StatWidget from '../ui/StatWidget';
 import GlassCard from '../ui/GlassCard';
 import { format, subMonths } from 'date-fns';
+import { ReturnLoadSuggestionsWidget } from '../loads/ReturnLoadSuggestionsWidget';
+import { LiveDriverAvailabilityWidget } from './LiveDriverAvailabilityWidget';
 
 interface TransporterOverviewProps {
   stats: any;
@@ -62,6 +64,8 @@ const TransporterOverview: React.FC<TransporterOverviewProps> = ({
 
   // --- Calculations ---
   const totalRevenue = trips.filter(t => t.status === 'COMPLETED').reduce((sum, t) => sum + (t.load?.budget || 0), 0);
+  const completedTrips = trips.filter(t => t.status === 'COMPLETED');
+  const latestCompletedTrip = completedTrips.length > 0 ? completedTrips[0] : null;
 
   return (
     <div className="space-y-6">
@@ -275,7 +279,21 @@ const TransporterOverview: React.FC<TransporterOverviewProps> = ({
             )}
           </div>
         </GlassCard>
+        {/* Live Driver Availability */}
+        <div className="lg:col-span-2">
+          <LiveDriverAvailabilityWidget />
+        </div>
       </div>
+
+      {/* 4. RETURN LOAD SUGGESTIONS */}
+      {latestCompletedTrip && (
+        <div className="mt-8">
+          <ReturnLoadSuggestionsWidget 
+            completedTripId={latestCompletedTrip.id} 
+            deliveryCity={latestCompletedTrip.load?.destination?.split(',')[0]} 
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -15,7 +15,9 @@ import {
   HiArrowLeft,
   HiCheckCircle,
   HiChevronRight,
-  HiTruck
+  HiTruck,
+  HiEye,
+  HiEyeOff
 } from 'react-icons/hi';
 import { toast } from 'react-hot-toast';
 import CloudinaryService from '../../services/profile/cloudinary.service';
@@ -23,6 +25,7 @@ import CloudinaryService from '../../services/profile/cloudinary.service';
 const TransporterRegister: React.FC = () => {
   const [step, setStep] = useState(1);
   const [isUploading, setIsUploading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { register: registerUser, isLoading } = useAuth();
 
@@ -169,7 +172,7 @@ const TransporterRegister: React.FC = () => {
                     <InputField label="Mobile Number" name="mobile" value={formData.mobile} onChange={handleChange} icon={<HiPhone />} placeholder="10-digit number" required minLength={10} maxLength={10} pattern="[6-9][0-9]{9}" title="Enter a valid 10-digit Indian mobile number starting with 6-9" />
                     <InputField label="Email Address" type="email" name="email" value={formData.email} onChange={handleChange} icon={<HiMail />} placeholder="agency@email.com" required />
                   </div>
-                  <InputField label="Create Password" type="password" name="password" value={formData.password} onChange={handleChange} icon={<HiLockClosed />} placeholder="Minimum 6 characters" required minLength={6} />
+                  <InputField label="Create Password" type={showPassword ? "text" : "password"} name="password" value={formData.password} onChange={handleChange} icon={<HiLockClosed />} rightIcon={showPassword ? <HiEyeOff /> : <HiEye />} onRightIconClick={() => setShowPassword(!showPassword)} placeholder="Minimum 6 characters" required minLength={6} />
                 </div>
                 <div className="pt-6">
                   <button type="button" onClick={nextStep} className="w-full bg-orange-600 text-white py-4 rounded-xl font-bold hover:bg-orange-700 transition shadow-lg flex items-center justify-center">
@@ -255,7 +258,7 @@ const TransporterRegister: React.FC = () => {
 };
 
 // Helper Components
-const InputField: React.FC<any> = ({ label, type = 'text', name, value, onChange, icon, placeholder, required = false, ...rest }) => (
+const InputField: React.FC<any> = ({ label, type = 'text', name, value, onChange, icon, rightIcon, onRightIconClick, placeholder, required = false, ...rest }) => (
   <div>
     <label className="block text-sm font-bold text-gray-700 mb-2">{label} {required && <span className="text-red-500">*</span>}</label>
     <div className="relative group">
@@ -270,10 +273,19 @@ const InputField: React.FC<any> = ({ label, type = 'text', name, value, onChange
         value={value}
         onChange={onChange}
         {...rest}
-        className={`block w-full ${icon ? 'pl-11' : 'pl-4'} pr-4 py-3.5 bg-gray-50 border-2 border-gray-50 rounded-xl focus:bg-white focus:border-orange-600 focus:outline-none transition-all placeholder:text-gray-400 text-gray-800 font-medium`}
+        className={`block w-full ${icon ? 'pl-11' : 'pl-4'} ${rightIcon ? 'pr-12' : 'pr-4'} py-3.5 bg-gray-50 border-2 border-gray-50 rounded-xl focus:bg-white focus:border-orange-600 focus:outline-none transition-all placeholder:text-gray-400 text-gray-800 font-medium`}
         placeholder={placeholder}
         required={required}
       />
+      {rightIcon && (
+        <button
+          type="button"
+          onClick={onRightIconClick}
+          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-orange-600 transition-colors"
+        >
+          {rightIcon}
+        </button>
+      )}
     </div>
   </div>
 );

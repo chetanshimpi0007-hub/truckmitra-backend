@@ -21,8 +21,7 @@ import TransporterProfileForm from '../../Components/profile/TransporterProfileF
 import DocumentUpload from '../../Components/profile/DocumentUpload';
 import RatingCard from '../../Components/rating/RatingCard';
 import RatingSummary from '../../Components/rating/RatingSummary';
-
-
+import AdminProfileForm from '../../Components/profile/AdminProfileForm';
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
   const {
@@ -190,6 +189,12 @@ const ProfilePage: React.FC = () => {
             )}
             {user?.role === 'TRANSPORTER' && (
               <TransporterProfileForm
+                profile={profile as any}
+                onSave={updateProfile}
+              />
+            )}
+            {user?.role === 'ADMIN' && (
+              <AdminProfileForm
                 profile={profile as any}
                 onSave={updateProfile}
               />

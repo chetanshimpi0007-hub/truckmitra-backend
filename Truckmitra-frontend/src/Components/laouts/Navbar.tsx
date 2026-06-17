@@ -66,7 +66,14 @@ const Navbar: React.FC = () => {
   const getProtectedNavItems = () => {
     if (!user) return [];
 
-    // Common items for all logged-in users
+    // If user is not verified, only show Profile link
+    if (user.role !== 'ADMIN' && user.accountStatus !== AccountStatus.VERIFIED) {
+      return [
+        { label: 'Profile', path: '/profile', icon: <HiUser className="w-5 h-5" /> }
+      ];
+    }
+
+    // Common items for all logged-in verified users
     const commonItems = [
       { label: 'Dashboard', path: getDashboardLink(), icon: <HiDashboard className="w-5 h-5" /> },
       { label: 'Profile', path: '/profile', icon: <HiUser className="w-5 h-5" /> },

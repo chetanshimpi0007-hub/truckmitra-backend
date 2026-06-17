@@ -50,6 +50,9 @@ public class Load extends BaseEntity {
 
     private BigDecimal budget;
 
+    @Column(name = "estimated_distance_km")
+    private Double estimatedDistanceKm;
+
     @Enumerated(EnumType.STRING)
     private LoadStatus status;
 
@@ -65,6 +68,10 @@ public class Load extends BaseEntity {
 
     @com.fasterxml.jackson.annotation.JsonProperty("isBiddingEnabled")
     private Boolean isBiddingEnabled;
+
+    @Column(name = "assignment_type")
+    @Enumerated(EnumType.STRING)
+    private com.truckmitra.entity.common.enums.AssignmentType assignmentType;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "load", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -54,6 +54,8 @@ public class TripServiceImpl implements TripService {
     private final com.truckmitra.service.CloudinaryService cloudinaryService;
     private final com.truckmitra.repository.TripPhotoRepository tripPhotoRepository;
     private final OsrmRouteProvider osrmRouteProvider;
+    private final com.truckmitra.service.common.AuditService auditService;
+    private final com.truckmitra.service.billing.BillingService billingService;
 
     @Override
     @Transactional
@@ -82,6 +84,7 @@ public class TripServiceImpl implements TripService {
                 .destination(load.getDestination())
                 .distance(routeData.getDistanceKm())
                 .freightAmount(bid.getAmount())
+                .shipperAmount(bid.getAmount())
                 .carbonEmission(routeData.getCarbonEmissionKg())
                 .totalTollCost(routeData.getEstimatedTollCostInr())
                 .fuelCost(routeData.getFuelEstimateLiters() != null ? routeData.getFuelEstimateLiters() * 95.0 : null)
@@ -117,7 +120,7 @@ public class TripServiceImpl implements TripService {
 
     @Override
     @Transactional
-    public Trip assignDirectTransporterLoad(Long loadId, Long driverId, Long vehicleId) {
+    public Trip assignDirectTransporterLoad(Long loadId, Long driverId, Long vehicleId, java.math.BigDecimal driverAmount) {
         Long userId = com.truckmitra.security.SecurityUtils.getCurrentUserId();
         com.truckmitra.entity.user.Transporter transporter = transporterRepository.findById(userId)
                 .orElseThrow(() -> new com.truckmitra.exception.AppExceptions.UnauthorizedActionException("Transporter not found"));
@@ -136,8 +139,16 @@ public class TripServiceImpl implements TripService {
             throw new com.truckmitra.exception.AppExceptions.UnauthorizedActionException("Driver does not belong to your fleet.");
         }
 
-        if (!Boolean.TRUE.equals(driver.getIsAvailable()) || Boolean.TRUE.equals(driver.getIsOnTrip())) {
+        if (driver.getAvailabilityStatus() != com.truckmitra.entity.common.enums.DriverAvailabilityStatus.AVAILABLE) {
             throw new RuntimeException("Driver is currently unavailable or on another trip.");
+        }
+
+        java.math.BigDecimal shipperAmount = load.getBudget() != null ? load.getBudget() : java.math.BigDecimal.ZERO;
+        if (driverAmount == null || driverAmount.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Driver amount must be provided and greater than 0");
+        }
+        if (driverAmount.compareTo(shipperAmount) > 0) {
+            throw new RuntimeException("Driver amount cannot exceed shipper amount");
         }
 
         com.truckmitra.entity.fleet.Vehicle vehicle = null;
@@ -154,7 +165,7 @@ public class TripServiceImpl implements TripService {
             vehicleRepository.save(vehicle);
         }
 
-        driver.setIsAvailable(false);
+        driver.startTrip();
         driverRepository.save(driver);
 
         String tripNumber = "TRP-" + java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")
@@ -174,6 +185,8 @@ public class TripServiceImpl implements TripService {
                 .destination(load.getDestination())
                 .distance(routeData.getDistanceKm())
                 .freightAmount(load.getBudget() != null ? load.getBudget() : java.math.BigDecimal.ZERO)
+                .shipperAmount(load.getBudget() != null ? load.getBudget() : java.math.BigDecimal.ZERO)
+                .driverAmount(driverAmount)
                 .carbonEmission(routeData.getCarbonEmissionKg())
                 .totalTollCost(routeData.getEstimatedTollCostInr())
                 .fuelCost(routeData.getFuelEstimateLiters() != null ? routeData.getFuelEstimateLiters() * 95.0 : null)
@@ -192,7 +205,11 @@ public class TripServiceImpl implements TripService {
 
         Trip savedTrip = tripRepository.save(trip);
 
-        load.setStatus(com.truckmitra.entity.common.enums.LoadStatus.ASSIGNED);
+        if (load.getAssignmentType() == com.truckmitra.entity.common.enums.AssignmentType.DIRECT_TRANSPORTER) {
+            load.setStatus(com.truckmitra.entity.common.enums.LoadStatus.DRIVER_ASSIGNMENT_PENDING);
+        } else {
+            load.setStatus(com.truckmitra.entity.common.enums.LoadStatus.ASSIGNED);
+        }
         loadRepository.save(load);
 
         // Notify driver
@@ -243,13 +260,21 @@ public class TripServiceImpl implements TripService {
 
     @Override
     @Transactional
-    public Trip assignDriver(Long tripId, Long driverId) {
+    public Trip assignDriver(Long tripId, Long driverId, java.math.BigDecimal driverAmount) {
         Trip trip = getTripById(tripId);
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new RuntimeException("Driver not found"));
 
-        if (driver.getIsOnTrip() != null && driver.getIsOnTrip()) {
-            throw new RuntimeException("Driver is already on an active trip");
+        if (driver.getAvailabilityStatus() != com.truckmitra.entity.common.enums.DriverAvailabilityStatus.AVAILABLE) {
+            throw new RuntimeException("Driver is already on an active trip or unavailable");
+        }
+        
+        java.math.BigDecimal shipperAmount = trip.getShipperAmount() != null ? trip.getShipperAmount() : java.math.BigDecimal.ZERO;
+        if (driverAmount == null || driverAmount.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Driver amount must be provided and greater than 0");
+        }
+        if (driverAmount.compareTo(shipperAmount) > 0) {
+            throw new RuntimeException("Driver amount cannot exceed shipper amount");
         }
 
         // Cancel previous pending assignments
@@ -276,7 +301,10 @@ public class TripServiceImpl implements TripService {
 
         trip.setDriver(driver);
         trip.setStatus(TripStatus.ASSIGNED);
-        driver.setIsOnTrip(true);
+        if (driverAmount != null) {
+            trip.setDriverAmount(driverAmount);
+        }
+        driver.startTrip();
         driverRepository.save(driver);
 
         // Notify driver of new assignment
@@ -305,6 +333,8 @@ public class TripServiceImpl implements TripService {
             log.error("Failed to send assignment notification to driver: {}", e.getMessage());
         }
 
+        auditService.log("DRIVER_ASSIGNED", "BUSINESS", "Transporter " + trip.getTransporter().getFullName() + " assigned Driver " + driver.getFullName() + " to Trip #" + trip.getTripNumber(), trip.getTransporter().getId());
+
         return tripRepository.save(trip);
     }
 
@@ -312,7 +342,7 @@ public class TripServiceImpl implements TripService {
 
     @Override
     @Transactional
-    public Trip assignFleet(Long tripId, Long driverId, Long vehicleId) {
+    public Trip assignFleet(Long tripId, Long driverId, Long vehicleId, java.math.BigDecimal driverAmount) {
         com.truckmitra.entity.fleet.Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
         com.truckmitra.entity.user.Driver driver = driverRepository.findById(driverId)
@@ -323,7 +353,7 @@ public class TripServiceImpl implements TripService {
         assignVehicle(tripId, vehicleId);
         vehicle.setDriver(driver);
         vehicleRepository.save(vehicle);
-        return assignDriver(tripId, driverId);
+        return assignDriver(tripId, driverId, driverAmount);
     }
 
     // ── DRIVER ACCEPTS ASSIGNMENT ─────────────────────────────────────────────
@@ -412,6 +442,8 @@ public class TripServiceImpl implements TripService {
 
         // Reset driver and vehicle so transporter can re-assign
         if (trip.getDriver() != null) {
+            trip.getDriver().setAvailabilityStatus(com.truckmitra.entity.common.enums.DriverAvailabilityStatus.AVAILABLE);
+            trip.getDriver().setIsAvailable(true);
             trip.getDriver().setIsOnTrip(false);
             driverRepository.save(trip.getDriver());
             trip.setDriver(null);
@@ -494,6 +526,8 @@ public class TripServiceImpl implements TripService {
             log.error("Failed to send start notifications for trip {}: {}", tripId, e.getMessage());
         }
 
+        auditService.log("TRIP_STARTED", "BUSINESS", "Driver " + trip.getDriver().getFullName() + " started Trip #" + trip.getTripNumber(), trip.getDriver().getId());
+
         return savedTrip;
     }
 
@@ -536,6 +570,8 @@ public class TripServiceImpl implements TripService {
         trip.setPodSignatureUrl(pod.getSignatureUrl());
         trip.setStatus(TripStatus.POD_UPLOADED);
         tripRepository.save(trip);
+
+        auditService.log("POD_UPLOADED", "BUSINESS", "Driver " + trip.getDriver().getFullName() + " uploaded POD for Trip #" + trip.getTripNumber(), trip.getDriver().getId());
     }
 
     // ── MARK DELIVERED ────────────────────────────────────────────────────────
@@ -647,7 +683,7 @@ public class TripServiceImpl implements TripService {
             vehicleRepository.save(trip.getVehicle());
         }
         if (trip.getDriver() != null) {
-            trip.getDriver().setIsOnTrip(false);
+            trip.getDriver().completeTrip(trip.getDriverAmount() != null ? trip.getDriverAmount().doubleValue() : 0.0);
             driverRepository.save(trip.getDriver());
         }
 
@@ -676,6 +712,13 @@ public class TripServiceImpl implements TripService {
         }
 
         Trip savedTrip = tripRepository.save(trip);
+        
+        // Generate Billing Invoice
+        try {
+            billingService.generateInvoiceForTrip(savedTrip);
+        } catch (Exception e) {
+            log.error("Failed to generate billing invoice for trip {}: {}", tripId, e.getMessage(), e);
+        }
 
         // Notify all parties
         try {
@@ -693,6 +736,8 @@ public class TripServiceImpl implements TripService {
         } catch (Exception e) {
             log.error("Failed to send completion notifications: {}", e.getMessage());
         }
+
+        auditService.log("TRIP_COMPLETED", "BUSINESS", "Transporter " + trip.getTransporter().getFullName() + " marked Trip #" + trip.getTripNumber() + " as COMPLETED", trip.getTransporter().getId());
 
         return savedTrip;
     }
@@ -999,6 +1044,11 @@ public class TripServiceImpl implements TripService {
     @Override
     public List<Trip> getTransporterTrips(Long transporterId) {
         return tripRepository.findByTransporterId(transporterId);
+    }
+
+    @Override
+    public List<Trip> getShipperTrips(Long shipperId) {
+        return tripRepository.findByShipperId(shipperId);
     }
 
     @Override

@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> handleBadCredentials(BadCredentialsException ex) {
         log.error("Bad credentials: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ApiResponse.error("Invalid credentials", null));
+                .body(ApiResponse.error(ex.getMessage(), null));
     }
 
     @ExceptionHandler(AccessDeniedException.class)

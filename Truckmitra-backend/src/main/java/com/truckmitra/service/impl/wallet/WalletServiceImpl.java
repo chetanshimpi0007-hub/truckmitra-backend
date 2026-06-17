@@ -200,6 +200,11 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
+    public Page<TransactionResponse> getAllTransactions(Pageable pageable) {
+        return transactionRepository.findAll(pageable).map(this::mapToTransactionResponse);
+    }
+
+    @Override
     public TransactionResponse getTransaction(String transactionId) {
         return transactionRepository.findByTransactionId(transactionId)
                 .map(this::mapToTransactionResponse)

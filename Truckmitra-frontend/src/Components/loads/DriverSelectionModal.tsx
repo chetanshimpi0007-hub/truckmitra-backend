@@ -3,14 +3,16 @@ import { HiX, HiTruck, HiUser, HiPhone } from 'react-icons/hi';
 import protectedApi from '../../services/api/protectedAndPublicAPI';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { ProfitEstimatorWidget } from '../dashboard/ProfitEstimatorWidget';
 
 interface DriverSelectionModalProps {
   loadId: number;
+  shipperAmount: number;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-const DriverSelectionModal: React.FC<DriverSelectionModalProps> = ({ loadId, onClose, onSuccess }) => {
+const DriverSelectionModal: React.FC<DriverSelectionModalProps> = ({ loadId, shipperAmount, onClose, onSuccess }) => {
   const navigate = useNavigate();
   const [drivers, setDrivers] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
@@ -18,6 +20,7 @@ const DriverSelectionModal: React.FC<DriverSelectionModalProps> = ({ loadId, onC
   const [submitting, setSubmitting] = useState(false);
   const [selectedDriverId, setSelectedDriverId] = useState<number | null>(null);
   const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
+  const [driverAmount, setDriverAmount] = useState<number | ''>('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,10 +56,23 @@ const DriverSelectionModal: React.FC<DriverSelectionModalProps> = ({ loadId, onC
       toast.error('Please select a driver');
       return;
     }
+    if (driverAmount === '') {
+      toast.error('Please enter driver payment amount');
+      return;
+    }
+    const amount = Number(driverAmount);
+    if (amount <= 0) {
+      toast.error('Driver payment amount must be greater than 0');
+      return;
+    }
+    if (amount > shipperAmount) {
+      toast.error(`Driver payment amount cannot exceed the shipper amount (₹${shipperAmount})`);
+      return;
+    }
     setSubmitting(true);
     try {
       await protectedApi.post('/api/trips/direct-assign', null, {
-        params: { loadId, driverId: selectedDriverId, vehicleId: selectedVehicleId }
+        params: { loadId, driverId: selectedDriverId, vehicleId: selectedVehicleId, driverAmount: Number(driverAmount) }
       });
       toast.success('Driver assigned successfully!');
       onSuccess();
@@ -102,6 +118,22 @@ const DriverSelectionModal: React.FC<DriverSelectionModalProps> = ({ loadId, onC
             </div>
           ) : (
             <div className="space-y-4">
+              <div className="mb-6">
+                <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block">Driver Payment Amount (₹)</label>
+                <input type="number" value={driverAmount} onChange={e => setDriverAmount(e.target.value === '' ? '' : Number(e.target.value))}
+                  placeholder={`Shipper Amount: ₹${shipperAmount}`}
+                  className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-emerald-500 outline-none font-bold text-slate-900" />
+                {driverAmount !== '' && (
+                  <p className="text-xs font-bold mt-1 text-slate-500">
+                    Transporter Margin: <span className="text-emerald-600">₹{(shipperAmount - Number(driverAmount)).toLocaleString('en-IN')}</span>
+                  </p>
+                )}
+              </div>
+              
+              <div className="mb-6">
+                <ProfitEstimatorWidget loadId={loadId} />
+              </div>
+
               <h3 className="text-sm font-black uppercase text-slate-400 tracking-widest mb-2">Available Drivers</h3>
               <div className="grid gap-4">
                 {drivers.map(driver => {

@@ -19,6 +19,7 @@ import DriverDashboard from '../pages/driver/DriverDashboard';
 import ShipperDashboard from '../pages/shipper/ShipperDashboard';
 import TransporterDashboard from '../pages/transporter/TransporterDashboard';
 import AdminDashboard from '../pages/admin/AdminDashboard';
+import AdminTransactions from '../pages/admin/AdminTransactions';
 import ReportsPage from '../pages/admin/ReportsPage';
 import SystemSettings from '../pages/admin/SystemSettings';
 import CreateLoad from '../pages/loads/CreateLoad';
@@ -37,21 +38,20 @@ import SubscriptionManagement from '../pages/profile/SubscriptionManagement';
 import MyRatingsPage from '../pages/rating/MyRatingsPage';
 import UserRatingsPage from '../pages/rating/UserRatingsPage';
 import CreateRatingPage from '../Components/rating/CreateRatingPage';
+import InvoiceDetails from '../pages/billing/InvoiceDetails';
 import RatingDetailPage from '../pages/rating/RatingDetailPage';
 import EditRatingPage from '../pages/rating/EditRatingPage';
 import EditReviewPage from '../pages/rating/EditReviewPage';
 import VerifyLR from '../pages/public/VerifyLR';
 import PricingPage from '../pages/public/PricingPage';
+import AboutUs from '../pages/public/AboutUs';
 
 const AppRoutes = () => {
   return (
     <Routes>
       {/* Public Routes - No authentication required */}
       <Route path="/" element={<LandingPage />} />
-      <Route path="/about" element={<StaticPage title="About Us" />} />
-      <Route path="/careers" element={<StaticPage title="Careers" />} />
-      <Route path="/press" element={<StaticPage title="Press" />} />
-      <Route path="/blog" element={<StaticPage title="Blog" />} />
+      <Route path="/about" element={<AboutUs />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/help" element={<StaticPage title="Help Center" />} />
       <Route path="/contact" element={<StaticPage title="Contact Us" />} />
@@ -91,9 +91,10 @@ const AppRoutes = () => {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/edit" element={<EditProfilePage />} />
         <Route path="/profile/documents" element={<DocumentsPage />} />
-        
+        {/* Wallet and Billing */}
         <Route path="/wallet" element={<Wallet />} />
-
+        <Route path="/dashboard/billing/:id" element={<InvoiceDetails />} />
+        
          {/* My Ratings */}
         <Route path="/ratings/received" element={<MyRatingsPage type="received" />} />
         <Route path="/ratings/given" element={<MyRatingsPage type="given" />} />
@@ -134,9 +135,9 @@ const AppRoutes = () => {
 
       <Route element={<PrivateRoute allowedRoles={['SHIPPER']} />}>
         <Route path="/shipper/dashboard" element={<ShipperDashboard />} />
-        <Route path="/shipper/loads" element={<Loads />} />
+        <Route path="/shipper/loads" element={<Navigate to="/shipper/dashboard" replace />} />
         <Route path="/shipper/loads/create" element={<CreateLoad />} />
-        <Route path="/shipper/bids" element={<Bids />} />
+        <Route path="/shipper/bids" element={<Navigate to="/shipper/dashboard" replace />} />
         <Route path="/shipper/profile" element={<ProfilePage />} />
       </Route>
 
@@ -154,9 +155,9 @@ const AppRoutes = () => {
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<AdminDashboard />} />
         <Route path="/admin/users/:id" element={<AdminDashboard />} />
-        <Route path="/admin/transactions" element={<div>Transactions</div>} />
-        <Route path="/admin/reports" element={<div>Reports</div>} />
-        <Route path="/admin/settings" element={<div>Settings</div>} />
+        <Route path="/admin/transactions" element={<AdminTransactions />} />
+        <Route path="/admin/reports" element={<ReportsPage />} />
+        <Route path="/admin/settings" element={<SystemSettings />} />
       </Route>
 
       {/* 404 Route */}

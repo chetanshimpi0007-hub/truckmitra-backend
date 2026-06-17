@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { LogisticsSide } from '../illustrations/LogisticsSide';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -39,11 +40,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitle }) =>
 
       {/* Right Side - Hero Banner */}
       <div className="hidden lg:block relative w-0 flex-1 bg-slate-900">
-        <img
-          className="absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-overlay"
-          src="/assets/marketing/login-hero.png"
-          alt="TruckMitra Logistics Ecosystem"
-        />
+        <LogisticsSide className="absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-overlay" />
         {/* Glass Overlay over the image */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
         <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>

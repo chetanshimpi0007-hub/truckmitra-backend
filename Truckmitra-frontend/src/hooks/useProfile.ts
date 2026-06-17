@@ -114,11 +114,13 @@ export const useProfile = () => {
       toast.success('Document uploaded successfully');
       // Refresh documents list
       await dispatch(fetchDocuments()).unwrap();
+      // Refresh profile to reflect any updated profile pictures immediately
+      await loadProfile();
     } catch (err: any) {
       toast.error(err || 'Failed to upload document');
       throw err;
     }
-  }, [dispatch]);
+  }, [dispatch, loadProfile]);
 
   const removeDocument = useCallback(async (documentId: number): Promise<void> => {
     try {
@@ -148,6 +150,15 @@ export const useProfile = () => {
         return transporterProfile;
       case 'SHIPPER':
         return shipperProfile;
+      case 'ADMIN':
+        return { 
+          id: user.id,
+          fullName: user.fullName, 
+          email: user.email, 
+          mobile: user.mobile,
+          companyName: 'TruckMitra Administration',
+          address: 'TruckMitra HQ, India'
+        };
       default:
         return null;
     }

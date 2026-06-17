@@ -26,6 +26,7 @@ public class TripController {
     private final PdfService pdfService;
     private final DriverRepository driverRepository;
     private final CloudinaryService cloudinaryService;
+    private final com.truckmitra.service.load.ReturnLoadPredictorService returnLoadPredictorService;
 
     // ── PDF DOWNLOADS ─────────────────────────────────────────────────────────
 
@@ -98,13 +99,14 @@ public class TripController {
             @RequestParam Long tripId,
             @RequestParam Long driverId,
             @RequestParam Long vehicleId,
+            @RequestParam(required = false) java.math.BigDecimal driverAmount,
             @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails != null) {
             org.slf4j.LoggerFactory.getLogger(TripController.class)
                     .info("assignFleet called by user: {} with authorities: {}",
                             userDetails.getUsername(), userDetails.getAuthorities());
         }
-        return ResponseEntity.ok(tripService.assignFleet(tripId, driverId, vehicleId));
+        return ResponseEntity.ok(tripService.assignFleet(tripId, driverId, vehicleId, driverAmount));
     }
 
     /** Transporter assigns driver and vehicle directly to a load they created */
@@ -113,15 +115,19 @@ public class TripController {
     public ResponseEntity<Trip> directAssign(
             @RequestParam Long loadId,
             @RequestParam Long driverId,
-            @RequestParam(required = false) Long vehicleId) {
-        return ResponseEntity.ok(tripService.assignDirectTransporterLoad(loadId, driverId, vehicleId));
+            @RequestParam(required = false) Long vehicleId,
+            @RequestParam(required = false) java.math.BigDecimal driverAmount) {
+        return ResponseEntity.ok(tripService.assignDirectTransporterLoad(loadId, driverId, vehicleId, driverAmount));
     }
 
     /** Transporter assigns a driver to a trip */
     @PostMapping("/{tripId}/assign-driver/{driverId}")
     @PreAuthorize("hasRole('TRANSPORTER') or hasRole('ADMIN')")
-    public ResponseEntity<Trip> assignDriver(@PathVariable Long tripId, @PathVariable Long driverId) {
-        return ResponseEntity.ok(tripService.assignDriver(tripId, driverId));
+    public ResponseEntity<Trip> assignDriver(
+            @PathVariable Long tripId, 
+            @PathVariable Long driverId,
+            @RequestParam(required = false) java.math.BigDecimal driverAmount) {
+        return ResponseEntity.ok(tripService.assignDriver(tripId, driverId, driverAmount));
     }
 
     // ── DRIVER ACCEPT / REJECT ────────────────────────────────────────────────
@@ -324,6 +330,14 @@ public class TripController {
         return ResponseEntity.ok(tripService.getTransporterTrips(transporterId));
     }
 
+    /** Get all trips for the current shipper */
+    @GetMapping("/shipper")
+    @PreAuthorize("hasRole('SHIPPER') or hasRole('ADMIN')")
+    public ResponseEntity<List<Trip>> getShipperTrips(@AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = com.truckmitra.security.SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(tripService.getShipperTrips(userId));
+    }
+
     /** Upload a trip photo (Pickup or Destination) */
     @PostMapping("/{tripId}/photos")
     @PreAuthorize("hasRole('DRIVER') or hasRole('TRANSPORTER') or hasRole('ADMIN')")
@@ -355,5 +369,12 @@ public class TripController {
                 .build())
             .toList();
         return ResponseEntity.ok(response);
+    }
+
+    /** Get return load suggestions for a completed trip */
+    @GetMapping("/{tripId}/return-load-suggestions")
+    @PreAuthorize("hasRole('DRIVER') or hasRole('TRANSPORTER') or hasRole('ADMIN')")
+    public ResponseEntity<List<com.truckmitra.dto.response.ReturnLoadSuggestionResponse>> getReturnLoadSuggestions(@PathVariable Long tripId) {
+        return ResponseEntity.ok(returnLoadPredictorService.getSuggestions(tripId));
     }
 }

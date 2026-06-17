@@ -60,6 +60,9 @@ public class Vehicle extends BaseEntity {
     @Builder.Default
     private Boolean isAvailable = true;
 
+    @Column(name = "average_mileage")
+    private Double averageMileage;
+
     @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transporter_id")

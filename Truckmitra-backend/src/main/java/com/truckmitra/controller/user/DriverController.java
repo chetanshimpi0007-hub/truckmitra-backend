@@ -21,6 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.truckmitra.security.SecurityUtils;
+import com.truckmitra.service.user.DriverAvailabilityService;
+import com.truckmitra.dto.response.DriverAvailabilitySummaryResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -38,6 +42,7 @@ public class DriverController {
     private final WalletRepository walletRepository;
     private final VehicleRepository vehicleRepository;
     private final com.truckmitra.service.common.SubscriptionService subscriptionService;
+    private final DriverAvailabilityService driverAvailabilityService;
 
     /** Returns all drivers linked to a transporter (including pending ones). */
     @GetMapping("/transporter/{transporterId}")
@@ -57,6 +62,25 @@ public class DriverController {
                         .filter(d -> d.getAccountStatus() == AccountStatus.VERIFIED)
                         .collect(java.util.stream.Collectors.toList());
                 return ResponseEntity.ok(approvedDrivers);
+        }
+
+        @GetMapping("/availability-summary")
+        public ResponseEntity<DriverAvailabilitySummaryResponse> getAvailabilitySummary() {
+                Long currentUserId = SecurityUtils.getCurrentUserId();
+                return ResponseEntity.ok(driverAvailabilityService.getAvailabilitySummary(currentUserId));
+        }
+
+        @GetMapping("/available")
+        public ResponseEntity<Page<Driver>> getAvailableDrivers(
+                @RequestParam(required = false) String city,
+                @RequestParam(required = false) String vehicleType,
+                @RequestParam(defaultValue = "0") int page,
+                @RequestParam(defaultValue = "20") int size
+        ) {
+                Long currentUserId = SecurityUtils.getCurrentUserId();
+                return ResponseEntity.ok(driverAvailabilityService.getAvailableDrivers(
+                        currentUserId, city, vehicleType, PageRequest.of(page, size)
+                ));
         }
 
     /**

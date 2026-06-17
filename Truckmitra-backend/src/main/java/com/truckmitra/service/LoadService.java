@@ -15,6 +15,8 @@ public interface LoadService {
     Load assignTransporter(Long loadId, Long transporterId);
     List<Load> getLoadsByStatus(LoadStatus status);
     List<Load> getLoadsByStatusAndBidding(LoadStatus status, Boolean isBiddingEnabled);
+    Load acceptDirectLoad(Long loadId, Long transporterId);
+    Load rejectDirectLoad(Long loadId, Long transporterId);
     Load updateLoad(Long loadId, LoadRequest request, User user);
     void deleteLoad(Long loadId, User user);
 }

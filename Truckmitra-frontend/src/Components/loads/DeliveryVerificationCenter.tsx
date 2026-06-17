@@ -8,7 +8,7 @@ import {
 import { protectedApi } from '../../services/api/protectedAndPublicAPI';
 import { toast } from 'react-hot-toast';
 
-type TabOption = 'summary' | 'lr' | 'pod' | 'pickup' | 'destination';
+type TabOption = 'summary' | 'lr' | 'pod' | 'pickup_receipt' | 'delivery_receipt' | 'pickup' | 'destination';
 
 export default function DeliveryVerificationCenter({ trip, onClose, onDone }: any) {
   const [activeTab, setActiveTab] = useState<TabOption>('summary');
@@ -161,9 +161,9 @@ export default function DeliveryVerificationCenter({ trip, onClose, onDone }: an
           
           {/* SIDEBAR TABS */}
           <div className="w-full md:w-64 bg-slate-50 dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-700 p-4 space-y-2 overflow-y-auto">
-            {(['summary', 'lr', 'pod', 'pickup', 'destination'] as TabOption[]).map(tab => {
-              const labels: Record<string, string> = { summary: 'Trip Summary', lr: 'Digital LR', pod: 'Proof of Delivery', pickup: 'Pickup Photos', destination: 'Dest Photos' };
-              const icons: Record<string, any> = { summary: <HiInformationCircle/>, lr: <HiDocumentText/>, pod: <HiCheckCircle/>, pickup: <HiPhotograph/>, destination: <HiPhotograph/> };
+            {(['summary', 'lr', 'pod', 'pickup_receipt', 'delivery_receipt', 'pickup', 'destination'] as TabOption[]).map(tab => {
+              const labels: Record<string, string> = { summary: 'Trip Summary', lr: 'Digital LR', pod: 'Proof of Delivery', pickup_receipt: 'Pickup Receipt', delivery_receipt: 'Delivery Receipt', pickup: 'Pickup Photos', destination: 'Dest Photos' };
+              const icons: Record<string, any> = { summary: <HiInformationCircle/>, lr: <HiDocumentText/>, pod: <HiCheckCircle/>, pickup_receipt: <HiDocumentText/>, delivery_receipt: <HiDocumentText/>, pickup: <HiPhotograph/>, destination: <HiPhotograph/> };
               const counts: Record<string, number | null> = { pickup: pickupPhotos.length, destination: destinationPhotos.length };
               
               return (
@@ -325,6 +325,60 @@ export default function DeliveryVerificationCenter({ trip, onClose, onDone }: an
                   </div>
                 )}
 
+                {/* 6. PICKUP RECEIPT */}
+                {activeTab === 'pickup_receipt' && (
+                  <div className="h-full min-h-[500px]">
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-8">Pickup Receipt</h3>
+                    {trip.pickupReceiptUrl ? (
+                      <div className="group relative bg-slate-100 dark:bg-slate-800 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-700 h-[500px]">
+                          <img src={trip.pickupReceiptUrl} alt="Pickup Receipt" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                          <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/50 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <div className="flex space-x-4">
+                              <button onClick={() => setZoomedPhoto(trip.pickupReceiptUrl)} className="w-14 h-14 bg-white/20 hover:bg-brand backdrop-blur-md rounded-2xl flex items-center justify-center text-white transition shadow-2xl">
+                                <HiZoomIn className="w-6 h-6" />
+                              </button>
+                              <button onClick={() => handleDownload(trip.pickupReceiptUrl, `PickupReceipt_${trip.id}`)} className="w-14 h-14 bg-white/20 hover:bg-brand backdrop-blur-md rounded-2xl flex items-center justify-center text-white transition shadow-2xl">
+                                <HiDownload className="w-6 h-6" />
+                              </button>
+                            </div>
+                          </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-32 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700">
+                        <HiDocumentText className="w-20 h-20 text-slate-200 dark:text-slate-700 mb-6" />
+                        <h3 className="text-2xl font-black text-slate-400 dark:text-slate-500">Pickup Receipt Missing</h3>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 7. DELIVERY RECEIPT */}
+                {activeTab === 'delivery_receipt' && (
+                  <div className="h-full min-h-[500px]">
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-8">Delivery Receipt</h3>
+                    {trip.deliveryReceiptUrl ? (
+                      <div className="group relative bg-slate-100 dark:bg-slate-800 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-700 h-[500px]">
+                          <img src={trip.deliveryReceiptUrl} alt="Delivery Receipt" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                          <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/50 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <div className="flex space-x-4">
+                              <button onClick={() => setZoomedPhoto(trip.deliveryReceiptUrl)} className="w-14 h-14 bg-white/20 hover:bg-brand backdrop-blur-md rounded-2xl flex items-center justify-center text-white transition shadow-2xl">
+                                <HiZoomIn className="w-6 h-6" />
+                              </button>
+                              <button onClick={() => handleDownload(trip.deliveryReceiptUrl, `DeliveryReceipt_${trip.id}`)} className="w-14 h-14 bg-white/20 hover:bg-brand backdrop-blur-md rounded-2xl flex items-center justify-center text-white transition shadow-2xl">
+                                <HiDownload className="w-6 h-6" />
+                              </button>
+                            </div>
+                          </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-32 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700">
+                        <HiDocumentText className="w-20 h-20 text-slate-200 dark:text-slate-700 mb-6" />
+                        <h3 className="text-2xl font-black text-slate-400 dark:text-slate-500">Delivery Receipt Missing</h3>
+                      </div>
+                    )}
+                  </div>
+                )}
+
               </motion.div>
             </AnimatePresence>
           </div>
@@ -349,13 +403,13 @@ export default function DeliveryVerificationCenter({ trip, onClose, onDone }: an
                 onClick={handleReject} disabled={loading}
                 className="flex-1 md:flex-none px-8 py-4 bg-white dark:bg-slate-800 text-rose-500 border-2 border-rose-100 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-2xl font-black tracking-widest uppercase transition-colors disabled:opacity-50"
               >
-                {loading ? 'Processing...' : 'Reject'}
+                {loading ? 'Processing...' : 'Reject Receipt'}
               </button>
               <button 
                 onClick={handleAccept} disabled={loading}
                 className="flex-1 md:flex-none px-12 py-4 bg-emerald-600 hover:bg-slate-900 dark:hover:bg-brand text-white rounded-2xl font-black tracking-widest uppercase shadow-xl shadow-emerald-200 dark:shadow-none transition-all disabled:opacity-50 flex items-center justify-center space-x-3"
               >
-                <span>{loading ? 'Processing...' : 'Accept & Verify'}</span>
+                <span>{loading ? 'Processing...' : 'Accept Receipt'}</span>
                 {!loading && <HiCheckCircle className="w-6 h-6" />}
               </button>
             </div>

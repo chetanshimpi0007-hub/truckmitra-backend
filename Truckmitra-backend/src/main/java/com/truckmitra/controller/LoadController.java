@@ -123,5 +123,30 @@ public ResponseEntity<Load> createLoad(
         // The service should check if the 'user' is actually the owner of 'loadId'
         return ResponseEntity.ok(loadService.assignTransporter(loadId, transporterId));
     }
+    @PostMapping("/{loadId}/transporter/accept")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('TRANSPORTER')")
+    public ResponseEntity<Load> acceptDirectLoad(
+            @PathVariable Long loadId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByMobile(userDetails.getUsername())
+                .orElseGet(() -> userRepository.findByEmail(userDetails.getUsername()).orElse(null));
+        if (user == null) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(loadService.acceptDirectLoad(loadId, user.getId()));
+    }
+
+    @PostMapping("/{loadId}/transporter/reject")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('TRANSPORTER')")
+    public ResponseEntity<Load> rejectDirectLoad(
+            @PathVariable Long loadId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByMobile(userDetails.getUsername())
+                .orElseGet(() -> userRepository.findByEmail(userDetails.getUsername()).orElse(null));
+        if (user == null) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(loadService.rejectDirectLoad(loadId, user.getId()));
+    }
 }
 

@@ -56,6 +56,8 @@ export const tripService = {
     protectedApi.post(`/api/trips/${tripId}/transporter-accept`),
   transporterRejectDelivery: (tripId: number, rejectionReason: string) =>
     protectedApi.post(`/api/trips/${tripId}/transporter-reject`, { rejectionReason }),
+  getReturnLoadSuggestions: (tripId: number) =>
+    protectedApi.get(`/api/trips/${tripId}/return-load-suggestions`),
 };
 
 export type TripStatus =

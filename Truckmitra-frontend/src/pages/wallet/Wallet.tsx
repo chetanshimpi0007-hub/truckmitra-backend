@@ -48,9 +48,10 @@ const Wallet: React.FC = () => {
       
       const transRes = await protectedApi.get('/api/wallet/my/transactions');
       setTransactions(transRes.data.data.content || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Wallet fetch error:', error);
-      toast.error('Failed to load wallet data');
+      const errorMessage = error.response?.data?.message || error.message || 'Unknown error';
+      toast.error(`Failed to load wallet data: ${errorMessage}`);
     } finally {
       setLoading(false);
     }

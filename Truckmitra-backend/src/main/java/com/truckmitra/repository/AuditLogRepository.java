@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     List<AuditLog> findByUserIdOrderByTimestampDesc(Long userId);
+    org.springframework.data.domain.Page<AuditLog> findByUserIdOrderByTimestampDesc(Long userId, org.springframework.data.domain.Pageable pageable);
 }

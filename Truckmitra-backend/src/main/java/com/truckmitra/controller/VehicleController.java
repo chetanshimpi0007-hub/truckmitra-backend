@@ -39,7 +39,41 @@ public class VehicleController {
 
     @GetMapping("/driver/{driverId}")
     public ResponseEntity<List<Vehicle>> getVehiclesByDriverId(@PathVariable Long driverId) {
-        return ResponseEntity.ok(vehicleRepository.findByDriverId(driverId));
+        List<Vehicle> vehicles = vehicleRepository.findByDriverId(driverId);
+        
+        // If mapping does not exist, automatically assign driver's registered vehicle
+        if (vehicles == null || vehicles.isEmpty()) {
+            java.util.List<Vehicle> mutableVehicles = new java.util.ArrayList<>();
+            if (vehicles != null) {
+                mutableVehicles.addAll(vehicles);
+            }
+            
+            userRepository.findById(driverId).ifPresent(user -> {
+                if (user instanceof com.truckmitra.entity.user.Driver) {
+                    com.truckmitra.entity.user.Driver driver = (com.truckmitra.entity.user.Driver) user;
+                    if (driver.getVehicleNumber() != null && !driver.getVehicleNumber().isEmpty()) {
+                        Vehicle autoVehicle = new Vehicle();
+                        autoVehicle.setVehicleNumber(driver.getVehicleNumber());
+                        autoVehicle.setCapacity(driver.getVehicleCapacity() != null ? Double.parseDouble(driver.getVehicleCapacity()) : 0.0);
+                        autoVehicle.setVehicleType(driver.getPreferredVehicleType() != null ? driver.getPreferredVehicleType().name() : "TRUCK");
+                        autoVehicle.setVehicleFrontImageUrl(driver.getVehicleFrontImageUrl());
+                        autoVehicle.setVehicleBackImageUrl(driver.getVehicleBackImageUrl());
+                        autoVehicle.setVehicleRcImageUrl(driver.getVehiclePucImageUrl()); // fallback
+                        autoVehicle.setDriver(driver);
+                        autoVehicle.setIsAvailable(true);
+                        
+                        // Save to establish the mapping
+                        autoVehicle = vehicleRepository.save(autoVehicle);
+                        
+                        // Add to our list
+                        mutableVehicles.add(autoVehicle);
+                    }
+                }
+            });
+            return ResponseEntity.ok(mutableVehicles);
+        }
+        
+        return ResponseEntity.ok(vehicles);
     }
 
     @GetMapping("/me")

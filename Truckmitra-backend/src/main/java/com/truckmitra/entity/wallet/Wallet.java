@@ -5,6 +5,7 @@ import com.truckmitra.entity.common.BaseEntity;
 import com.truckmitra.entity.common.enums.AccountStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -42,40 +43,52 @@ public class Wallet extends BaseEntity {
     @Column(nullable = false, unique = true, length = 20)
     private String walletNumber; // Unique wallet number (e.g., WAL-2024-00001)
 
+    @Builder.Default
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal currentBalance = BigDecimal.ZERO; // Available balance
 
+    @Builder.Default
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal escrowBalance = BigDecimal.ZERO; // Held balance (for ongoing trips)
 
+    @Builder.Default
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal lifetimeDeposit = BigDecimal.ZERO; // Total money added
 
+    @Builder.Default
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal lifetimeWithdrawal = BigDecimal.ZERO; // Total money withdrawn
 
+    @Builder.Default
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal lifetimeEarnings = BigDecimal.ZERO; // Total trip earnings
 
+    @Builder.Default
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal lifetimeSpent = BigDecimal.ZERO; // Total money spent
 
+    @Builder.Default
     @Column(nullable = false, length = 20)
     private String walletStatus = "ACTIVE"; // ACTIVE, FROZEN, CLOSED
 
     private LocalDateTime lastTransactionAt;
 
+    @Builder.Default
     private Integer dailyTransactionCount = 0;
 
+    @Builder.Default
     private BigDecimal dailyTransactionLimit = new BigDecimal("100000"); // ₹1,00,000 default
 
+    @Builder.Default
     private BigDecimal perTransactionLimit = new BigDecimal("50000"); // ₹50,000 default
 
     // Security fields
     private String walletPin; // For transactions (encrypted)
 
+    @Builder.Default
     private Boolean isPinSet = false;
 
+    @Builder.Default
     private Integer failedPinAttempts = 0;
 
     private LocalDateTime pinLockUntil;

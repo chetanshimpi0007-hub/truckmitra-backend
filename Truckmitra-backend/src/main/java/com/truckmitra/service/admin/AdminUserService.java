@@ -23,6 +23,8 @@ public interface AdminUserService {
     
     UserDetailResponse getUserDetails(Long userId);
     
+    com.truckmitra.dto.response.admin.UserFinancialSnapshotDto getUserFinancialSnapshot(Long userId);
+    
     Page<User> getAllUsers(AccountStatus status, Role role, String search, Pageable pageable);
     
     // ==================== STATUS UPDATE OPERATIONS ====================
@@ -38,6 +40,12 @@ public interface AdminUserService {
     User deleteUser(Long userId);
     
     User restoreUser(Long userId);
+    
+
+    org.springframework.data.domain.Page<com.truckmitra.entity.load.Trip> getUserTrips(Long userId, org.springframework.data.domain.Pageable pageable);
+    org.springframework.data.domain.Page<com.truckmitra.dto.response.wallet.TransactionResponse> getUserPayments(Long userId, org.springframework.data.domain.Pageable pageable);
+    org.springframework.data.domain.Page<com.truckmitra.entity.AuditLog> getUserTimeline(Long userId, org.springframework.data.domain.Pageable pageable);
+    org.springframework.data.domain.Page<com.truckmitra.entity.load.Trip> getUserInvoices(Long userId, org.springframework.data.domain.Pageable pageable);
     
     User updateUserStatus(Long userId, StatusUpdateRequest request);
     

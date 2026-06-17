@@ -14,4 +14,7 @@ public interface LoadRepository extends JpaRepository<Load, Long> {
     List<Load> findByStatusAndIsBiddingEnabled(LoadStatus status, Boolean isBiddingEnabled);
     long countByShipperId(Long shipperId);
     long countByTransporterId(Long transporterId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT l FROM Load l WHERE l.source LIKE CONCAT(:city, '%') AND l.status NOT IN ('COMPLETED', 'CANCELLED', 'REJECTED', 'ASSIGNED', 'DRIVER_ASSIGNMENT_PENDING') ORDER BY l.budget DESC, l.createdAt DESC")
+    List<Load> findReturnLoadSuggestions(@org.springframework.data.repository.query.Param("city") String city, org.springframework.data.domain.Pageable pageable);
 }

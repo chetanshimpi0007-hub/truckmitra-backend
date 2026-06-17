@@ -18,4 +18,5 @@ public class LoadRequest {
     private Long transporterId; // For direct assignment
     @com.fasterxml.jackson.annotation.JsonProperty("isBiddingEnabled")
     private Boolean isBiddingEnabled;
+    private com.truckmitra.entity.common.enums.AssignmentType assignmentType;
 }

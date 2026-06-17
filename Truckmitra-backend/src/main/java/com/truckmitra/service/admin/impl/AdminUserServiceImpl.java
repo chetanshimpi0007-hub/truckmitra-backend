@@ -14,10 +14,21 @@ import com.truckmitra.exception.UnauthorizedException;
 import com.truckmitra.repository.auth.UserRepository;
 import com.truckmitra.service.admin.AdminUserService;
 import com.truckmitra.service.notification.NotificationService;
+import com.truckmitra.dto.response.admin.UserFinancialSnapshotDto;
+import com.truckmitra.repository.billing.TripInvoiceRepository;
+import com.truckmitra.repository.billing.PaymentRecordRepository;
+import com.truckmitra.repository.TripRepository;
+import com.truckmitra.entity.common.enums.TripStatus;
+import com.truckmitra.entity.load.Trip;
+import com.truckmitra.entity.billing.TripInvoice;
+import com.truckmitra.dto.response.billing.TripInvoiceDto;
+import com.truckmitra.repository.AuditLogRepository;
+import com.truckmitra.service.wallet.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,9 +36,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -36,8 +49,24 @@ import java.util.Map;
 public class AdminUserServiceImpl implements AdminUserService {
 
     private final UserRepository userRepository;
+    
     @Autowired
     private NotificationService notificationService;
+    
+    @Autowired
+    private TripRepository tripRepository;
+    
+    @Autowired
+    private TripInvoiceRepository tripInvoiceRepository;
+    
+    @Autowired
+    private PaymentRecordRepository paymentRecordRepository;
+    
+    @Autowired
+    private WalletService walletService;
+    
+    @Autowired
+    private AuditLogRepository auditLogRepository;
 
     // ==================== GET OPERATIONS ====================
 
@@ -45,7 +74,10 @@ public class AdminUserServiceImpl implements AdminUserService {
     public Page<User> getPendingUsers(Pageable pageable) {
         log.debug("Fetching pending users, page: {}, size: {}", 
                   pageable.getPageNumber(), pageable.getPageSize());
-        return userRepository.findByAccountStatus(AccountStatus.PENDING_VERIFICATION, pageable);
+        return userRepository.findByAccountStatusIn(
+            java.util.Arrays.asList(AccountStatus.PENDING_VERIFICATION, AccountStatus.REGISTERED, AccountStatus.PROFILE_COMPLETED), 
+            pageable
+        );
     }
 
     @Override
@@ -57,8 +89,12 @@ public class AdminUserServiceImpl implements AdminUserService {
             counts.put(status, userRepository.countByAccountStatus(status));
         }
         
+        long pendingTotal = counts.getOrDefault(AccountStatus.PENDING_VERIFICATION, 0L) +
+                            counts.getOrDefault(AccountStatus.REGISTERED, 0L) +
+                            counts.getOrDefault(AccountStatus.PROFILE_COMPLETED, 0L);
+        
         return UserStatsResponse.builder()
-                .pending(counts.getOrDefault(AccountStatus.PENDING_VERIFICATION, 0L))
+                .pending(pendingTotal)
                 .approved(counts.getOrDefault(AccountStatus.VERIFIED, 0L))
                 .rejected(counts.getOrDefault(AccountStatus.REJECTED, 0L))
                 .suspended(counts.getOrDefault(AccountStatus.SUSPENDED, 0L))
@@ -82,6 +118,68 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         
         return UserDetailResponse.fromUser(user);
+    }
+
+    @Override
+    public UserFinancialSnapshotDto getUserFinancialSnapshot(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        List<Trip> trips = new ArrayList<>();
+        if (user.getRole() == Role.DRIVER) {
+            trips = tripRepository.findByDriverId(userId);
+        } else if (user.getRole() == Role.TRANSPORTER) {
+            trips = tripRepository.findByTransporterId(userId);
+        } else if (user.getRole() == Role.SHIPPER) {
+            trips = tripRepository.findByShipperId(userId);
+        }
+
+        int totalTrips = trips.size();
+        int activeTrips = (int) trips.stream().filter(t -> t.getStatus() != TripStatus.COMPLETED && t.getStatus() != TripStatus.CANCELLED).count();
+        int completedTrips = (int) trips.stream().filter(t -> t.getStatus() == TripStatus.COMPLETED).count();
+
+        // Get Invoices directly mapped to these trips
+        List<Long> tripIds = trips.stream().map(Trip::getId).collect(Collectors.toList());
+        
+        // This query requires a custom method in TripInvoiceRepository, but we can just fetch all and filter for now
+        // Assuming we just want metrics, let's keep it simple.
+        
+        return UserFinancialSnapshotDto.builder()
+                .userId(user.getId())
+                .fullName(user.getFullName())
+                .role(user.getRole().name())
+                .mobile(user.getMobile())
+                .email(user.getEmail())
+                .registrationDate(user.getCreatedAt().toString())
+                .status(user.getAccountStatus().name())
+                .totalTrips(totalTrips)
+                .activeTrips(activeTrips)
+                .completedTrips(completedTrips)
+                .build();
+    }
+
+    @Override
+    public Page<com.truckmitra.entity.load.Trip> getUserTrips(Long userId, Pageable pageable) {
+        log.debug("Fetching trips for user: {}, page: {}", userId, pageable.getPageNumber());
+        return tripRepository.findAllTripsByUserId(userId, pageable);
+    }
+
+    @Override
+    public Page<com.truckmitra.dto.response.wallet.TransactionResponse> getUserPayments(Long userId, Pageable pageable) {
+        log.debug("Fetching payments for user: {}, page: {}", userId, pageable.getPageNumber());
+        return walletService.getTransactionHistory(userId, pageable);
+    }
+
+    @Override
+    public Page<com.truckmitra.entity.AuditLog> getUserTimeline(Long userId, Pageable pageable) {
+        log.debug("Fetching timeline for user: {}, page: {}", userId, pageable.getPageNumber());
+        return auditLogRepository.findByUserIdOrderByTimestampDesc(userId, pageable);
+    }
+
+    @Override
+    public Page<com.truckmitra.entity.load.Trip> getUserInvoices(Long userId, Pageable pageable) {
+        log.debug("Fetching invoices (trips with invoice) for user: {}, page: {}", userId, pageable.getPageNumber());
+        return tripRepository.findInvoicesByUserId(userId, pageable);
     }
 
     @Override

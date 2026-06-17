@@ -6,5 +6,10 @@ public enum LoadStatus {
     ASSIGNED,       // Assigned to a transporter
     IN_TRANSIT,     // Trip started
     COMPLETED,      // Trip finished and receipt accepted
-    CANCELLED       // Cancelled by shipper or admin
+    CANCELLED,      // Cancelled by shipper or admin
+    DRAFT,          // Direct assignment draft
+    PENDING_ACCEPTANCE, // Direct assignment waiting for transporter
+    ACCEPTED,       // Transporter accepted
+    DRIVER_ASSIGNMENT_PENDING, // Transporter accepted, waiting for driver
+    REJECTED        // Transporter rejected
 }

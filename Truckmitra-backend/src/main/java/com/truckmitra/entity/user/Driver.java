@@ -2,6 +2,7 @@
 package com.truckmitra.entity.user;
 
 import com.truckmitra.entity.common.enums.VehicleType;
+import com.truckmitra.entity.common.enums.DriverAvailabilityStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -57,13 +58,23 @@ public class Driver extends User {
 
     private LocalDateTime lastLocationUpdate;
 
+    @Deprecated
     @Builder.Default
     @Column(nullable = false)
     private Boolean isAvailable = true;
 
+    @Deprecated
     @Builder.Default
     @Column(nullable = false)
     private Boolean isOnTrip = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "availability_status")
+    @Builder.Default
+    private DriverAvailabilityStatus availabilityStatus = DriverAvailabilityStatus.AVAILABLE;
+
+    @Column(name = "last_seen_at")
+    private LocalDateTime lastSeenAt;
 
     @Builder.Default
     private Integer totalTripsCompleted = 0;
@@ -122,11 +133,13 @@ public class Driver extends User {
     public void startTrip() {
         this.isOnTrip = true;
         this.isAvailable = false;
+        this.availabilityStatus = DriverAvailabilityStatus.ON_TRIP;
     }
 
     public void completeTrip(Double earnings) {
         this.isOnTrip = false;
         this.isAvailable = true;
+        this.availabilityStatus = DriverAvailabilityStatus.AVAILABLE;
         this.totalTripsCompleted++;
         this.totalEarnings += earnings;
     }

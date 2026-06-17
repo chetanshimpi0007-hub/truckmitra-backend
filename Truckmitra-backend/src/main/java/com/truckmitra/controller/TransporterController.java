@@ -24,4 +24,12 @@ public class TransporterController {
                 .map(t -> ResponseEntity.ok(ApiResponse.success("Transporter fetched", t)))
                 .orElseGet(() -> ResponseEntity.ok(ApiResponse.success("Not found", null)));
     }
+
+    @GetMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('SHIPPER') or hasRole('ADMIN')")
+    public ResponseEntity<java.util.List<Transporter>> getActiveTransporters() {
+        return ResponseEntity.ok(transporterRepository.findAll().stream()
+                .filter(t -> Boolean.TRUE.equals(t.getIsVerified()))
+                .collect(java.util.stream.Collectors.toList()));
+    }
 }
