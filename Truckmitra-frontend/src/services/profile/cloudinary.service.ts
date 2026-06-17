@@ -96,4 +96,5 @@ class CloudinaryService {
   }
 }
 
-export default new CloudinaryService();
+const cloudinaryServiceInstance = new CloudinaryService();
+export default cloudinaryServiceInstance;

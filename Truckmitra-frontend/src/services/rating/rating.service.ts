@@ -114,4 +114,5 @@ class RatingService {
   }
 }
 
-export default new RatingService();
+const ratingServiceInstance = new RatingService();
+export default ratingServiceInstance;

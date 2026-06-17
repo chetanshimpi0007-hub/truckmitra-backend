@@ -107,4 +107,5 @@ async uploadDocument(data: DocumentUploadRequest): Promise<UserDocument> {
   }
 }
 
-export default new ProfileService();
+const profileServiceInstance = new ProfileService();
+export default profileServiceInstance;
