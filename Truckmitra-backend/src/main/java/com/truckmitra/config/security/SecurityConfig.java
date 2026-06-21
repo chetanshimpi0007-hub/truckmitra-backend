@@ -67,7 +67,10 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/webjars/**",
 
-                    "/api/auth/**"
+                    "/api/auth/**",
+                    "/socket.io/**",
+                    "/ws/**",
+                    "/stomp/**"
                 ).permitAll()
 
                 // OPTIONS

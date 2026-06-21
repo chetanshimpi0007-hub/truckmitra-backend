@@ -37,11 +37,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String path = request.getServletPath();
 
-        // Swagger & H2 bypass
+        // Swagger, H2 & WebSocket bypass
         if (
                 path.startsWith("/swagger-ui") ||
                 path.startsWith("/v3/api-docs") ||
-                path.startsWith("/h2-console")
+                path.startsWith("/h2-console") ||
+                path.startsWith("/socket.io") ||
+                path.startsWith("/ws") ||
+                path.startsWith("/stomp")
         ) {
             filterChain.doFilter(request, response);
             return;
