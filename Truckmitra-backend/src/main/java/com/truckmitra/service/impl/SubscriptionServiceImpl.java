@@ -27,6 +27,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final BidRepository bidRepository;
     private final VehicleRepository vehicleRepository;
     private final DriverRepository driverRepository;
+    private final com.truckmitra.repository.user.ShipperRepository shipperRepository;
+    private final com.truckmitra.repository.user.TransporterRepository transporterRepository;
     private final com.truckmitra.service.common.BillingService billingService;
     private final com.truckmitra.service.common.AuditService auditService;
 
@@ -70,11 +72,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public boolean canPerformAction(User user, String action) {
         UserSubscription sub = userSubscriptionRepository.findByUser(user).orElse(null);
         if (sub == null || !"ACTIVE".equals(sub.getStatus())) {
-            if ("LOAD_POST".equals(action) && user instanceof com.truckmitra.entity.user.Shipper shipper) {
-                return shipper.getFreeLoadsRemaining() != null && shipper.getFreeLoadsRemaining() > 0;
+            if ("LOAD_POST".equals(action) && user.getRole() == com.truckmitra.entity.common.enums.Role.SHIPPER) {
+                com.truckmitra.entity.user.Shipper shipper = shipperRepository.findById(user.getId()).orElse(null);
+                if (shipper == null) return false;
+                Integer remaining = shipper.getFreeLoadsRemaining();
+                return remaining == null || remaining > 0;
             }
-            if ("BID_LIMIT".equals(action) && user instanceof com.truckmitra.entity.user.Transporter transporter) {
-                return transporter.getFreeBidsRemaining() != null && transporter.getFreeBidsRemaining() > 0;
+            if ("BID_LIMIT".equals(action) && user.getRole() == com.truckmitra.entity.common.enums.Role.TRANSPORTER) {
+                com.truckmitra.entity.user.Transporter transporter = transporterRepository.findById(user.getId()).orElse(null);
+                if (transporter == null) return false;
+                Integer remaining = transporter.getFreeBidsRemaining();
+                return remaining == null || remaining > 0;
             }
             return false;
         }
