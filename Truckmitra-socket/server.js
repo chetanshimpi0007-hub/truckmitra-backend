@@ -63,7 +63,7 @@ app.post('/api/chat', (req, res) => {
   res.json({ success: true, message: 'Chat sent' });
 });
 
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
   console.log(`Truckmitra Socket.io Server running on port ${PORT}`);
 });
