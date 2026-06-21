@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:4000';
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL as string;
 
 // Read token from either new or legacy key
 const initialToken = localStorage.getItem('accessToken') ?? localStorage.getItem('token');
