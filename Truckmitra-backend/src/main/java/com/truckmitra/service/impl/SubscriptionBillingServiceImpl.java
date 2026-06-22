@@ -29,7 +29,6 @@ public class SubscriptionBillingServiceImpl implements SubscriptionBillingServic
 
         sub.setStatus("ACTIVE");
         sub.setStartDate(LocalDateTime.now());
-        sub.setNextBillingDate(LocalDateTime.now().plusMonths("YEARLY".equals(sub.getPlan().getBillingCycle()) ? 12 : 1));
         userSubscriptionRepository.save(sub);
 
         SubscriptionHistory history = SubscriptionHistory.builder()
@@ -57,7 +56,6 @@ public class SubscriptionBillingServiceImpl implements SubscriptionBillingServic
                 .orElseThrow(() -> new RuntimeException("Subscription not found: " + subscriptionId));
 
         sub.setStatus("ACTIVE");
-        sub.setNextBillingDate(LocalDateTime.now().plusMonths("YEARLY".equals(sub.getPlan().getBillingCycle()) ? 12 : 1));
         userSubscriptionRepository.save(sub);
 
         SubscriptionHistory history = SubscriptionHistory.builder()

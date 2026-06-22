@@ -32,5 +32,8 @@ public record TransporterProfileUpdateRequest(
     // Preferences
     Boolean pushNotificationsEnabled,
     Boolean emailNotificationsEnabled,
-    Boolean smsNotificationsEnabled
+    Boolean smsNotificationsEnabled,
+
+    // Frontend specific mapping fields
+    String ownerName
 ) {}

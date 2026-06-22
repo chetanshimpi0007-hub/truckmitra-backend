@@ -158,8 +158,10 @@ public class BillingServiceImpl implements BillingService {
     public BillingSummaryDto getDriverBillingSummary(Long driverId) {
         // For driver, we look at Driver amount. But TripInvoice is Total Freight.
         // We'll calculate Driver specifics from Trips directly.
-        Double totalEarned = (Double) entityManager.createQuery("SELECT SUM(t.driverAmount) FROM Trip t WHERE t.driver.id = :driverId AND t.status = 'COMPLETED'")
-                .setParameter("driverId", driverId).getSingleResult();
+        Double totalEarned = (Double) entityManager.createQuery("SELECT SUM(t.driverAmount) FROM Trip t WHERE t.driver.id = :driverId AND t.status = :status")
+                .setParameter("driverId", driverId)
+                .setParameter("status", com.truckmitra.entity.common.enums.TripStatus.COMPLETED)
+                .getSingleResult();
         totalEarned = totalEarned != null ? totalEarned : 0.0;
         
         return BillingSummaryDto.builder()
@@ -200,21 +202,24 @@ public class BillingServiceImpl implements BillingService {
         Double totalPending = result[2] != null ? (Double) result[2] : 0.0;
         Long totalInv = result[3] != null ? (Long) result[3] : 0L;
         
-        String overdueCountQueryStr = "SELECT COUNT(i) FROM TripInvoice i JOIN i.trip t WHERE i.status = 'OVERDUE' ";
+        String overdueCountQueryStr = "SELECT COUNT(i) FROM TripInvoice i JOIN i.trip t WHERE i.status = :overdueStatus ";
         if (driverId != null) overdueCountQueryStr += " AND t.driver.id = :id";
         if (transporterId != null) overdueCountQueryStr += " AND t.transporter.id = :id";
         if (shipperId != null) overdueCountQueryStr += " AND t.shipper.id = :id";
         var overdueQuery = entityManager.createQuery(overdueCountQueryStr);
+        overdueQuery.setParameter("overdueStatus", com.truckmitra.entity.common.enums.InvoicePaymentStatus.OVERDUE);
         if (driverId != null) overdueQuery.setParameter("id", driverId);
         else if (transporterId != null) overdueQuery.setParameter("id", transporterId);
         else if (shipperId != null) overdueQuery.setParameter("id", shipperId);
         Long overdueInvs = (Long) overdueQuery.getSingleResult();
         
-        String pendingCountQueryStr = "SELECT COUNT(i) FROM TripInvoice i JOIN i.trip t WHERE i.status IN ('PENDING', 'PARTIALLY_PAID') ";
+        String pendingCountQueryStr = "SELECT COUNT(i) FROM TripInvoice i JOIN i.trip t WHERE i.status IN (:pendingStatus, :partiallyPaidStatus) ";
         if (driverId != null) pendingCountQueryStr += " AND t.driver.id = :id";
         if (transporterId != null) pendingCountQueryStr += " AND t.transporter.id = :id";
         if (shipperId != null) pendingCountQueryStr += " AND t.shipper.id = :id";
         var pendingQuery = entityManager.createQuery(pendingCountQueryStr);
+        pendingQuery.setParameter("pendingStatus", com.truckmitra.entity.common.enums.InvoicePaymentStatus.PENDING);
+        pendingQuery.setParameter("partiallyPaidStatus", com.truckmitra.entity.common.enums.InvoicePaymentStatus.PARTIALLY_PAID);
         if (driverId != null) pendingQuery.setParameter("id", driverId);
         else if (transporterId != null) pendingQuery.setParameter("id", transporterId);
         else if (shipperId != null) pendingQuery.setParameter("id", shipperId);

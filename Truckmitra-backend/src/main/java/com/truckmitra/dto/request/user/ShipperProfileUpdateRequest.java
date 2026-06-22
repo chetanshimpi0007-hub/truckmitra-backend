@@ -28,5 +28,10 @@ public record ShipperProfileUpdateRequest(
     // Preferences
     Boolean pushNotificationsEnabled,
     Boolean emailNotificationsEnabled,
-    Boolean smsNotificationsEnabled
+    Boolean smsNotificationsEnabled,
+
+    // Frontend specific mapping fields
+    String authorizedPersonName,
+    String companyPan,
+    String registeredOfficeAddress
 ) {}

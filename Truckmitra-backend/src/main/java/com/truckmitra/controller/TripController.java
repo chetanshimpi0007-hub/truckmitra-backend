@@ -323,6 +323,13 @@ public class TripController {
         return ResponseEntity.ok(tripService.getDriverTrips(driverId));
     }
 
+    /** Get return load suggestions for a completed trip */
+    @GetMapping("/{tripId}/return-loads")
+    @PreAuthorize("hasRole('DRIVER') or hasRole('TRANSPORTER') or hasRole('ADMIN')")
+    public ResponseEntity<List<com.truckmitra.dto.response.ReturnLoadSuggestionResponse>> getReturnLoads(@PathVariable Long tripId) {
+        return ResponseEntity.ok(returnLoadPredictorService.getSuggestions(tripId));
+    }
+
     /** Get all trips for a specific transporter */
     @GetMapping("/transporter/{transporterId}")
     @PreAuthorize("hasRole('TRANSPORTER') or hasRole('ADMIN')")

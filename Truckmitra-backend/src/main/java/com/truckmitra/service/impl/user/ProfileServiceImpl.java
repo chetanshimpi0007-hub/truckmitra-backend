@@ -92,6 +92,7 @@ public class ProfileServiceImpl implements ProfileService {
         if (request.pincode() != null) driver.setPincode(request.pincode());
 
         // Update driver specific
+        if (request.aadharNumber() != null) driver.setAadhaarNumber(request.aadharNumber());
         if (request.drivingLicenseNumber() != null) 
             driver.setDrivingLicenseNumber(request.drivingLicenseNumber());
         if (request.licenseExpiryDate() != null) 
@@ -131,10 +132,11 @@ public class ProfileServiceImpl implements ProfileService {
         Shipper shipper = shipperRepository.findById(shipperId)
                 .orElseThrow(() -> new ResourceNotFoundException("Shipper", "id", shipperId));
 
-        // Update basic info
         if (request.fullName() != null) shipper.setFullName(request.fullName());
+        if (request.authorizedPersonName() != null) shipper.setFullName(request.authorizedPersonName());
         if (request.email() != null) shipper.setEmail(request.email());
         if (request.address() != null) shipper.setAddress(request.address());
+        if (request.registeredOfficeAddress() != null) shipper.setAddress(request.registeredOfficeAddress());
         if (request.city() != null) shipper.setCity(request.city());
         if (request.state() != null) shipper.setState(request.state());
         if (request.pincode() != null) shipper.setPincode(request.pincode());
@@ -142,6 +144,7 @@ public class ProfileServiceImpl implements ProfileService {
         // Update business details
         if (request.companyName() != null) shipper.setCompanyName(request.companyName());
         if (request.gstNumber() != null) shipper.setGstNumber(request.gstNumber());
+        if (request.companyPan() != null) shipper.setPanNumber(request.companyPan());
         if (request.businessType() != null) shipper.setBusinessType(request.businessType());
         if (request.industryType() != null) shipper.setIndustryType(request.industryType());
 
@@ -167,10 +170,11 @@ public class ProfileServiceImpl implements ProfileService {
         Transporter transporter = transporterRepository.findById(transporterId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transporter", "id", transporterId));
 
-        // Update basic info
         if (request.fullName() != null) transporter.setFullName(request.fullName());
+        if (request.ownerName() != null) transporter.setFullName(request.ownerName());
         if (request.email() != null) transporter.setEmail(request.email());
         if (request.address() != null) transporter.setAddress(request.address());
+        if (request.officeAddress() != null) transporter.setAddress(request.officeAddress());
         if (request.city() != null) transporter.setCity(request.city());
         if (request.state() != null) transporter.setState(request.state());
         if (request.pincode() != null) transporter.setPincode(request.pincode());

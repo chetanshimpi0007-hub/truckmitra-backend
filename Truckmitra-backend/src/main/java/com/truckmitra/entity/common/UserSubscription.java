@@ -43,5 +43,4 @@ public class UserSubscription {
 
     private String razorpayCustomerId;
 
-    private LocalDateTime nextBillingDate;
 }

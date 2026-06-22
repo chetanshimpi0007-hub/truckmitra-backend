@@ -44,7 +44,7 @@ public class AdminAnalyticsService {
         long activeSubscriptions = (Long) entityManager.createQuery("SELECT COUNT(s) FROM Subscription s WHERE s.status = 'ACTIVE'").getSingleResult();
         long pendingDeliveries = (Long) entityManager.createQuery("SELECT COUNT(t) FROM Trip t WHERE t.status = 'DELIVERED'").getSingleResult();
 
-        return new OverviewDTO(totalUsers, shippers, transporters, drivers, activeLoads, completedTrips, revenue, walletTransactions, activeSubscriptions, 12.5, pendingDeliveries);
+        return new OverviewDTO(totalUsers, shippers, transporters, drivers, activeLoads, completedTrips, revenue, walletTransactions, activeSubscriptions, 0.0, pendingDeliveries);
     }
 
     public UsersAnalyticsDTO getUsersAnalytics() {
@@ -186,13 +186,13 @@ public class AdminAnalyticsService {
     }
 
     public AIMatchingAnalyticsDTO getAIMatchingAnalytics() {
-        Double avgScore = 75.0;
+        Double avgScore = 0.0;
         try {
             Double val = (Double) entityManager.createQuery("SELECT AVG(r.matchScore) FROM LoadRecommendation r").getSingleResult();
             if (val != null) avgScore = Math.round(val * 10.0) / 10.0;
         } catch (Exception ignored) {}
 
-        double acceptanceRate = 68.0;
+        double acceptanceRate = 0.0;
         try {
             Long total = (Long) entityManager.createQuery("SELECT COUNT(r) FROM LoadRecommendation r").getSingleResult();
             if (total != null && total > 0) {
@@ -201,7 +201,7 @@ public class AdminAnalyticsService {
             }
         } catch (Exception ignored) {}
 
-        double matchSuccessRate = 84.5;
+        double matchSuccessRate = 0.0;
         try {
             Long totalLoads = (Long) entityManager.createQuery("SELECT COUNT(l) FROM Load l").getSingleResult();
             if (totalLoads != null && totalLoads > 0) {

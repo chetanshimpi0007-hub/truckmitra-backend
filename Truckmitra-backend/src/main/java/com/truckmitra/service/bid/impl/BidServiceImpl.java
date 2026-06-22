@@ -15,6 +15,7 @@ import com.truckmitra.service.wallet.WalletService;
 import com.truckmitra.dto.request.wallet.EscrowRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -175,6 +176,9 @@ public class BidServiceImpl implements BidService {
             auditService.log("LOAD_ACCEPTED", "BUSINESS", "Shipper " + load.getShipper().getFullName() + " accepted bid from Transporter " + accepted.getTransporter().getFullName() + " for Load #" + load.getId(), load.getShipper().getId());
         }
 
+        Hibernate.initialize(accepted.getTransporter());
+        Hibernate.initialize(accepted.getLoad());
+
         return accepted;
     }
 
@@ -194,6 +198,10 @@ public class BidServiceImpl implements BidService {
                 rejected.getId()
             );
         } catch (Exception ignored) {}
+        
+        Hibernate.initialize(rejected.getTransporter());
+        Hibernate.initialize(rejected.getLoad());
+        
         return rejected;
     }
 }

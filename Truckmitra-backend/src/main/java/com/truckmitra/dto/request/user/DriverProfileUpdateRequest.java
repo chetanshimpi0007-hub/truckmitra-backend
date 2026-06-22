@@ -33,5 +33,10 @@ public record DriverProfileUpdateRequest(
     @Pattern(regexp = "^[A-Z]{4}0[A-Z0-9]{6}$", message = "Invalid IFSC code")
     String ifscCode,
     
-    String upiId
+    String upiId,
+
+    // Frontend specific mapping fields
+    String aadharNumber,
+    Integer experienceInYears,
+    String preferredRoute
 ) {}
