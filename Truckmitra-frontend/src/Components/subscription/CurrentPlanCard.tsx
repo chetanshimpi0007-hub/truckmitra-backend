@@ -9,7 +9,7 @@ interface CurrentPlanCardProps {
 const CurrentPlanCard: React.FC<CurrentPlanCardProps> = ({ subscription, onCancel }) => {
     if (!subscription || !subscription.plan) return null;
 
-    const { plan, status, nextBillingDate, autoRenew } = subscription;
+    const { plan, status, autoRenew } = subscription;
 
     return (
         <div className="bg-gradient-to-br from-indigo-900 to-slate-900 p-8 rounded-[32px] text-white shadow-xl relative overflow-hidden">
@@ -40,8 +40,8 @@ const CurrentPlanCard: React.FC<CurrentPlanCardProps> = ({ subscription, onCance
                             <HiCalendar className="w-5 h-5" />
                         </div>
                         <div>
-                            <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">Renewal Date</div>
-                            <div className="font-medium">{nextBillingDate ? new Date(nextBillingDate).toLocaleDateString() : 'N/A'}</div>
+                            <div className="text-sm text-gray-500">End Date</div>
+                            <div className="font-medium">{subscription.endDate ? new Date(subscription.endDate).toLocaleDateString() : 'N/A'}</div>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
