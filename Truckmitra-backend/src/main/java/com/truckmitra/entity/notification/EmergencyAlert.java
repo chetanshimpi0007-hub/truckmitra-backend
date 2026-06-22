@@ -1,5 +1,6 @@
 package com.truckmitra.entity.notification;
 
+import jakarta.persistence.Column;
 import com.truckmitra.entity.common.BaseEntity;
 import com.truckmitra.entity.user.User;
 import jakarta.persistence.*;
@@ -38,5 +39,6 @@ public class EmergencyAlert extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime timestamp = LocalDateTime.now();
     
+    @Column(name = "resolution_notes")
     private String resolutionNotes;
 }

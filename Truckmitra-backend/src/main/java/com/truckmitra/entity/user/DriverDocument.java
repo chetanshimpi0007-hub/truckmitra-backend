@@ -1,6 +1,7 @@
 // src/main/java/com/truckmitra/entity/user/DriverDocument.java
 package com.truckmitra.entity.user;
 
+import jakarta.persistence.Column;
 import com.truckmitra.entity.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -24,31 +25,37 @@ public class DriverDocument extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "driver_id", nullable = false)
     private Long driverId;
 
-    @Column(nullable = false, length = 50)
+    @Column(name = "document_type", nullable = false, length = 50)
     private String documentType; // DRIVING_LICENSE, AADHAAR, PAN, VOTER_ID
 
-    @Column(nullable = false)
+    @Column(name = "document_number", nullable = false)
     private String documentNumber;
 
+    @Column(name = "document_image_url")
     private String documentImageUrl;
 
+    @Column(name = "issue_date")
     private LocalDate issueDate;
 
+    @Column(name = "expiry_date")
     private LocalDate expiryDate;
 
-    @Column(nullable = false, length = 20)
+    @Column(name = "verification_status", nullable = false, length = 20)
     private String verificationStatus = "PENDING"; // PENDING, VERIFIED, REJECTED
 
+    @Column(name = "rejection_reason")
     private String rejectionReason;
 
+    @Column(name = "verified_by")
     private Long verifiedBy; // Admin ID
 
+    @Column(name = "verified_at")
     private LocalDate verifiedAt;
 
-    @Column(nullable = false)
+    @Column(name = "is_expired", nullable = false)
     private Boolean isExpired = false;
 
     @PrePersist

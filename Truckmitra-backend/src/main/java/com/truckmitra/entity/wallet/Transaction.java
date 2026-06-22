@@ -1,6 +1,7 @@
 // src/main/java/com/truckmitra/entity/wallet/Transaction.java
 package com.truckmitra.entity.wallet;
 
+import jakarta.persistence.Column;
 import com.truckmitra.entity.common.BaseEntity;
 import com.truckmitra.entity.common.enums.TransactionType;
 import jakarta.persistence.*;
@@ -34,26 +35,26 @@ public class Transaction extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 30)
+    @Column(name = "transaction_id", nullable = false, unique = true, length = 30)
     private String transactionId; // Format: TXN-YYYYMMDD-XXXXXXXX
 
-    @Column(nullable = false)
+    @Column(name = "wallet_id", nullable = false)
     private Long walletId;
 
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(length = 20)
+    @Column(name = "user_role", length = 20)
     private String userRole;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
+    @Column(name = "transaction_type", nullable = false, length = 30)
     private TransactionType transactionType;
 
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(name = "current_balance", nullable = false, precision = 15, scale = 2)
     private BigDecimal currentBalance; // Balance after transaction
 
     @Column(nullable = false, length = 10)
@@ -62,34 +63,46 @@ public class Transaction extends BaseEntity {
     @Column(nullable = false, length = 20)
     private String status = "PENDING"; // PENDING, SUCCESS, FAILED, REVERSED
 
-    @Column(nullable = false)
+    @Column(name = "transaction_date", nullable = false)
     private LocalDateTime transactionDate;
 
     // Payment method details
+    @Column(name = "payment_method")
     private String paymentMethod; // UPI, CARD, NET_BANKING, WALLET, BANK_TRANSFER
 
+    @Column(name = "payment_gateway")
     private String paymentGateway; // RAZORPAY, STRIPE, CASHFREE, etc.
 
+    @Column(name = "gateway_transaction_id")
     private String gatewayTransactionId; // Reference from payment gateway
 
+    @Column(name = "bank_reference_number")
     private String bankReferenceNumber;
 
+    @Column(name = "upi_transaction_id")
     private String upiTransactionId;
 
     // For internal transfers
+    @Column(name = "from_wallet_id")
     private Long fromWalletId;
 
+    @Column(name = "to_wallet_id")
     private Long toWalletId;
 
+    @Column(name = "from_user_id")
     private Long fromUserId;
 
+    @Column(name = "to_user_id")
     private Long toUserId;
 
     // Trip related
+    @Column(name = "trip_id")
     private Long tripId;
 
+    @Column(name = "load_id")
     private Long loadId;
 
+    @Column(name = "bid_id")
     private Long bidId;
 
     // Additional details
@@ -99,33 +112,43 @@ public class Transaction extends BaseEntity {
     private String remarks;
 
     // Failure handling
+    @Column(name = "failure_reason")
     private String failureReason;
 
+    @Column(name = "retry_count")
     private Integer retryCount = 0;
 
+    @Column(name = "settled_at")
     private LocalDateTime settledAt;
 
     // For reversals
+    @Column(name = "reversed_transaction_id")
     private Long reversedTransactionId;
 
+    @Column(name = "reversal_reason")
     private String reversalReason;
 
     // Audit
+    @Column(name = "initiated_by")
     private String initiatedBy; // USER, SYSTEM, ADMIN
 
+    @Column(name = "approved_by")
     private Long approvedBy; // Admin ID if manual approval
 
+    @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
     // Metadata
+    @Column(name = "ip_address")
     private String ipAddress;
 
+    @Column(name = "user_agent")
     private String userAgent;
 
-    @Column(length = 1000)
+    @Column(name = "request_payload", length = 1000)
     private String requestPayload; // For debugging
 
-    @Column(length = 1000)
+    @Column(name = "response_payload", length = 1000)
     private String responsePayload; // From payment gateway
 
     // Business methods

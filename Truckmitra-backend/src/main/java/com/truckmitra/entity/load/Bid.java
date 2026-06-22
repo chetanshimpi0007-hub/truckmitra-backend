@@ -1,5 +1,6 @@
 package com.truckmitra.entity.load;
 
+import jakarta.persistence.Column;
 import com.truckmitra.entity.common.BaseEntity;
 import com.truckmitra.entity.common.enums.BidStatus;
 import com.truckmitra.entity.user.Transporter;
@@ -38,8 +39,10 @@ public class Bid extends BaseEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
+    @Column(name = "estimated_delivery_days")
     private Integer estimatedDeliveryDays;
 
+    @Column(name = "vehicle_type")
     private String vehicleType;
 
     private String comment;

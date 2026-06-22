@@ -1,5 +1,6 @@
 package com.truckmitra.entity.load;
 
+import jakarta.persistence.Column;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -20,11 +21,13 @@ public class LorryReceipt {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "lr_number", unique = true, nullable = false)
     private String lrNumber;
 
+    @Column(name = "qr_code_url")
     private String qrCodeUrl;
 
+    @Column(name = "pdf_url")
     private String pdfUrl;
 
     // Suppress full Trip serialization to avoid circular reference and LazyInitializationException.
@@ -39,8 +42,10 @@ public class LorryReceipt {
         "startedAt", "completedAt", "rejectionReason"})
     private Trip trip;
 
+    @Column(name = "generated_at")
     private LocalDateTime generatedAt;
 
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist

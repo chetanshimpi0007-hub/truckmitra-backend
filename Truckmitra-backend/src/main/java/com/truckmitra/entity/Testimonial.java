@@ -1,5 +1,6 @@
 package com.truckmitra.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,9 +21,10 @@ public class Testimonial {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "author_name", nullable = false)
     private String authorName;
 
+    @Column(name = "author_role")
     private String authorRole;
 
     private String company;
@@ -32,8 +34,10 @@ public class Testimonial {
 
     private Integer rating;
 
+    @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
     
     @PrePersist

@@ -1,6 +1,7 @@
 // src/main/java/com/truckmitra/entity/user/User.java
 package com.truckmitra.entity.user;
 
+import jakarta.persistence.Column;
 import com.truckmitra.entity.common.BaseEntity;
 import com.truckmitra.entity.common.enums.AccountStatus;
 import com.truckmitra.entity.common.enums.Role;
@@ -48,7 +49,7 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
     @Column(nullable = false, unique = true, length = 10)
@@ -65,9 +66,10 @@ public class User extends BaseEntity {
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(name = "account_status", nullable = false, length = 20)
     private AccountStatus accountStatus;
 
+    @Column(name = "profile_image_url")
     private String profileImageUrl;
 
     private String address;
@@ -80,81 +82,100 @@ public class User extends BaseEntity {
     
     private String pincode;
 
+    @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 
+    @Column(name = "device_token")
     private String deviceToken;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "is_mobile_verified", nullable = false)
     private Boolean isMobileVerified = false;
 
+    @Column(name = "is_email_verified")
     @Builder.Default
     private Boolean isEmailVerified = false;
 
+    @Column(name = "failed_login_attempts")
     @Builder.Default
     private Integer failedLoginAttempts = 0;
 
+    @Column(name = "lockout_time")
     private LocalDateTime lockoutTime;
 
+    @Column(name = "refresh_token")
     private String refreshToken;
 
     // OAuth2 fields
-    @Column(unique = true)
+    @Column(name = "google_id", unique = true)
     private String googleId;
 
-    @Column(unique = true)
+    @Column(name = "facebook_id", unique = true)
     private String facebookId;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "is_google_login", nullable = false)
     private Boolean isGoogleLogin = false;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "is_facebook_login", nullable = false)
     private Boolean isFacebookLogin = false;
 
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "preferred_login_type", nullable = false)
     private String preferredLoginType = "EMAIL_PASSWORD";
 
+    @Column(name = "last_otp_sent_at")
     private LocalDateTime lastOtpSentAt;
 
+    @Column(name = "otp_attempts")
     @Builder.Default
     private Integer otpAttempts = 0;
 
     // Preference fields
-    @Column(length = 20)
+    @Column(name = "preferred_language", length = 20)
     private String preferredLanguage;
 
+    @Column(name = "push_notifications_enabled")
     @Builder.Default
     private Boolean pushNotificationsEnabled = true;
 
+    @Column(name = "email_notifications_enabled")
     @Builder.Default
     private Boolean emailNotificationsEnabled = true;
 
+    @Column(name = "sms_notifications_enabled")
     @Builder.Default
     private Boolean smsNotificationsEnabled = true;
 
     // Metadata
+    @Column(name = "registered_ip")
     private String registeredIp;
 
+    @Column(name = "registered_at")
     private LocalDateTime registeredAt;
 
+    @Column(name = "last_login_ip")
     private String lastLoginIp;
     
+    @Column(name = "verified_by")
     private Long verifiedBy;      // Admin ID who verified the user
+    @Column(name = "verified_at")
     private LocalDateTime verifiedAt; // When the user was verified
     
+    @Column(name = "emergency_alerts")
     @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "driver", fetch = FetchType.LAZY)
     @Builder.Default
     private List<EmergencyAlert> emergencyAlerts = new ArrayList<>();
 
+    @Column(name = "sent_messages")
     @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY)
     @Builder.Default
     private List<ChatMessage> sentMessages = new ArrayList<>();
 
+    @Column(name = "received_messages")
     @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
     @Builder.Default
@@ -164,11 +185,11 @@ public class User extends BaseEntity {
  // Add these fields
 
  @Builder.Default
- @Column(nullable = false)
+ @Column(name = "is_profile_completed", nullable = false)
  private Boolean isProfileCompleted = false;  // ✅ Profile completion status
 
  @Builder.Default
- @Column(nullable = false)
+ @Column(name = "is_verified", nullable = false)
  private Boolean isVerified = false;  // ✅ Admin verification status
 
  // Helper method to check if user can use business features

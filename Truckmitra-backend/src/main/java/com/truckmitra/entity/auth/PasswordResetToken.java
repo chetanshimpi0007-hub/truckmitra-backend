@@ -1,5 +1,6 @@
 package com.truckmitra.entity.auth;
 
+import jakarta.persistence.Column;
 import com.truckmitra.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,11 +28,11 @@ public class PasswordResetToken {
     @JoinColumn(nullable = false, name = "user_id")
     private User user;
 
-    @Column(nullable = false)
+    @Column(name = "expiry_date", nullable = false)
     private LocalDateTime expiryDate;
 
     @CreationTimestamp
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     
     public boolean isExpired() {

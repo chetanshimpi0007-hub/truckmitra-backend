@@ -24,7 +24,7 @@ public class InAppNotificationService {
     private final SimpMessagingTemplate messagingTemplate;
     private final com.truckmitra.service.notification.PushNotificationService pushNotificationService;
 
-    @Transactional
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void sendNotification(Long userId, String title, String message, NotificationType type, Long relatedId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));

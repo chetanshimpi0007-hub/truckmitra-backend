@@ -1,5 +1,6 @@
 package com.truckmitra.entity.common;
 
+import jakarta.persistence.Column;
 import com.truckmitra.entity.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,10 +30,13 @@ public class SubscriptionHistory {
     @JoinColumn(name = "plan_id")
     private SubscriptionPlan plan;
 
+    @Column(name = "razorpay_payment_id")
     private String razorpayPaymentId;
 
+    @Column(name = "razorpay_subscription_id")
     private String razorpaySubscriptionId;
 
+    @Column(name = "razorpay_signature")
     private String razorpaySignature;
 
     private Double amount;
@@ -41,7 +45,9 @@ public class SubscriptionHistory {
 
     private String status; // SUCCESS, FAILED, PENDING
 
+    @Column(name = "event_type")
     private String eventType; // CHARGED, CANCELLED, ACTIVATED
 
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

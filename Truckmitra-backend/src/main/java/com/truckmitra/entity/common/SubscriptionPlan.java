@@ -1,5 +1,6 @@
 package com.truckmitra.entity.common;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,23 +29,31 @@ public class SubscriptionPlan {
 
     private Double price;
 
+    @Column(name = "billing_cycle")
     private String billingCycle; // MONTHLY, YEARLY
 
+    @Column(name = "razorpay_plan_id")
     private String razorpayPlanId;
 
+    @Column(name = "max_loads")
     private Integer maxLoads;
     
+    @Column(name = "max_bids")
     private Integer maxBids;
 
+    @Column(name = "max_vehicles")
     private Integer maxVehicles;
 
+    @Column(name = "max_drivers")
     private Integer maxDrivers;
 
     @Builder.Default
     private Boolean active = true;
 
+    @Column(name = "has_analytics")
     private Boolean hasAnalytics;
 
+    @Column(name = "has_voice_assistant")
     private Boolean hasVoiceAssistant;
 
     @ElementCollection

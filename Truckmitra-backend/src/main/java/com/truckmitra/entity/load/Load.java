@@ -1,6 +1,7 @@
 // src/main/java/com/truckmitra/entity/load/Load.java
 package com.truckmitra.entity.load;
 
+import jakarta.persistence.Column;
 import com.truckmitra.entity.common.BaseEntity;
 import com.truckmitra.entity.common.enums.LoadStatus;
 import com.truckmitra.entity.user.Shipper;
@@ -41,11 +42,13 @@ public class Load extends BaseEntity {
     @Column(nullable = false)
     private Double weight; // in tons
 
+    @Column(name = "material_type")
     private String materialType;
 
     @Column(length = 500)
     private String description;
 
+    @Column(name = "pickup_date")
     private LocalDateTime pickupDate;
 
     private BigDecimal budget;
@@ -66,6 +69,7 @@ public class Load extends BaseEntity {
     @JoinColumn(name = "transporter_id")
     private Transporter transporter;
 
+    @Column(name = "is_bidding_enabled")
     @com.fasterxml.jackson.annotation.JsonProperty("isBiddingEnabled")
     private Boolean isBiddingEnabled;
 

@@ -31,11 +31,13 @@ public class NotificationServiceImpl implements NotificationService {
     private JavaMailSender mailSender;
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void sendNotification(User user, String title, String message, NotificationType type) {
         sendNotification(user, title, message, type, null);
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void sendNotification(User user, String title, String message, NotificationType type, Long relatedId) {
         // 1. Save to Database
         Notification notification = Notification.builder()

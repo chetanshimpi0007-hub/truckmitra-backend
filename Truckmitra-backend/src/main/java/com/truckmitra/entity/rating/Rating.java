@@ -1,5 +1,6 @@
 package com.truckmitra.entity.rating;
 
+import jakarta.persistence.Column;
 import com.truckmitra.entity.common.enums.Role;
 import com.truckmitra.entity.user.User;
 import com.truckmitra.entity.load.Trip;
@@ -44,7 +45,7 @@ public class Rating {
     @Enumerated(EnumType.STRING)
     private RatingType ratingType;
 
-    @Column(nullable = false)
+    @Column(name = "rating_value", nullable = false)
     private Integer ratingValue; // 1 to 5
 
     @Column(length = 1000)

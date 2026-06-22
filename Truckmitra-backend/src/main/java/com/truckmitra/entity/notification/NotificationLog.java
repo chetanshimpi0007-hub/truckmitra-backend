@@ -1,6 +1,7 @@
 // src/main/java/com/truckmitra/entity/notification/NotificationLog.java
 package com.truckmitra.entity.notification;
 
+import jakarta.persistence.Column;
 import com.truckmitra.entity.common.BaseEntity;
 import com.truckmitra.enums.ChannelType;
 import com.truckmitra.enums.NotificationStatus;
@@ -31,34 +32,38 @@ public class NotificationLog extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Long userId;
     
-    @Column(nullable = false)
+    @Column(name = "recipient_address", nullable = false)
     private String recipientAddress; // Email ya Phone number
     
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "channel_type", nullable = false)
     private ChannelType channelType;
     
     @Column(nullable = false)
     private String subject;
     
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(name = "content_body", columnDefinition = "TEXT", nullable = false)
     private String contentBody;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NotificationStatus status;
     
+    @Column(name = "error_message")
     private String errorMessage;
     
+    @Column(name = "retry_count")
     private Integer retryCount;
     
+    @Column(name = "sent_at")
     private LocalDateTime sentAt;
     
+    @Column(name = "delivered_at")
     private LocalDateTime deliveredAt;
     
-    @Column(nullable = false)
+    @Column(name = "template_name", nullable = false)
     private String templateName;
 }

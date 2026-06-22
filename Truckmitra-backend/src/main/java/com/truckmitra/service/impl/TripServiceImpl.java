@@ -60,7 +60,7 @@ public class TripServiceImpl implements TripService {
     private final org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
 
     @Override
-    @Transactional
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public Trip createInitialTrip(Long loadId, Long bidId) {
         Load load = loadRepository.findById(loadId)
                 .orElseThrow(() -> new RuntimeException("Load not found"));

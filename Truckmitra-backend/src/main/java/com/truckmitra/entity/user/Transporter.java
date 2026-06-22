@@ -1,6 +1,7 @@
 // src/main/java/com/truckmitra/entity/user/Transporter.java
 package com.truckmitra.entity.user;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,65 +25,87 @@ import java.util.List;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Transporter extends User {
 
-    @Column(nullable = false)
+    @Column(name = "agency_name", nullable = false)
     private String agencyName;
 
+    @Column(name = "gst_number")
     private String gstNumber;
 
+    @Column(name = "pan_number")
     private String panNumber;
 
+    @Column(name = "aadhaar_number")
     private String aadhaarNumber;
 
+    @Column(name = "aadhaar_front_image_url")
     private String aadhaarFrontImageUrl;
 
+    @Column(name = "aadhaar_back_image_url")
     private String aadhaarBackImageUrl;
 
+    @Column(name = "pan_card_image_url")
     private String panCardImageUrl;
 
+    @Column(name = "office_address")
     private String officeAddress;
 
-    @Column(nullable = false)
+    @Column(name = "fleet_size", nullable = false)
     private Integer fleetSize;
 
+    @Column(name = "service_areas")
     private String serviceAreas;
 
+    @Column(name = "experience_in_years")
     private Integer experienceInYears;
 
+    @Column(name = "gst_certificate_url")
     private String gstCertificateUrl;
 
+    @Column(name = "business_card_url")
     private String businessCardUrl;
 
     // Stats
+    @Column(name = "total_drivers")
     @Builder.Default
     private Integer totalDrivers = 0;
 
+    @Column(name = "total_vehicles")
     @Builder.Default
     private Integer totalVehicles = 0;
 
+    @Column(name = "bids_won")
     @Builder.Default
     private Integer bidsWon = 0;
 
+    @Column(name = "average_rating")
     @Builder.Default
     private Double averageRating = 0.0;
 
+    @Column(name = "total_ratings")
     @Builder.Default
     private Integer totalRatings = 0;
 
+    @Column(name = "average_driver_rating")
     @Builder.Default
     private Double averageDriverRating = 0.0;
 
+    @Column(name = "total_driver_ratings")
     @Builder.Default
     private Integer totalDriverRatings = 0;
 
+    @Column(name = "is_verified")
     @Builder.Default
     private Boolean isVerified = false;
 
+    @Column(name = "commission_rate")
     @Builder.Default
     private Double commissionRate = 5.0;
 
+    @Column(name = "total_earnings")
     @Builder.Default
     private Double totalEarnings = 0.0;
 
+    @Column(name = "free_bids_remaining")
     @Builder.Default
     private Integer freeBidsRemaining = 2;
 
@@ -102,10 +125,13 @@ public class Transporter extends User {
     private List<Long> vehicleIds = new ArrayList<>();
 
     // Subscription
+    @Column(name = "subscription_start_date")
     private LocalDateTime subscriptionStartDate;
 
+    @Column(name = "subscription_end_date")
     private LocalDateTime subscriptionEndDate;
 
+    @Column(name = "subscription_plan")
     private String subscriptionPlan;
 
     @ToString.Exclude

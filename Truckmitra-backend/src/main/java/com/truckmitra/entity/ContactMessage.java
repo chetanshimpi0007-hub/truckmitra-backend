@@ -1,5 +1,6 @@
 package com.truckmitra.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,6 +37,7 @@ public class ContactMessage {
     @Builder.Default
     private String status = "UNREAD"; // UNREAD, READ, RESOLVED
 
+    @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;
 }

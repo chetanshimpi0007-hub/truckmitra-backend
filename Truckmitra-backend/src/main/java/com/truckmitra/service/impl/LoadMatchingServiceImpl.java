@@ -220,7 +220,7 @@ public class LoadMatchingServiceImpl implements LoadMatchingService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void processNewLoad(Long loadId) {
         Load load = loadRepository.findById(loadId).orElse(null);
         if (load == null) return;

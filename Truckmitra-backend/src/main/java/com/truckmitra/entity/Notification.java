@@ -1,5 +1,6 @@
 package com.truckmitra.entity;
 
+import jakarta.persistence.Column;
 import com.truckmitra.enums.NotificationType;
 
 import com.truckmitra.entity.user.User;
@@ -38,7 +39,7 @@ public class Notification {
     @Column(name = "related_id")
     private Long relatedId; // e.g. loadId, tripId
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
