@@ -131,18 +131,18 @@ export default function AdminAnalyticsDashboard() {
 
             {/* KEY METRICS GRID */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                <MetricCard title="Total Users" value={overview.totalUsers} icon={<HiUsers />} color="bg-blue-500" />
-                <MetricCard title="Active Loads" value={overview.activeLoads} icon={<HiShoppingCart />} color="bg-emerald-500" />
-                <MetricCard title="Completed Trips" value={overview.completedTrips} icon={<HiTruck />} color="bg-indigo-500" />
-                <MetricCard title="Revenue" value={`₹${overview.totalRevenue.toLocaleString()}`} icon={<HiCash />} color="bg-amber-500" />
+                <MetricCard title="Total Users" value={overview.totalUsers || 0} icon={<HiUsers />} color="bg-blue-500" />
+                <MetricCard title="Active Loads" value={overview.activeLoads || 0} icon={<HiShoppingCart />} color="bg-emerald-500" />
+                <MetricCard title="Completed Trips" value={overview.completedTrips || 0} icon={<HiTruck />} color="bg-indigo-500" />
+                <MetricCard title="Revenue" value={`₹${(overview.totalRevenue || 0).toLocaleString()}`} icon={<HiCash />} color="bg-amber-500" />
                 <MetricCard title="Subscriptions" value={overview.activeSubscriptions} icon={<HiDocumentText />} color="bg-purple-500" />
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                <SubMetricCard title="Shippers" value={overview.totalShippers} />
-                <SubMetricCard title="Transporters" value={overview.totalTransporters} />
-                <SubMetricCard title="Drivers" value={overview.totalDrivers} />
-                <SubMetricCard title="Pending Deliveries" value={overview.pendingDeliveries} />
+                <SubMetricCard title="Shippers" value={overview.totalShippers || 0} />
+                <SubMetricCard title="Transporters" value={overview.totalTransporters || 0} />
+                <SubMetricCard title="Drivers" value={overview.totalDrivers || 0} />
+                <SubMetricCard title="Pending Deliveries" value={overview.pendingDeliveries || 0} />
             </div>
 
             {/* SUBSCRIPTION METRICS */}
@@ -151,12 +151,12 @@ export default function AdminAnalyticsDashboard() {
                     <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 p-6 rounded-3xl text-white relative overflow-hidden">
                         <div className="absolute -right-3 -top-3 w-16 h-16 bg-white opacity-10 rounded-full" />
                         <div className="text-xs font-black uppercase tracking-widest text-indigo-200 mb-2">MRR</div>
-                        <div className="text-3xl font-black">₹{Math.round(subscriptionAnalytics.mrr).toLocaleString()}</div>
+                        <div className="text-3xl font-black">₹{Math.round(subscriptionAnalytics.mrr || 0).toLocaleString()}</div>
                     </div>
                     <div className="bg-gradient-to-br from-violet-600 to-violet-800 p-6 rounded-3xl text-white relative overflow-hidden">
                         <div className="absolute -right-3 -top-3 w-16 h-16 bg-white opacity-10 rounded-full" />
                         <div className="text-xs font-black uppercase tracking-widest text-violet-200 mb-2">ARR</div>
-                        <div className="text-3xl font-black">₹{Math.round(subscriptionAnalytics.arr).toLocaleString()}</div>
+                        <div className="text-3xl font-black">₹{Math.round(subscriptionAnalytics.arr || 0).toLocaleString()}</div>
                     </div>
                     <SubMetricCard title="Active Subscriptions" value={subscriptionAnalytics.activeSubscriptions} />
                     <SubMetricCard title="Cancelled" value={subscriptionAnalytics.cancelledSubscriptions} />
@@ -286,7 +286,7 @@ export default function AdminAnalyticsDashboard() {
                         <table className="w-full text-left text-sm">
                             <thead>
                                 <tr className="bg-slate-50 text-slate-500 font-black uppercase tracking-wider text-[10px]">
-                                    {Object.keys(paginatedData[0])
+                                    {Object.keys(paginatedData[0] || {})
                                         .filter(k => typeof paginatedData[0][k] !== 'object')
                                         .map(key => (
                                         <th key={key} className="px-4 py-3">{key}</th>

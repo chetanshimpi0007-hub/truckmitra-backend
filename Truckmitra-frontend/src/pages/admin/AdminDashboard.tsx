@@ -132,12 +132,12 @@ const AdminDashboard: React.FC = () => {
     setTripsLoading(true);
     try {
       const res = await protectedApi.get('/api/trips/admin/all');
-      setAllTrips(res.data || []);
+      setAllTrips(Array.isArray(res.data) ? res.data : res.data?.content || []);
     } catch {
       try {
         // Fallback: try generic trips endpoint
         const res = await protectedApi.get('/api/trips');
-        setAllTrips(res.data || []);
+        setAllTrips(Array.isArray(res.data) ? res.data : res.data?.content || []);
       } catch { /* silent */ }
     } finally { setTripsLoading(false); }
   };
@@ -271,7 +271,7 @@ const AdminDashboard: React.FC = () => {
             { label: 'Total Users', value: platformAnalytics?.totalUsers || 0, icon: <HiUsers /> },
             { label: 'Total Loads', value: platformAnalytics?.totalLoads || 0, icon: <HiShoppingCart /> },
             { label: 'Recent Revenue', value: `₹${(platformAnalytics?.revenueTrends?.[platformAnalytics?.revenueTrends?.length - 1] || 0).toLocaleString('en-IN')}`, icon: <HiCash /> },
-            { label: 'Pending Approvals', value: pendingUsers.length, icon: <HiExclamationCircle /> }
+            { label: 'Pending Approvals', value: pendingUsers?.length || 0, icon: <HiExclamationCircle /> }
           ]}
         >
           <NotificationDropdown />
@@ -334,7 +334,7 @@ const AdminDashboard: React.FC = () => {
                   </button>
                </div>
                <UserTable 
-                 users={allUsers} 
+                 users={allUsers || []} 
                  onView={(u: any) => setViewing360UserId(u.id)}
                  onApprove={(u: any) => { verifyUser(u.id).then(refreshData); }}
                  onReject={(u: any) => { setActionUserId(u.id); setShowRejectModal(true); }}
@@ -368,7 +368,7 @@ const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 gap-6">
-                {allUsers.filter(u => u.role === kycTab && (u.accountStatus === 'PENDING_VERIFICATION' || u.accountStatus === 'REGISTERED' || u.accountStatus === 'PROFILE_COMPLETED')).length === 0 ? (
+                {(allUsers || []).filter(u => u.role === kycTab && (u.accountStatus === 'PENDING_VERIFICATION' || u.accountStatus === 'REGISTERED' || u.accountStatus === 'PROFILE_COMPLETED')).length === 0 ? (
                   <div className="bg-white p-20 rounded-3xl border border-slate-200 text-center">
                     <HiCheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
                     <h3 className="text-xl font-black">All Clear!</h3>
@@ -376,7 +376,7 @@ const AdminDashboard: React.FC = () => {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                     {allUsers.filter(u => u.role === kycTab && (u.accountStatus === 'PENDING_VERIFICATION' || u.accountStatus === 'REGISTERED' || u.accountStatus === 'PROFILE_COMPLETED')).map((u: any) => (
+                     {(allUsers || []).filter(u => u.role === kycTab && (u.accountStatus === 'PENDING_VERIFICATION' || u.accountStatus === 'REGISTERED' || u.accountStatus === 'PROFILE_COMPLETED')).map((u: any) => (
                         <KycCard 
                           key={u.id} 
                           user={u} 
@@ -421,27 +421,27 @@ const AdminDashboard: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm border-b-4 border-b-rose-500">
                   <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Pending Verification</div>
-                  <div className="text-4xl font-black text-rose-600">{allTrips.filter(t => t.status === 'DELIVERED').length}</div>
+                  <div className="text-4xl font-black text-rose-600">{(allTrips || []).filter(t => t.status === 'DELIVERED').length}</div>
                 </div>
                 <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm border-b-4 border-b-amber-500">
                   <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">In Transit</div>
-                  <div className="text-4xl font-black text-amber-600">{allTrips.filter(t => t.status === 'IN_TRANSIT').length}</div>
+                  <div className="text-4xl font-black text-amber-600">{(allTrips || []).filter(t => t.status === 'IN_TRANSIT').length}</div>
                 </div>
                 <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm border-b-4 border-b-emerald-500">
                   <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Completed</div>
-                  <div className="text-4xl font-black text-emerald-600">{allTrips.filter(t => t.status === 'COMPLETED').length}</div>
+                  <div className="text-4xl font-black text-emerald-600">{(allTrips || []).filter(t => t.status === 'COMPLETED').length}</div>
                 </div>
               </div>
 
               {/* Pending Receipt Verifications */}
-              {allTrips.filter(t => t.status === 'DELIVERED').length > 0 && (
+              {(allTrips || []).filter(t => t.status === 'DELIVERED').length > 0 && (
                 <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
                   <h3 className="text-xl font-black mb-6 flex items-center space-x-3">
                     <span className="w-3 h-3 bg-rose-500 rounded-full animate-pulse" />
                     <span>Pending Receipt Verifications</span>
                   </h3>
                   <div className="space-y-4">
-                    {allTrips.filter(t => t.status === 'DELIVERED').map((trip: any) => (
+                    {(allTrips || []).filter(t => t.status === 'DELIVERED').map((trip: any) => (
                       <div key={trip.id} className="flex flex-col md:flex-row items-center justify-between p-6 rounded-2xl bg-rose-50 border border-rose-100 gap-4">
                         <div>
                           <div className="font-black text-slate-900">{trip.load?.source} → {trip.load?.destination}</div>
@@ -468,7 +468,7 @@ const AdminDashboard: React.FC = () => {
                   <div className="flex items-center justify-center py-16">
                     <div className="animate-spin w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full" />
                   </div>
-                ) : allTrips.length === 0 ? (
+                ) : (allTrips || []).length === 0 ? (
                   <div className="py-16 text-center">
                     <EmptyState type="trips" className="w-32 h-32 mx-auto mb-4" />
                     <p className="text-slate-400 font-bold">No trips found on platform.</p>
@@ -486,7 +486,7 @@ const AdminDashboard: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-50">
-                        {allTrips.slice(0, 50).map((trip: any) => (
+                        {(allTrips || []).slice(0, 50).map((trip: any) => (
                           <tr key={trip.id} className="hover:bg-indigo-50/30 transition-colors">
                             <td className="px-6 py-4 text-sm font-black text-slate-400">#{trip.id}</td>
                             <td className="px-6 py-4">
