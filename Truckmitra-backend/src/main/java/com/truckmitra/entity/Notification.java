@@ -32,11 +32,13 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     private NotificationType type;
 
-    @Column(name = "is_read", nullable = false, columnDefinition = "boolean default false")
+    @Column(name = "readstatus", nullable = false, columnDefinition = "boolean default false")
     private boolean isRead = false;
 
+    @Column(name = "related_id")
     private Long relatedId; // e.g. loadId, tripId
 
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
