@@ -34,7 +34,7 @@ public class Trip extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "trip_number", unique = true, nullable = false)
+    @Column(name = "tripnumber", unique = true, nullable = false)
     private String tripNumber;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -71,77 +71,77 @@ public class Trip extends BaseEntity {
     private java.math.BigDecimal shipperAmount;
     private java.math.BigDecimal driverAmount;
 
-    @Column(name = "pickup_date")
+    @Column(name = "pickupdate")
     private LocalDateTime pickupDate;
-    @Column(name = "delivery_date")
+    @Column(name = "deliverydate")
     private LocalDateTime deliveryDate;
 
     // Analytics & Costs
-    @Column(name = "carbon_emission")
+    @Column(name = "carbonemission")
     private Double carbonEmission;
-    @Column(name = "total_toll_cost")
+    @Column(name = "totaltollcost")
     private Double totalTollCost;
-    @Column(name = "fuel_cost")
+    @Column(name = "fuelcost")
     private Double fuelCost;
-    @Column(name = "driver_charges")
+    @Column(name = "drivercharges")
     private Double driverCharges;
 
     // Route Intelligence (OSRM)
-    @Column(name = "estimated_travel_time_mins")
+    @Column(name = "estimatedtraveltimemins")
     private Integer estimatedTravelTimeMins;
-    @Column(name = "toll_plaza_count")
+    @Column(name = "tollplazacount")
     private Integer tollPlazaCount;
-    @Column(name = "estimated_toll_cost")
+    @Column(name = "estimatedtollcost")
     private Double estimatedTollCost;
-    @Column(name = "fuel_estimate_liters")
+    @Column(name = "fuelestimateliters")
     private Double fuelEstimateLiters;
-    @Column(name = "source_latitude")
+    @Column(name = "sourcelatitude")
     private Double sourceLatitude;
-    @Column(name = "source_longitude")
+    @Column(name = "sourcelongitude")
     private Double sourceLongitude;
-    @Column(name = "destination_latitude")
+    @Column(name = "destinationlatitude")
     private Double destinationLatitude;
-    @Column(name = "destination_longitude")
+    @Column(name = "destinationlongitude")
     private Double destinationLongitude;
 
-    @Column(name = "started_at")
+    @Column(name = "startedat")
     private LocalDateTime startedAt;
-    @Column(name = "completed_at")
+    @Column(name = "completedat")
     private LocalDateTime completedAt;
 
-    @Column(name = "start_photo_url")
+    @Column(name = "startphotourl")
     private String startPhotoUrl;
-    @Column(name = "pod_url")
+    @Column(name = "podurl")
     private String podUrl; // Proof of delivery image
-    @Column(name = "pod_signature_url")
+    @Column(name = "podsignatureurl")
     private String podSignatureUrl;
-    @Column(name = "pod_reference_number")
+    @Column(name = "podreferencenumber")
     private String podReferenceNumber;
     @Column(name = "trip_pdf_url")
     private String tripPdfUrl;
 
     // Workflow document URLs
-    @Column(name = "assignment_pdf_url")
+    @Column(name = "assignmentpdfurl")
     private String assignmentPdfUrl;      // Generated on ACCEPTED
     private String finalInvoicePdfUrl;    // Generated on COMPLETED
-    @Column(name = "pickup_receipt_url")
+    @Column(name = "pickupreceipturl")
     private String pickupReceiptUrl;      // Required before START TRIP
-    @Column(name = "delivery_receipt_url")
+    @Column(name = "deliveryreceipturl")
     private String deliveryReceiptUrl;    // Required for delivery submission
-    @Column(name = "rejection_reason")
+    @Column(name = "rejectionreason")
     private String rejectionReason;       // Filled by transporter when rejecting
 
     // Location enablement flag (set by driver before starting trip)
-    @Column(name = "location_enabled")
+    @Column(name = "locationenabled")
     @Builder.Default
     private Boolean locationEnabled = false;
 
     // Live location
-    @Column(name = "current_lat")
+    @Column(name = "currentlat")
     private Double currentLat;
-    @Column(name = "current_lng")
+    @Column(name = "currentlng")
     private Double currentLng;
-    @Column(name = "last_location_update")
+    @Column(name = "lastlocationupdate")
     private LocalDateTime lastLocationUpdate;
 
     @ManyToOne(fetch = FetchType.LAZY)

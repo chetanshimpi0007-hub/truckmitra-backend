@@ -22,7 +22,7 @@ public class Invoice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "invoice_number", unique = true)
+    @Column(name = "invoicenumber", unique = true)
     private String invoiceNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,38 +33,38 @@ public class Invoice {
     @JoinColumn(name = "subscription_id")
     private UserSubscription subscription;
 
-    @Column(name = "plan_name")
+    @Column(name = "planname")
     private String planName;
     private Double amount;
-    @Column(name = "gst_amount")
+    @Column(name = "gstamount")
     private Double gstAmount;
     
-    @Column(name = "gst_rate")
+    @Column(name = "gstrate")
     @Builder.Default
     private Double gstRate = 18.0;
     
-    @Column(name = "total_amount")
+    @Column(name = "totalamount")
     private Double totalAmount;
     
     @Builder.Default
     private String status = "PENDING"; // PENDING, PAID, CANCELLED
     
-    @Column(name = "pdf_url")
+    @Column(name = "pdfurl")
     private String pdfUrl;
     
     // Snapshots for historical integrity
-    @Column(name = "billing_gst_number")
+    @Column(name = "billinggstnumber")
     private String billingGstNumber;
-    @Column(name = "billing_address")
+    @Column(name = "billingaddress")
     private String billingAddress;
-    @Column(name = "billing_logo_url")
+    @Column(name = "billinglogourl")
     private String billingLogoUrl;
     
-    @Column(name = "billing_date")
+    @Column(name = "billingdate")
     private LocalDate billingDate;
-    @Column(name = "due_date")
+    @Column(name = "duedate")
     private LocalDate dueDate;
-    @Column(name = "created_at")
+    @Column(name = "createdat")
     private LocalDateTime createdAt;
 
     @PrePersist

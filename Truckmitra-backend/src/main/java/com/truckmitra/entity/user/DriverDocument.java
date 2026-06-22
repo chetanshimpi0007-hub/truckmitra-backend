@@ -25,37 +25,37 @@ public class DriverDocument extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "driver_id", nullable = false)
+    @Column(name = "driverid", nullable = false)
     private Long driverId;
 
-    @Column(name = "document_type", nullable = false, length = 50)
+    @Column(name = "documenttype", nullable = false, length = 50)
     private String documentType; // DRIVING_LICENSE, AADHAAR, PAN, VOTER_ID
 
-    @Column(name = "document_number", nullable = false)
+    @Column(name = "documentnumber", nullable = false)
     private String documentNumber;
 
-    @Column(name = "document_image_url")
+    @Column(name = "documentimageurl")
     private String documentImageUrl;
 
-    @Column(name = "issue_date")
+    @Column(name = "issuedate")
     private LocalDate issueDate;
 
-    @Column(name = "expiry_date")
+    @Column(name = "expirydate")
     private LocalDate expiryDate;
 
-    @Column(name = "verification_status", nullable = false, length = 20)
+    @Column(name = "verificationstatus", nullable = false, length = 20)
     private String verificationStatus = "PENDING"; // PENDING, VERIFIED, REJECTED
 
-    @Column(name = "rejection_reason")
+    @Column(name = "rejectionreason")
     private String rejectionReason;
 
-    @Column(name = "verified_by")
+    @Column(name = "verifiedby")
     private Long verifiedBy; // Admin ID
 
-    @Column(name = "verified_at")
+    @Column(name = "verifiedat")
     private LocalDate verifiedAt;
 
-    @Column(name = "is_expired", nullable = false)
+    @Column(name = "isexpired", nullable = false)
     private Boolean isExpired = false;
 
     @PrePersist

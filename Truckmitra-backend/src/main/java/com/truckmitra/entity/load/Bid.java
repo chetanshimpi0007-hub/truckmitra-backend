@@ -39,10 +39,10 @@ public class Bid extends BaseEntity {
     @Column(nullable = false)
     private BigDecimal amount;
 
-    @Column(name = "estimated_delivery_days")
+    @Column(name = "estimateddeliverydays")
     private Integer estimatedDeliveryDays;
 
-    @Column(name = "vehicle_type")
+    @Column(name = "vehicletype")
     private String vehicleType;
 
     private String comment;

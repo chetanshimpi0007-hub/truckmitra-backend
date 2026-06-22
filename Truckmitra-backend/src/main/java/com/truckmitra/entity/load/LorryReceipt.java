@@ -21,13 +21,13 @@ public class LorryReceipt {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "lr_number", unique = true, nullable = false)
+    @Column(name = "lrnumber", unique = true, nullable = false)
     private String lrNumber;
 
-    @Column(name = "qr_code_url")
+    @Column(name = "qrcodeurl")
     private String qrCodeUrl;
 
-    @Column(name = "pdf_url")
+    @Column(name = "pdfurl")
     private String pdfUrl;
 
     // Suppress full Trip serialization to avoid circular reference and LazyInitializationException.
@@ -42,10 +42,10 @@ public class LorryReceipt {
         "startedAt", "completedAt", "rejectionReason"})
     private Trip trip;
 
-    @Column(name = "generated_at")
+    @Column(name = "generatedat")
     private LocalDateTime generatedAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updatedat")
     private LocalDateTime updatedAt;
 
     @PrePersist

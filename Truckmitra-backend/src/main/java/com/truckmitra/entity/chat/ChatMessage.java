@@ -40,6 +40,6 @@ public class ChatMessage extends BaseEntity {
     private LocalDateTime timestamp = LocalDateTime.now();
 
     @Builder.Default
-    @Column(name = "is_read", nullable = false)
+    @Column(name = "isread", nullable = false)
     private Boolean isRead = false;
 }

@@ -30,23 +30,23 @@ public class UserSubscription {
     @JoinColumn(name = "plan_id")
     private SubscriptionPlan plan;
 
-    @Column(name = "start_date")
+    @Column(name = "startdate")
     private LocalDateTime startDate;
     
-    @Column(name = "end_date")
+    @Column(name = "enddate")
     private LocalDateTime endDate;
 
-    @Column(name = "auto_renew")
+    @Column(name = "autorenew")
     @Builder.Default
     private Boolean autoRenew = true;
 
     @Builder.Default
     private String status = "ACTIVE"; // ACTIVE, EXPIRED, CANCELLED
 
-    @Column(name = "razorpay_subscription_id")
+    @Column(name = "razorpaysubscriptionid")
     private String razorpaySubscriptionId;
 
-    @Column(name = "razorpay_customer_id")
+    @Column(name = "razorpaycustomerid")
     private String razorpayCustomerId;
 
 }

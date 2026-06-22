@@ -39,7 +39,7 @@ public class Notification {
     @Column(name = "related_id")
     private Long relatedId; // e.g. loadId, tripId
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "createdat", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist

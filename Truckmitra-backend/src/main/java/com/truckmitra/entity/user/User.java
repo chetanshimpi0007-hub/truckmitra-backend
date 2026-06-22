@@ -49,7 +49,7 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "full_name", nullable = false, length = 100)
+    @Column(name = "fullname", nullable = false, length = 100)
     private String fullName;
 
     @Column(nullable = false, unique = true, length = 10)
@@ -66,10 +66,10 @@ public class User extends BaseEntity {
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "account_status", nullable = false, length = 20)
+    @Column(name = "accountstatus", nullable = false, length = 20)
     private AccountStatus accountStatus;
 
-    @Column(name = "profile_image_url")
+    @Column(name = "profileimageurl")
     private String profileImageUrl;
 
     private String address;
@@ -82,85 +82,85 @@ public class User extends BaseEntity {
     
     private String pincode;
 
-    @Column(name = "last_login_at")
+    @Column(name = "lastloginat")
     private LocalDateTime lastLoginAt;
 
-    @Column(name = "device_token")
+    @Column(name = "devicetoken")
     private String deviceToken;
 
     @Builder.Default
-    @Column(name = "is_mobile_verified", nullable = false)
+    @Column(name = "ismobileverified", nullable = false)
     private Boolean isMobileVerified = false;
 
-    @Column(name = "is_email_verified")
+    @Column(name = "isemailverified")
     @Builder.Default
     private Boolean isEmailVerified = false;
 
-    @Column(name = "failed_login_attempts")
+    @Column(name = "failedloginattempts")
     @Builder.Default
     private Integer failedLoginAttempts = 0;
 
-    @Column(name = "lockout_time")
+    @Column(name = "lockouttime")
     private LocalDateTime lockoutTime;
 
-    @Column(name = "refresh_token")
+    @Column(name = "refreshtoken")
     private String refreshToken;
 
     // OAuth2 fields
-    @Column(name = "google_id", unique = true)
+    @Column(name = "googleid", unique = true)
     private String googleId;
 
-    @Column(name = "facebook_id", unique = true)
+    @Column(name = "facebookid", unique = true)
     private String facebookId;
 
     @Builder.Default
-    @Column(name = "is_google_login", nullable = false)
+    @Column(name = "isgooglelogin", nullable = false)
     private Boolean isGoogleLogin = false;
 
     @Builder.Default
-    @Column(name = "is_facebook_login", nullable = false)
+    @Column(name = "isfacebooklogin", nullable = false)
     private Boolean isFacebookLogin = false;
 
     @Builder.Default
-    @Column(name = "preferred_login_type", nullable = false)
+    @Column(name = "preferredlogintype", nullable = false)
     private String preferredLoginType = "EMAIL_PASSWORD";
 
-    @Column(name = "last_otp_sent_at")
+    @Column(name = "lastotpsentat")
     private LocalDateTime lastOtpSentAt;
 
-    @Column(name = "otp_attempts")
+    @Column(name = "otpattempts")
     @Builder.Default
     private Integer otpAttempts = 0;
 
     // Preference fields
-    @Column(name = "preferred_language", length = 20)
+    @Column(name = "preferredlanguage", length = 20)
     private String preferredLanguage;
 
-    @Column(name = "push_notifications_enabled")
+    @Column(name = "pushnotificationsenabled")
     @Builder.Default
     private Boolean pushNotificationsEnabled = true;
 
-    @Column(name = "email_notifications_enabled")
+    @Column(name = "emailnotificationsenabled")
     @Builder.Default
     private Boolean emailNotificationsEnabled = true;
 
-    @Column(name = "sms_notifications_enabled")
+    @Column(name = "smsnotificationsenabled")
     @Builder.Default
     private Boolean smsNotificationsEnabled = true;
 
     // Metadata
-    @Column(name = "registered_ip")
+    @Column(name = "registeredip")
     private String registeredIp;
 
-    @Column(name = "registered_at")
+    @Column(name = "registeredat")
     private LocalDateTime registeredAt;
 
-    @Column(name = "last_login_ip")
+    @Column(name = "lastloginip")
     private String lastLoginIp;
     
-    @Column(name = "verified_by")
+    @Column(name = "verifiedby")
     private Long verifiedBy;      // Admin ID who verified the user
-    @Column(name = "verified_at")
+    @Column(name = "verifiedat")
     private LocalDateTime verifiedAt; // When the user was verified
     
     @Column(name = "emergency_alerts")
@@ -185,11 +185,11 @@ public class User extends BaseEntity {
  // Add these fields
 
  @Builder.Default
- @Column(name = "is_profile_completed", nullable = false)
+ @Column(name = "isprofilecompleted", nullable = false)
  private Boolean isProfileCompleted = false;  // ✅ Profile completion status
 
  @Builder.Default
- @Column(name = "is_verified", nullable = false)
+ @Column(name = "isverified", nullable = false)
  private Boolean isVerified = false;  // ✅ Admin verification status
 
  // Helper method to check if user can use business features

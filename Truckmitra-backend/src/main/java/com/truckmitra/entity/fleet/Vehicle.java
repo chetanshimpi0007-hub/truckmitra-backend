@@ -27,47 +27,47 @@ public class Vehicle extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "vehicle_number", nullable = false, unique = true)
+    @Column(name = "vehiclenumber", nullable = false, unique = true)
     private String vehicleNumber; // Plate Number
 
-    @Column(name = "vehicle_type", nullable = false)
+    @Column(name = "vehicletype", nullable = false)
     private String vehicleType; // e.g., TATA ACE, TRUCK 10T
 
     @Column(nullable = false)
     private Double capacity; // in Tons
 
-    @Column(name = "rc_number")
+    @Column(name = "rcnumber")
     private String rcNumber;
     
     private String model;
     
     private String manufacturer;
 
-    @Column(name = "insurance_number")
+    @Column(name = "insurancenumber")
     private String insuranceNumber;
     
-    @Column(name = "insurance_expiry")
+    @Column(name = "insuranceexpiry")
     private LocalDate insuranceExpiry;
 
-    @Column(name = "fitness_certificate_number")
+    @Column(name = "fitnesscertificatenumber")
     private String fitnessCertificateNumber;
     
-    @Column(name = "fitness_expiry")
+    @Column(name = "fitnessexpiry")
     private LocalDate fitnessExpiry;
 
-    @Column(name = "permit_number")
+    @Column(name = "permitnumber")
     private String permitNumber;
     
-    @Column(name = "permit_expiry")
+    @Column(name = "permitexpiry")
     private LocalDate permitExpiry;
 
-    @Column(name = "pollution_certificate_number")
+    @Column(name = "pollutioncertificatenumber")
     private String pollutionCertificateNumber;
     
-    @Column(name = "pollution_expiry")
+    @Column(name = "pollutionexpiry")
     private LocalDate pollutionExpiry;
 
-    @Column(name = "is_available")
+    @Column(name = "isavailable")
     @Builder.Default
     private Boolean isAvailable = true;
 
@@ -84,11 +84,11 @@ public class Vehicle extends BaseEntity {
     @JoinColumn(name = "driver_id")
     private com.truckmitra.entity.user.Driver driver;
 
-    @Column(name = "vehicle_front_image_url")
+    @Column(name = "vehiclefrontimageurl")
     private String vehicleFrontImageUrl;
-    @Column(name = "vehicle_back_image_url")
+    @Column(name = "vehiclebackimageurl")
     private String vehicleBackImageUrl;
-    @Column(name = "vehicle_rc_image_url")
+    @Column(name = "vehiclercimageurl")
     private String vehicleRcImageUrl;
 
     @PrePersist

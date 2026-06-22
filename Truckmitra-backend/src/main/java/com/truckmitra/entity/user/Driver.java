@@ -31,59 +31,59 @@ public class Driver extends User {
     @Column(name = "driving_license_number")
     private String drivingLicenseNumber;
 
-    @Column(name = "driving_license_image_url")
+    @Column(name = "drivinglicenseimageurl")
     private String drivingLicenseImageUrl;
 
     @Column(name = "license_expiry_date")
     private LocalDate licenseExpiryDate;
 
-    @Column(name = "preferred_vehicle_type")
+    @Column(name = "preferredvehicletype")
     @Enumerated(EnumType.STRING)
     private VehicleType preferredVehicleType;
 
-    @Column(name = "aadhaar_front_image_url")
+    @Column(name = "aadhaarfrontimageurl")
     private String aadhaarFrontImageUrl;
-    @Column(name = "aadhaar_back_image_url")
+    @Column(name = "aadhaarbackimageurl")
     private String aadhaarBackImageUrl;
-    @Column(name = "pan_card_image_url")
+    @Column(name = "pancardimageurl")
     private String panCardImageUrl;
-    @Column(name = "aadhaar_number")
+    @Column(name = "aadhaarnumber")
     private String aadhaarNumber;
-    @Column(name = "pan_number")
+    @Column(name = "pannumber")
     private String panNumber;
 
-    @Column(name = "vehicle_number")
+    @Column(name = "vehiclenumber")
     private String vehicleNumber;
-    @Column(name = "vehicle_capacity")
+    @Column(name = "vehiclecapacity")
     private String vehicleCapacity;
-    @Column(name = "vehicle_puc_image_url")
+    @Column(name = "vehiclepucimageurl")
     private String vehiclePucImageUrl;
-    @Column(name = "vehicle_front_image_url")
+    @Column(name = "vehiclefrontimageurl")
     private String vehicleFrontImageUrl;
-    @Column(name = "vehicle_back_image_url")
+    @Column(name = "vehiclebackimageurl")
     private String vehicleBackImageUrl;
-    @Column(name = "vehicle_insurance_image_url")
+    @Column(name = "vehicleinsuranceimageurl")
     private String vehicleInsuranceImageUrl;
-    @Column(name = "vehicle_fuel_type")
+    @Column(name = "vehiclefueltype")
     private String vehicleFuelType;
 
-    @Column(name = "current_latitude")
+    @Column(name = "currentlatitude")
     private Double currentLatitude;
 
-    @Column(name = "current_longitude")
+    @Column(name = "currentlongitude")
     private Double currentLongitude;
 
-    @Column(name = "last_location_update")
+    @Column(name = "lastlocationupdate")
     private LocalDateTime lastLocationUpdate;
 
     @Deprecated
     @Builder.Default
-    @Column(name = "is_available", nullable = false)
+    @Column(name = "isavailable", nullable = false)
     private Boolean isAvailable = true;
 
     @Deprecated
     @Builder.Default
-    @Column(name = "is_on_trip", nullable = false)
+    @Column(name = "isontrip", nullable = false)
     private Boolean isOnTrip = false;
 
     @Enumerated(EnumType.STRING)
@@ -94,18 +94,18 @@ public class Driver extends User {
     @Column(name = "last_seen_at")
     private LocalDateTime lastSeenAt;
 
-    @Column(name = "total_trips_completed")
+    @Column(name = "totaltripscompleted")
     @Builder.Default
     private Integer totalTripsCompleted = 0;
 
-    @Column(name = "total_earnings")
+    @Column(name = "totalearnings")
     @Builder.Default
     private Double totalEarnings = 0.0;
 
     @Builder.Default
     private Double rating = 0.0;
 
-    @Column(name = "total_ratings")
+    @Column(name = "totalratings")
     @Builder.Default
     private Integer totalRatings = 0;
 
@@ -113,19 +113,19 @@ public class Driver extends User {
     private Long transporterId;
 
     // Bank details
-    @Column(name = "account_holder_name")
+    @Column(name = "accountholdername")
     private String accountHolderName;
 
-    @Column(name = "bank_name")
+    @Column(name = "bankname")
     private String bankName;
 
-    @Column(name = "account_number")
+    @Column(name = "accountnumber")
     private String accountNumber;
 
-    @Column(name = "ifsc_code")
+    @Column(name = "ifsccode")
     private String ifscCode;
 
-    @Column(name = "upi_id")
+    @Column(name = "upiid")
     private String upiId;
 
     // Emergency contact
@@ -136,15 +136,15 @@ public class Driver extends User {
     private String emergencyContactNumber;
 
     // Preferences
-    @Column(name = "available_for_long_route")
+    @Column(name = "availableforlongroute")
     @Builder.Default
     private Boolean availableForLongRoute = true;
 
-    @Column(name = "available_for_local_route")
+    @Column(name = "availableforlocalroute")
     @Builder.Default
     private Boolean availableForLocalRoute = true;
 
-    @Column(name = "minimum_advance_required")
+    @Column(name = "minimumadvancerequired")
     @Builder.Default
     private Double minimumAdvanceRequired = 0.0;
 

@@ -25,25 +25,25 @@ public class BillingDetails {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "company_name")
+    @Column(name = "companyname")
     private String companyName;
-    @Column(name = "gst_number")
+    @Column(name = "gstnumber")
     private String gstNumber;
-    @Column(name = "company_address")
+    @Column(name = "companyaddress")
     private String companyAddress;
     
-    @Column(name = "invoice_prefix")
+    @Column(name = "invoiceprefix")
     @Builder.Default
     private String invoicePrefix = "TM";
     
-    @Column(name = "theme_colors")
+    @Column(name = "themecolors")
     private String themeColors; // JSON string for white-label
-    @Column(name = "logo_url")
+    @Column(name = "logourl")
     private String logoUrl;
 
-    @Column(name = "created_at")
+    @Column(name = "createdat")
     private LocalDateTime createdAt;
-    @Column(name = "updated_at")
+    @Column(name = "updatedat")
     private LocalDateTime updatedAt;
 
     @PrePersist

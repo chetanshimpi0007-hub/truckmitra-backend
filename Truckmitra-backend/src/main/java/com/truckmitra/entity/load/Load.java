@@ -42,13 +42,13 @@ public class Load extends BaseEntity {
     @Column(nullable = false)
     private Double weight; // in tons
 
-    @Column(name = "material_type")
+    @Column(name = "materialtype")
     private String materialType;
 
     @Column(length = 500)
     private String description;
 
-    @Column(name = "pickup_date")
+    @Column(name = "pickupdate")
     private LocalDateTime pickupDate;
 
     private BigDecimal budget;

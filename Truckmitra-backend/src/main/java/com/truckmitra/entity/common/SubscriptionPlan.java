@@ -35,13 +35,13 @@ public class SubscriptionPlan {
     @Column(name = "razorpay_plan_id")
     private String razorpayPlanId;
 
-    @Column(name = "max_loads")
+    @Column(name = "loadpostlimit")
     private Integer maxLoads;
     
-    @Column(name = "max_bids")
+    @Column(name = "bidlimit")
     private Integer maxBids;
 
-    @Column(name = "max_vehicles")
+    @Column(name = "fleetlimit")
     private Integer maxVehicles;
 
     @Column(name = "max_drivers")
@@ -50,10 +50,10 @@ public class SubscriptionPlan {
     @Builder.Default
     private Boolean active = true;
 
-    @Column(name = "has_analytics")
+    @Column(name = "hasanalytics")
     private Boolean hasAnalytics;
 
-    @Column(name = "has_voice_assistant")
+    @Column(name = "hasvoiceassistant")
     private Boolean hasVoiceAssistant;
 
     @ElementCollection

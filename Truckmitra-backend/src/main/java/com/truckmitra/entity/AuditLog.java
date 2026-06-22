@@ -25,12 +25,12 @@ public class AuditLog {
     @JoinColumn(name = "user_id")
     private com.truckmitra.entity.user.User user;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", insertable = false, updatable = false)
     private Long userId; // For cases where we only have ID
     private String module;
     private String action;
     private String details;
-    @Column(name = "ip_address")
+    @Column(name = "ipaddress")
     private String ipAddress;
     private LocalDateTime timestamp;
 

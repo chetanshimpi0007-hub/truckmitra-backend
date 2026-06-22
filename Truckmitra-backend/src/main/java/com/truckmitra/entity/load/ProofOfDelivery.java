@@ -21,19 +21,19 @@ public class ProofOfDelivery {
     @JoinColumn(name = "trip_id", nullable = false)
     private Trip trip;
 
-    @Column(name = "image_url")
+    @Column(name = "imageurl")
     private String imageUrl;
-    @Column(name = "signature_url")
+    @Column(name = "signatureurl")
     private String signatureUrl;
     
     @Column(length = 1000)
     private String remarks;
     
-    @Column(name = "uploaded_at")
+    @Column(name = "uploadedat")
     @Builder.Default
     private LocalDateTime uploadedAt = LocalDateTime.now();
     
-    @Column(name = "pod_reference_number")
+    @Column(name = "podreferencenumber")
     private String podReferenceNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)

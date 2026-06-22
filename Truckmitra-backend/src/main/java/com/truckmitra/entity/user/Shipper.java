@@ -26,63 +26,63 @@ import java.util.List;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Shipper extends User {
 
-    @Column(name = "company_name", nullable = false)
+    @Column(name = "companyname", nullable = false)
     private String companyName;
 
-    @Column(name = "gst_number")
+    @Column(name = "gstnumber")
     private String gstNumber;
 
-    @Column(name = "pan_number")
+    @Column(name = "pannumber")
     private String panNumber;
 
-    @Column(name = "aadhaar_number")
+    @Column(name = "aadhaarnumber")
     private String aadhaarNumber;
 
-    @Column(name = "aadhaar_front_image_url")
+    @Column(name = "aadhaarfrontimageurl")
     private String aadhaarFrontImageUrl;
 
-    @Column(name = "aadhaar_back_image_url")
+    @Column(name = "aadhaarbackimageurl")
     private String aadhaarBackImageUrl;
 
-    @Column(name = "pan_card_image_url")
+    @Column(name = "pancardimageurl")
     private String panCardImageUrl;
 
-    @Column(name = "business_type")
+    @Column(name = "businesstype")
     private String businessType;
 
-    @Column(name = "industry_type")
+    @Column(name = "industrytype")
     private String industryType;
 
-    @Column(name = "company_logo_url")
+    @Column(name = "companylogourl")
     private String companyLogoUrl;
 
-    @Column(name = "gst_certificate_url")
+    @Column(name = "gstcertificateurl")
     private String gstCertificateUrl;
 
-    @Column(name = "business_proof_url")
+    @Column(name = "businessproofurl")
     private String businessProofUrl;
 
-    @Column(name = "is_gst_verified")
+    @Column(name = "isgstverified")
     @Builder.Default
     private Boolean isGstVerified = false;
 
-    @Column(name = "total_loads_posted")
+    @Column(name = "totalloadsposted")
     @Builder.Default
     private Integer totalLoadsPosted = 0;
 
-    @Column(name = "active_loads")
+    @Column(name = "activeloads")
     @Builder.Default
     private Integer activeLoads = 0;
 
-    @Column(name = "total_spent")
+    @Column(name = "totalspent")
     @Builder.Default
     private Double totalSpent = 0.0;
 
-    @Column(name = "average_rating")
+    @Column(name = "averagerating")
     @Builder.Default
     private Double averageRating = 0.0;
 
-    @Column(name = "total_ratings")
+    @Column(name = "totalratings")
     @Builder.Default
     private Integer totalRatings = 0;
 
@@ -92,17 +92,17 @@ public class Shipper extends User {
     @Column(name = "verified_at")
     private LocalDateTime verifiedAt;
 
-    @Column(name = "free_loads_remaining")
+    @Column(name = "freeloadsremaining")
     @Builder.Default
     private Integer freeLoadsRemaining = 2;
 
-    @Column(name = "subscription_start_date")
+    @Column(name = "subscriptionstartdate")
     private LocalDateTime subscriptionStartDate;
 
-    @Column(name = "subscription_end_date")
+    @Column(name = "subscriptionenddate")
     private LocalDateTime subscriptionEndDate;
 
-    @Column(name = "subscription_plan")
+    @Column(name = "subscriptionplan")
     private String subscriptionPlan;
 
     @ToString.Exclude

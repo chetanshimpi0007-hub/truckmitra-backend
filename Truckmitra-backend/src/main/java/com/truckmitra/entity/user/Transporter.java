@@ -25,71 +25,71 @@ import java.util.List;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Transporter extends User {
 
-    @Column(name = "agency_name", nullable = false)
+    @Column(name = "agencyname", nullable = false)
     private String agencyName;
 
-    @Column(name = "gst_number")
+    @Column(name = "gstnumber")
     private String gstNumber;
 
-    @Column(name = "pan_number")
+    @Column(name = "pannumber")
     private String panNumber;
 
-    @Column(name = "aadhaar_number")
+    @Column(name = "aadhaarnumber")
     private String aadhaarNumber;
 
-    @Column(name = "aadhaar_front_image_url")
+    @Column(name = "aadhaarfrontimageurl")
     private String aadhaarFrontImageUrl;
 
-    @Column(name = "aadhaar_back_image_url")
+    @Column(name = "aadhaarbackimageurl")
     private String aadhaarBackImageUrl;
 
-    @Column(name = "pan_card_image_url")
+    @Column(name = "pancardimageurl")
     private String panCardImageUrl;
 
-    @Column(name = "office_address")
+    @Column(name = "officeaddress")
     private String officeAddress;
 
-    @Column(name = "fleet_size", nullable = false)
+    @Column(name = "fleetsize", nullable = false)
     private Integer fleetSize;
 
-    @Column(name = "service_areas")
+    @Column(name = "serviceareas")
     private String serviceAreas;
 
-    @Column(name = "experience_in_years")
+    @Column(name = "experienceinyears")
     private Integer experienceInYears;
 
-    @Column(name = "gst_certificate_url")
+    @Column(name = "gstcertificateurl")
     private String gstCertificateUrl;
 
-    @Column(name = "business_card_url")
+    @Column(name = "businesscardurl")
     private String businessCardUrl;
 
     // Stats
-    @Column(name = "total_drivers")
+    @Column(name = "totaldrivers")
     @Builder.Default
     private Integer totalDrivers = 0;
 
-    @Column(name = "total_vehicles")
+    @Column(name = "totalvehicles")
     @Builder.Default
     private Integer totalVehicles = 0;
 
-    @Column(name = "bids_won")
+    @Column(name = "bidswon")
     @Builder.Default
     private Integer bidsWon = 0;
 
-    @Column(name = "average_rating")
+    @Column(name = "averagerating")
     @Builder.Default
     private Double averageRating = 0.0;
 
-    @Column(name = "total_ratings")
+    @Column(name = "totalratings")
     @Builder.Default
     private Integer totalRatings = 0;
 
-    @Column(name = "average_driver_rating")
+    @Column(name = "averagedriverrating")
     @Builder.Default
     private Double averageDriverRating = 0.0;
 
-    @Column(name = "total_driver_ratings")
+    @Column(name = "totaldriverratings")
     @Builder.Default
     private Integer totalDriverRatings = 0;
 
@@ -97,15 +97,15 @@ public class Transporter extends User {
     @Builder.Default
     private Boolean isVerified = false;
 
-    @Column(name = "commission_rate")
+    @Column(name = "commissionrate")
     @Builder.Default
     private Double commissionRate = 5.0;
 
-    @Column(name = "total_earnings")
+    @Column(name = "totalearnings")
     @Builder.Default
     private Double totalEarnings = 0.0;
 
-    @Column(name = "free_bids_remaining")
+    @Column(name = "freebidsremaining")
     @Builder.Default
     private Integer freeBidsRemaining = 2;
 
@@ -125,13 +125,13 @@ public class Transporter extends User {
     private List<Long> vehicleIds = new ArrayList<>();
 
     // Subscription
-    @Column(name = "subscription_start_date")
+    @Column(name = "subscriptionstartdate")
     private LocalDateTime subscriptionStartDate;
 
-    @Column(name = "subscription_end_date")
+    @Column(name = "subscriptionenddate")
     private LocalDateTime subscriptionEndDate;
 
-    @Column(name = "subscription_plan")
+    @Column(name = "subscriptionplan")
     private String subscriptionPlan;
 
     @ToString.Exclude

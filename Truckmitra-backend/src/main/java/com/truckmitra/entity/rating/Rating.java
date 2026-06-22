@@ -45,7 +45,7 @@ public class Rating {
     @Enumerated(EnumType.STRING)
     private RatingType ratingType;
 
-    @Column(name = "rating_value", nullable = false)
+    @Column(name = "ratingvalue", nullable = false)
     private Integer ratingValue; // 1 to 5
 
     @Column(length = 1000)

@@ -39,6 +39,6 @@ public class EmergencyAlert extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime timestamp = LocalDateTime.now();
     
-    @Column(name = "resolution_notes")
+    @Column(name = "resolutionnotes")
     private String resolutionNotes;
 }
