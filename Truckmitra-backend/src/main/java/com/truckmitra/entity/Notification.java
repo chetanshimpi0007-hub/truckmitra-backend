@@ -32,6 +32,7 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     private NotificationType type;
 
+    @Column(name = "is_read", nullable = false, columnDefinition = "boolean default false")
     private boolean isRead = false;
 
     private Long relatedId; // e.g. loadId, tripId
