@@ -88,11 +88,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public boolean canPerformAction(User user, String action) {
         UserSubscription sub = userSubscriptionRepository.findByUser(user).orElse(null);
         if (sub == null || !"ACTIVE".equals(sub.getStatus())) {
-            if ("LOAD_POST".equals(action) && user.getRole() == com.truckmitra.entity.common.enums.Role.SHIPPER) {
-                com.truckmitra.entity.user.Shipper shipper = shipperRepository.findById(user.getId()).orElse(null);
-                if (shipper == null) return false;
-                Integer remaining = shipper.getFreeLoadsRemaining();
-                return remaining == null || remaining > 0;
+            if ("LOAD_POST".equals(action)) {
+                if (user.getRole() == com.truckmitra.entity.common.enums.Role.SHIPPER) {
+                    com.truckmitra.entity.user.Shipper shipper = shipperRepository.findById(user.getId()).orElse(null);
+                    if (shipper == null) return false;
+                    Integer remaining = shipper.getFreeLoadsRemaining();
+                    return remaining == null || remaining > 0;
+                } else if (user.getRole() == com.truckmitra.entity.common.enums.Role.TRANSPORTER) {
+                    return true; // Transporters can post loads for drivers without restriction
+                }
+                return false;
             }
             if ("BID_LIMIT".equals(action) && user.getRole() == com.truckmitra.entity.common.enums.Role.TRANSPORTER) {
                 com.truckmitra.entity.user.Transporter transporter = transporterRepository.findById(user.getId()).orElse(null);

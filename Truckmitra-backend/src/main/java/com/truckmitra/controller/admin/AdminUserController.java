@@ -43,7 +43,7 @@ public class AdminUserController {
 
     @GetMapping("/pending")
     public ResponseEntity<ApiResponse<Page<User>>> getPendingUsers(
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 20, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         Page<User> pendingUsers = adminUserService.getPendingUsers(pageable);
         return ResponseEntity.ok(ApiResponse.success("Pending users fetched successfully", pendingUsers));
     }
