@@ -89,7 +89,7 @@ public class AdminUserController {
     @GetMapping("/status/{status}")
     public ResponseEntity<ApiResponse<Page<User>>> getUsersByStatus(
             @PathVariable AccountStatus status,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 20, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         Page<User> users = adminUserService.getUsersByStatus(status, pageable);
         return ResponseEntity.ok(ApiResponse.success(
             String.format("Users with status %s fetched successfully", status), 
@@ -146,7 +146,7 @@ public class AdminUserController {
             @RequestParam(required = false) AccountStatus status,
             @RequestParam(required = false) Role role,
             @RequestParam(required = false) String search,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 20, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
         
         Page<User> users = adminUserService.getAllUsers(status, role, search, pageable);
         return ResponseEntity.ok(ApiResponse.success("Users fetched successfully", users));

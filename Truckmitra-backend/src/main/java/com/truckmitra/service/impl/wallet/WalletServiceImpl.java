@@ -33,6 +33,12 @@ public class WalletServiceImpl implements WalletService {
     private final TransactionRepository transactionRepository;
     private final InAppNotificationService notificationService;
 
+    @org.springframework.beans.factory.annotation.Value("${razorpay.key.id}")
+    private String razorpayKeyId;
+
+    @org.springframework.beans.factory.annotation.Value("${razorpay.key.secret}")
+    private String razorpayKeySecret;
+
     @Override
     @Transactional
     public WalletResponse createWallet(Long userId, String userRole) {
@@ -260,13 +266,11 @@ public class WalletServiceImpl implements WalletService {
     @Override
     public Object createRazorpayOrder(Long userId, BigDecimal amount) {
         try {
-            String keyId = System.getenv("RAZORPAY_KEY_ID");
-            String keySecret = System.getenv("RAZORPAY_KEY_SECRET");
-            if(keyId == null || keySecret == null) {
+            if(razorpayKeyId == null || razorpayKeySecret == null || razorpayKeyId.equals("dummy")) {
                 log.error("Razorpay credentials not found in env vars.");
                 throw new IllegalStateException("Payment Gateway is not configured. Razorpay keys are missing.");
             }
-            com.razorpay.RazorpayClient razorpay = new com.razorpay.RazorpayClient(keyId, keySecret);
+            com.razorpay.RazorpayClient razorpay = new com.razorpay.RazorpayClient(razorpayKeyId, razorpayKeySecret);
             org.json.JSONObject orderRequest = new org.json.JSONObject();
             orderRequest.put("amount", amount.multiply(new BigDecimal(100)).intValue()); // amount in the smallest currency unit
             orderRequest.put("currency", "INR");
@@ -283,9 +287,7 @@ public class WalletServiceImpl implements WalletService {
     @Transactional
     public TransactionResponse verifyRazorpayPayment(Long userId, String razorpayOrderId, String razorpayPaymentId, String razorpaySignature) {
         try {
-            String keyId = System.getenv("RAZORPAY_KEY_ID");
-            String keySecret = System.getenv("RAZORPAY_KEY_SECRET");
-            if(keyId == null || keySecret == null) {
+            if(razorpayKeyId == null || razorpayKeySecret == null || razorpayKeyId.equals("dummy")) {
                 throw new IllegalStateException("Payment Gateway is not configured. Razorpay keys are missing.");
             }
             
@@ -294,12 +296,12 @@ public class WalletServiceImpl implements WalletService {
             options.put("razorpay_payment_id", razorpayPaymentId);
             options.put("razorpay_signature", razorpaySignature);
             
-            boolean status = com.razorpay.Utils.verifyPaymentSignature(options, keySecret);
+            boolean status = com.razorpay.Utils.verifyPaymentSignature(options, razorpayKeySecret);
             if (!status) {
                 throw new RuntimeException("Payment signature verification failed");
             }
             
-            com.razorpay.RazorpayClient razorpay = new com.razorpay.RazorpayClient(keyId, keySecret);
+            com.razorpay.RazorpayClient razorpay = new com.razorpay.RazorpayClient(razorpayKeyId, razorpayKeySecret);
             com.razorpay.Order order = razorpay.orders.fetch(razorpayOrderId);
             
             if (order == null || !order.has("amount")) {

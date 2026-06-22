@@ -47,7 +47,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         if (plan.getPrice() == null || plan.getPrice() <= 0) {
             // Free plan logic
-            UserSubscription sub = userSubscriptionRepository.findByUser(user)
+            UserSubscription sub = userSubscriptionRepository.findByUser(user).stream().findFirst()
                     .orElse(UserSubscription.builder().user(user).build());
             
             sub.setPlan(plan);
@@ -60,7 +60,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         com.razorpay.Subscription razorpaySubscription = razorpaySubscriptionService.createSubscription(plan, user);
 
-        UserSubscription sub = userSubscriptionRepository.findByUser(user)
+        UserSubscription sub = userSubscriptionRepository.findByUser(user).stream().findFirst()
                 .orElse(UserSubscription.builder().user(user).build());
 
         String action = sub.getPlan() == null ? "SUBSCRIPTION_START" : 
@@ -80,13 +80,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public UserSubscription getCurrentSubscription(User user) {
-        return userSubscriptionRepository.findByUser(user)
+        return userSubscriptionRepository.findByUser(user).stream()
+                .filter(s -> "ACTIVE".equals(s.getStatus()))
+                .findFirst()
                 .orElseThrow(() -> new RuntimeException("No active subscription"));
     }
 
     @Override
     public boolean canPerformAction(User user, String action) {
-        UserSubscription sub = userSubscriptionRepository.findByUser(user).orElse(null);
+        UserSubscription sub = userSubscriptionRepository.findByUser(user).stream()
+                .filter(s -> "ACTIVE".equals(s.getStatus()))
+                .findFirst()
+                .orElse(null);
         if (sub == null || !"ACTIVE".equals(sub.getStatus())) {
             if ("LOAD_POST".equals(action)) {
                 if (user.getRole() == com.truckmitra.entity.common.enums.Role.SHIPPER) {
