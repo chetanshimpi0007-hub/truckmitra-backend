@@ -22,7 +22,7 @@ const DriverOverview: React.FC<DriverOverviewProps> = ({
     <div className="space-y-6">
       
       {/* 1. MOBILE FIRST STAT CARDS */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatWidget 
           title="Assigned Trips" 
           value={trips.filter(t => t.status === 'ASSIGNED').length} 

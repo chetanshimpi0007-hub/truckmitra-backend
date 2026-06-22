@@ -61,6 +61,29 @@ public class TripInvoice {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "shipper_id")
+    private Long shipperId;
+
+    @Column(name = "transporter_id")
+    private Long transporterId;
+
+    @Column(name = "driver_id")
+    private Long driverId;
+
+    @Column(name = "vehicle_id")
+    private Long vehicleId;
+
+    @Column(name = "amount")
+    private Double amount;
+
+    @Column(name = "gst_amount")
+    private Double gstAmount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "invoice_status")
+    @Builder.Default
+    private com.truckmitra.entity.common.enums.InvoiceStatus invoiceStatus = com.truckmitra.entity.common.enums.InvoiceStatus.DRAFT;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

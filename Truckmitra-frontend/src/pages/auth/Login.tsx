@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/auth.hook';
-import { FcGoogle } from 'react-icons/fc';
+
 import { FaFacebook, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { GoogleLogin } from '@react-oauth/google';
 import { AccountStatus } from '../../interfaces/auth.interface';
@@ -69,7 +69,6 @@ const Login: React.FC = () => {
   };
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
-    console.log('Google Success:', credentialResponse);
     try {
       const result = await loginWithGoogle(credentialResponse.credential);
       handlePostLogin(result);
@@ -99,8 +98,6 @@ const handlePostLogin = (result: any) => {
   if (!result) return;
 
   const user = result; // AuthResponse is returned directly by the hook
-
-  console.log('Login successful - User data:', user);
 
   if (user.statusMessage) {
     toast.success(user.statusMessage);

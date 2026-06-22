@@ -18,12 +18,10 @@ const PlaceBid = ({ loadId, onSuccess }: PlaceBidProps) => {
     if (!amount || Number(amount) <= 0) return toast.error('Amount must be > 0');
 
     const payload = { loadId, amount: Number(amount), remarks };
-    console.log('Posting bid payload:', payload);
 
     setLoading(true);
     try {
       const res = await protectedApi.post('/api/bids', payload);
-      console.log('PlaceBid response:', res?.data);
       toast.success(res?.data?.message || 'Bid placed');
       if (typeof onSuccess === 'function') onSuccess(res?.data);
     } catch (err: any) {

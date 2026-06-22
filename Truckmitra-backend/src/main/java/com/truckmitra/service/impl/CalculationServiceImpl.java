@@ -2,16 +2,13 @@
 package com.truckmitra.service.impl;
 
 import org.springframework.stereotype.Service;
-import java.util.Random;
 
 @Service
 public class CalculationServiceImpl {
 
-    private final Random random = new Random();
-
     public Double calculateDistance(String source, String destination) {
-        // Realistic mock: 100–1500 km range (replace with Google Maps API if needed)
-        return 100 + (1400) * random.nextDouble();
+        // Fail explicitly if external routing API is not configured.
+        throw new IllegalStateException("Google Maps API or OSRM is not configured. Cannot calculate real distance from " + source + " to " + destination);
     }
 
     public Double calculateCarbonEmission(Double distance, Double weight) {

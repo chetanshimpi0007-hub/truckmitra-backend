@@ -10,7 +10,9 @@ import com.truckmitra.entity.user.User;
 import com.truckmitra.repository.LoadRepository;
 import com.truckmitra.repository.user.ShipperRepository;
 import com.truckmitra.repository.user.TransporterRepository;
+import com.truckmitra.service.InAppNotificationService;
 import com.truckmitra.service.LoadService;
+import com.truckmitra.enums.NotificationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,8 @@ public class LoadServiceImpl implements LoadService {
     private final TransporterRepository transporterRepository;
     private final com.truckmitra.service.common.SubscriptionService subscriptionService;
     private final com.truckmitra.service.common.AuditService auditService;
+    private final InAppNotificationService inAppNotificationService;
+    private final com.truckmitra.service.LoadMatchingService loadMatchingService;
 
     @Override
     @Transactional
@@ -67,6 +71,8 @@ public class LoadServiceImpl implements LoadService {
                 loadBuilder.transporter(transporter);
                 Load savedLoad = loadRepository.save(loadBuilder.build());
                 auditService.logAction("LOAD_CREATED", "Shipper " + shipper.getFullName() + " created Load #" + savedLoad.getId() + " directly for Transporter " + transporter.getFullName(), user);
+                inAppNotificationService.sendNotification(transporter.getId(), "New Direct Load Assigned", "Shipper " + shipper.getFullName() + " assigned a load to you from " + request.getSource() + " to " + request.getDestination(), NotificationType.LOAD, savedLoad.getId());
+                try { loadMatchingService.processNewLoad(savedLoad.getId()); } catch (Exception e) { /* log or ignore */ }
                 return savedLoad;
             } else {
                 Load load = loadBuilder.build();
@@ -78,6 +84,7 @@ public class LoadServiceImpl implements LoadService {
                 }
                 Load savedLoad = loadRepository.save(load);
                 auditService.logAction("LOAD_CREATED", "Shipper " + shipper.getFullName() + " created Load #" + savedLoad.getId(), user);
+                try { loadMatchingService.processNewLoad(savedLoad.getId()); } catch (Exception e) { /* log or ignore */ }
                 return savedLoad;
             }
         } else if (user.getRole() == com.truckmitra.entity.common.enums.Role.TRANSPORTER) {
@@ -88,6 +95,7 @@ public class LoadServiceImpl implements LoadService {
             
             Load savedLoad = loadRepository.save(loadBuilder.build());
             auditService.logAction("LOAD_CREATED", "Transporter " + transporter.getFullName() + " created Load #" + savedLoad.getId(), user);
+            try { loadMatchingService.processNewLoad(savedLoad.getId()); } catch (Exception e) { /* log or ignore */ }
             return savedLoad;
         }
         

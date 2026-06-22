@@ -8,7 +8,6 @@ import {
   HiPlus, 
   HiDownload,
   HiCash,
-  HiReceiptTax,
   HiShieldCheck
 } from 'react-icons/hi';
 import { protectedApi } from '../../services/api/protectedAndPublicAPI';
@@ -61,6 +60,20 @@ const Wallet: React.FC = () => {
     fetchWalletData();
   }, []);
 
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handleAddMoney = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!amountToAdd || isNaN(Number(amountToAdd))) {
@@ -68,23 +81,79 @@ const Wallet: React.FC = () => {
       return;
     }
     
-    toast.success('Redirecting to Razorpay Checkout...');
-    // Process order creation through our backend (even though we open their custom link as requested)
+    toast.loading('Initializing payment...', { id: 'payment' });
+    
     try {
-      await protectedApi.post('/api/payments/create-order', { amount: Number(amountToAdd) });
-    } catch(err) {
-      // Ignored for dev dummy link redirect
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) {
+        toast.error('Failed to load Razorpay SDK. Check your connection.', { id: 'payment' });
+        return;
+      }
+
+      // 1. Create order on backend
+      const { data } = await protectedApi.post('/api/wallet/create-order', { amount: Number(amountToAdd) });
+      const order = data.data;
+
+      // Check if it's a mock order due to missing env vars
+      if (order.id && order.id.startsWith('order_mock_')) {
+        toast.success('Mock Order Created. Simulating Payment Redirect...', { id: 'payment' });
+        window.open('https://razorpay.me/@chetandevidasshimpi', '_blank');
+        
+        // Simulate backend verification
+        setTimeout(async () => {
+          await protectedApi.post('/api/wallet/verify-payment', { 
+            razorpay_order_id: order.id,
+            razorpay_payment_id: 'mock_pay_id',
+            razorpay_signature: 'mock_sig'
+          });
+          toast.success(`Verification complete (Simulated). Your balance is updated.`);
+          setShowAddMoney(false);
+          setAmountToAdd('');
+          fetchWalletData();
+        }, 3000);
+        return;
+      }
+
+      // 2. Open Razorpay Checkout Modal
+      const options = {
+        key: process.env.REACT_APP_RAZORPAY_KEY_ID || '', // Frontend key (public)
+        amount: order.amount,
+        currency: order.currency,
+        name: 'TruckMitra',
+        description: 'Wallet Recharge',
+        order_id: order.id,
+        handler: async function (response: any) {
+          try {
+            toast.loading('Verifying payment...', { id: 'payment' });
+            // 3. Verify payment on backend
+            await protectedApi.post('/api/wallet/verify-payment', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            });
+            
+            toast.success('Payment verified successfully!', { id: 'payment' });
+            setShowAddMoney(false);
+            setAmountToAdd('');
+            fetchWalletData();
+          } catch (err) {
+            toast.error('Payment verification failed', { id: 'payment' });
+          }
+        },
+        prefill: {
+          name: wallet?.walletNumber || 'User'},
+        theme: {
+          color: '#4F46E5'
+        }
+      };
+
+      const paymentObject = new (window as any).Razorpay(options);
+      paymentObject.open();
+      toast.dismiss('payment');
+      
+    } catch(err: any) {
+      toast.error(err.response?.data?.message || 'Failed to initialize payment', { id: 'payment' });
     }
-
-    // Open User's requested Razorpay link
-    window.open('https://razorpay.me/@chetandevidasshimpi', '_blank');
-
-    setTimeout(() => {
-        toast.success(`Verification pending (Simulated). Your balance will update shortly.`);
-        setShowAddMoney(false);
-        setAmountToAdd('');
-        fetchWalletData();
-    }, 2000);
   };
 
   if (loading) {
@@ -248,8 +317,8 @@ const Wallet: React.FC = () => {
       {showAddMoney && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowAddMoney(false)} />
-           <div className="relative bg-white w-full max-w-md rounded-[32px] overflow-hidden shadow-2xl p-10 animate-modalCenter">
-              <div className="flex items-center space-x-4 mb-8">
+           <div className="relative bg-white w-full max-w-md rounded-[32px] overflow-hidden shadow-2xl p-6 md:p-10 animate-modalCenter">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-8">
                  <div className="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
                     <HiCurrencyRupee className="w-8 h-8" />
                  </div>

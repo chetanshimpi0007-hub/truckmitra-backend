@@ -63,6 +63,7 @@ public class AuthServiceImpl implements AuthService {
     private final GoogleTokenValidator googleTokenValidator;
     private final FacebookTokenValidator facebookTokenValidator;
     private final com.truckmitra.service.security.RefreshTokenService refreshTokenService;
+    private final com.truckmitra.repository.user.DeviceTokenRepository deviceTokenRepository;
 
     // ==================== OTP Methods ====================
 
@@ -356,6 +357,7 @@ public class AuthServiceImpl implements AuthService {
     public void logout(Long userId) {
         log.info("Logging out user: {}", userId);
         refreshTokenService.deleteByUserId(userId);
+        deviceTokenRepository.deactivateAllTokensForUser(userId);
     }
 
     @Override
@@ -419,34 +421,25 @@ public class AuthServiceImpl implements AuthService {
         
         switch (request.role()) {
             case DRIVER:
-                Driver driver = new Driver();
-                driver.setDrivingLicenseNumber(request.drivingLicenseNumber());
-                if (request.licenseExpiryDate() != null && !request.licenseExpiryDate().isBlank()) {
-                    driver.setLicenseExpiryDate(java.time.LocalDate.parse(request.licenseExpiryDate()));
-                }
-                // driver.setDrivingLicenseImageUrl(request.licenseImageUrl());
-                driver.setAadhaarNumber(request.aadhaarNumber());
-                driver.setAadhaarFrontImageUrl(request.aadhaarFrontImageUrl());
-                driver.setAadhaarBackImageUrl(request.aadhaarBackImageUrl());
-                driver.setPanNumber(request.panNumber());
-                driver.setPanCardImageUrl(request.panCardImageUrl());
-                driver.setVehicleNumber(request.vehicleNumber());
-                driver.setVehicleCapacity(request.vehicleCapacity());
-                driver.setVehiclePucImageUrl(request.vehiclePucImageUrl());
-                driver.setVehicleFrontImageUrl(request.vehicleFrontImageUrl());
-                driver.setVehicleBackImageUrl(request.vehicleBackImageUrl());
-                driver.setVehicleInsuranceImageUrl(request.vehicleInsuranceImageUrl());
-                driver.setVehicleFuelType(request.vehicleFuelType());
-                driver.setEmergencyContactName(request.emergencyContactName());
-                driver.setEmergencyContactNumber(request.emergencyContactNumber());
-                if (request.preferredVehicleType() != null) {
-                    driver.setPreferredVehicleType(parseVehicleType(request.preferredVehicleType()));
-                }
-                driver.setIsAvailable(true);
-                driver.setIsOnTrip(false);
-                driver.setTotalTripsCompleted(0);
-                driver.setTotalEarnings(0.0);
-                driver.setRating(0.0);
+                Driver driver = Driver.builder()
+                    .drivingLicenseNumber(request.drivingLicenseNumber())
+                    .licenseExpiryDate(request.licenseExpiryDate() != null && !request.licenseExpiryDate().isBlank() ? java.time.LocalDate.parse(request.licenseExpiryDate()) : null)
+                    .aadhaarNumber(request.aadhaarNumber())
+                    .aadhaarFrontImageUrl(request.aadhaarFrontImageUrl())
+                    .aadhaarBackImageUrl(request.aadhaarBackImageUrl())
+                    .panNumber(request.panNumber())
+                    .panCardImageUrl(request.panCardImageUrl())
+                    .vehicleNumber(request.vehicleNumber())
+                    .vehicleCapacity(request.vehicleCapacity())
+                    .vehiclePucImageUrl(request.vehiclePucImageUrl())
+                    .vehicleFrontImageUrl(request.vehicleFrontImageUrl())
+                    .vehicleBackImageUrl(request.vehicleBackImageUrl())
+                    .vehicleInsuranceImageUrl(request.vehicleInsuranceImageUrl())
+                    .vehicleFuelType(request.vehicleFuelType())
+                    .emergencyContactName(request.emergencyContactName())
+                    .emergencyContactNumber(request.emergencyContactNumber())
+                    .preferredVehicleType(request.preferredVehicleType() != null ? parseVehicleType(request.preferredVehicleType()) : null)
+                    .build();
                 
                 // Set common fields
                 setCommonUserFields(driver, request);
@@ -458,21 +451,17 @@ public class AuthServiceImpl implements AuthService {
                 break;
                 
             case SHIPPER:
-                Shipper shipper = new Shipper();
-                shipper.setCompanyName(request.companyName());
-                shipper.setGstNumber(request.gstNumber());
-                shipper.setAadhaarNumber(request.aadhaarNumber());
-                shipper.setAadhaarFrontImageUrl(request.aadhaarFrontImageUrl());
-                shipper.setAadhaarBackImageUrl(request.aadhaarBackImageUrl());
-                shipper.setPanNumber(request.panNumber());
-                shipper.setPanCardImageUrl(request.panCardImageUrl());
-                shipper.setBusinessType(request.businessType());
-                shipper.setIndustryType(request.industryType());
-                shipper.setFreeLoadsRemaining(2);
-                shipper.setTotalLoadsPosted(0);
-                shipper.setActiveLoads(0);
-                shipper.setTotalSpent(0.0);
-                shipper.setAverageRating(0.0);
+                Shipper shipper = Shipper.builder()
+                    .companyName(request.companyName())
+                    .gstNumber(request.gstNumber())
+                    .aadhaarNumber(request.aadhaarNumber())
+                    .aadhaarFrontImageUrl(request.aadhaarFrontImageUrl())
+                    .aadhaarBackImageUrl(request.aadhaarBackImageUrl())
+                    .panNumber(request.panNumber())
+                    .panCardImageUrl(request.panCardImageUrl())
+                    .businessType(request.businessType())
+                    .industryType(request.industryType())
+                    .build();
                 
                 // Set common fields
                 setCommonUserFields(shipper, request);
@@ -484,23 +473,18 @@ public class AuthServiceImpl implements AuthService {
                 break;
                 
             case TRANSPORTER:
-                Transporter transporter = new Transporter();
-                transporter.setAgencyName(request.agencyName());
-                transporter.setGstNumber(request.gstNumber());
-                transporter.setAadhaarNumber(request.aadhaarNumber());
-                transporter.setAadhaarFrontImageUrl(request.aadhaarFrontImageUrl());
-                transporter.setAadhaarBackImageUrl(request.aadhaarBackImageUrl());
-                transporter.setPanNumber(request.panNumber());
-                transporter.setPanCardImageUrl(request.panCardImageUrl());
-                transporter.setFleetSize(request.fleetSize());
-                transporter.setServiceAreas(request.serviceAreas());
-                transporter.setExperienceInYears(request.experienceInYears());
-                transporter.setFreeBidsRemaining(2);
-                transporter.setTotalDrivers(0);
-                transporter.setTotalVehicles(0);
-                transporter.setBidsWon(0);
-                transporter.setAverageRating(0.0);
-                transporter.setTotalEarnings(0.0);
+                Transporter transporter = Transporter.builder()
+                    .agencyName(request.agencyName())
+                    .gstNumber(request.gstNumber())
+                    .aadhaarNumber(request.aadhaarNumber())
+                    .aadhaarFrontImageUrl(request.aadhaarFrontImageUrl())
+                    .aadhaarBackImageUrl(request.aadhaarBackImageUrl())
+                    .panNumber(request.panNumber())
+                    .panCardImageUrl(request.panCardImageUrl())
+                    .fleetSize(request.fleetSize())
+                    .serviceAreas(request.serviceAreas())
+                    .experienceInYears(request.experienceInYears())
+                    .build();
                 
                 // Set common fields
                 setCommonUserFields(transporter, request);
@@ -546,33 +530,20 @@ private void setCommonUserFields(User user, RegisterRequest request) {
 
 // ==================== Google Login ====================
 private User createAndSaveGoogleUser(GoogleIdToken.Payload payload) {
-    Shipper shipper = new Shipper();
-    
-    shipper.setFullName((String) payload.get("name"));
-    shipper.setEmail(payload.getEmail());
-    shipper.setGoogleId(payload.getSubject());
-    shipper.setIsGoogleLogin(true);
-    shipper.setIsMobileVerified(false);
-    shipper.setIsEmailVerified(Boolean.TRUE.equals(payload.getEmailVerified()));
-    shipper.setRole(Role.SHIPPER);
-    
-    // FIX: Make same as regular registration
-    // OPTION 1: Auto-approve for testing
-    shipper.setAccountStatus(AccountStatus.REGISTERED);
-    
-    // OPTION 2: Pending for production (uncomment below and comment above)
-    // shipper.setAccountStatus(AccountStatus.PENDING);
-    
-    shipper.setPreferredLoginType("GOOGLE");
-    shipper.setProfileImageUrl((String) payload.get("picture"));
-    shipper.setRegisteredIp(httpServletRequest.getRemoteAddr());
-    shipper.setRegisteredAt(LocalDateTime.now());
-    
-    shipper.setFreeLoadsRemaining(2);
-    shipper.setTotalLoadsPosted(0);
-    shipper.setActiveLoads(0);
-    shipper.setTotalSpent(0.0);
-    shipper.setAverageRating(0.0);
+    Shipper shipper = Shipper.builder()
+        .fullName((String) payload.get("name"))
+        .email(payload.getEmail())
+        .googleId(payload.getSubject())
+        .isGoogleLogin(true)
+        .isMobileVerified(false)
+        .isEmailVerified(Boolean.TRUE.equals(payload.getEmailVerified()))
+        .role(Role.SHIPPER)
+        .accountStatus(AccountStatus.REGISTERED)
+        .preferredLoginType("GOOGLE")
+        .profileImageUrl((String) payload.get("picture"))
+        .registeredIp(httpServletRequest.getRemoteAddr())
+        .registeredAt(LocalDateTime.now())
+        .build();
 
     shipper = shipperRepository.save(shipper);
     log.info("Google user created as Shipper with ID: {}", shipper.getId());
@@ -583,41 +554,29 @@ private User createAndSaveGoogleUser(GoogleIdToken.Payload payload) {
 
 // ==================== Facebook Login ====================
 private User createAndSaveFacebookUser(Map<String, Object> userInfo) {
-    Shipper shipper = new Shipper();
-    
-    shipper.setFullName((String) userInfo.get("name"));
-    shipper.setEmail((String) userInfo.get("email"));
-    shipper.setFacebookId((String) userInfo.get("id"));
-    shipper.setIsFacebookLogin(true);
-    shipper.setIsMobileVerified(false);
-    shipper.setIsEmailVerified(true);
-    shipper.setRole(Role.SHIPPER);
-    
-    // FIX: Make same as regular registration
-    // OPTION 1: Auto-approve for testing
-    shipper.setAccountStatus(AccountStatus.REGISTERED);
-    
-    // OPTION 2: Pending for production (uncomment below and comment above)
-    // shipper.setAccountStatus(AccountStatus.PENDING);
-    
-    shipper.setPreferredLoginType("FACEBOOK");
-    
+    String profileImageUrl = null;
     Map<String, Object> picture = (Map<String, Object>) userInfo.get("picture");
     if (picture != null) {
         Map<String, Object> data = (Map<String, Object>) picture.get("data");
         if (data != null) {
-            shipper.setProfileImageUrl((String) data.get("url"));
+            profileImageUrl = (String) data.get("url");
         }
     }
 
-    shipper.setRegisteredIp(httpServletRequest.getRemoteAddr());
-    shipper.setRegisteredAt(LocalDateTime.now());
-    
-    shipper.setFreeLoadsRemaining(2);
-    shipper.setTotalLoadsPosted(0);
-    shipper.setActiveLoads(0);
-    shipper.setTotalSpent(0.0);
-    shipper.setAverageRating(0.0);
+    Shipper shipper = Shipper.builder()
+        .fullName((String) userInfo.get("name"))
+        .email((String) userInfo.get("email"))
+        .facebookId((String) userInfo.get("id"))
+        .isFacebookLogin(true)
+        .isMobileVerified(false)
+        .isEmailVerified(true)
+        .role(Role.SHIPPER)
+        .accountStatus(AccountStatus.REGISTERED)
+        .preferredLoginType("FACEBOOK")
+        .profileImageUrl(profileImageUrl)
+        .registeredIp(httpServletRequest.getRemoteAddr())
+        .registeredAt(LocalDateTime.now())
+        .build();
 
     shipper = shipperRepository.save(shipper);
     log.info("Facebook user created as Shipper with ID: {}", shipper.getId());
@@ -626,30 +585,17 @@ private User createAndSaveFacebookUser(Map<String, Object> userInfo) {
 
 // ==================== OTP Login ====================
 private User createAndSaveOtpUser(String mobile) {
-    Driver driver = new Driver();
-    
-    driver.setMobile(mobile);
-    driver.setFullName("User-" + mobile.substring(mobile.length() - 4));
-    driver.setIsMobileVerified(true);
-    driver.setIsEmailVerified(false);
-    driver.setRole(Role.DRIVER);
-    
-    // FIX: Make same as regular registration
-    // OPTION 1: Auto-approve for testing
-    driver.setAccountStatus(AccountStatus.REGISTERED);
-    
-    // OPTION 2: Pending for production (uncomment below and comment above)
-    // driver.setAccountStatus(AccountStatus.PENDING);
-    
-    driver.setPreferredLoginType("PHONE_OTP");
-    driver.setRegisteredIp(httpServletRequest.getRemoteAddr());
-    driver.setRegisteredAt(LocalDateTime.now());
-    
-    driver.setIsAvailable(true);
-    driver.setIsOnTrip(false);
-    driver.setTotalTripsCompleted(0);
-    driver.setTotalEarnings(0.0);
-    driver.setRating(0.0);
+    Driver driver = Driver.builder()
+        .mobile(mobile)
+        .fullName("User-" + mobile.substring(mobile.length() - 4))
+        .isMobileVerified(true)
+        .isEmailVerified(false)
+        .role(Role.DRIVER)
+        .accountStatus(AccountStatus.REGISTERED)
+        .preferredLoginType("PHONE_OTP")
+        .registeredIp(httpServletRequest.getRemoteAddr())
+        .registeredAt(LocalDateTime.now())
+        .build();
 
     driver = driverRepository.save(driver);
     log.info("OTP user created as Driver with ID: {}", driver.getId());

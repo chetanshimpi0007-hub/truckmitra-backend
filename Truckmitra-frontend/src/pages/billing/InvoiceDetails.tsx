@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { TripInvoice, PaymentRecord } from '../../services/billing.service';
 import billingService from '../../services/billing.service';
 import { format } from 'date-fns';
-import { HiArrowLeft, HiDownload, HiCreditCard, HiCheckCircle } from 'react-icons/hi';
+import { HiArrowLeft, HiDownload, HiCreditCard} from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
 const InvoiceDetails: React.FC = () => {

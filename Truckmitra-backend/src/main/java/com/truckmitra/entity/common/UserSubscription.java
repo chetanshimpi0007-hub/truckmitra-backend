@@ -38,4 +38,10 @@ public class UserSubscription {
 
     @Builder.Default
     private String status = "ACTIVE"; // ACTIVE, EXPIRED, CANCELLED
+
+    private String razorpaySubscriptionId;
+
+    private String razorpayCustomerId;
+
+    private LocalDateTime nextBillingDate;
 }

@@ -8,10 +8,7 @@ import {
   HiMail, 
   HiLockClosed, 
   HiLocationMarker, 
-  HiOfficeBuilding,
-  HiTruck,
   HiIdentification,
-  HiCamera,
   HiCloudUpload,
   HiArrowRight,
   HiArrowLeft,
@@ -63,8 +60,7 @@ const DriverRegisterForm: React.FC = () => {
     vehicleFrontImageUrl: '',
     vehicleBackImageUrl: '',
     vehicleInsuranceImageUrl: '',
-    vehicleFuelType: 'DIESEL',
-  });
+    vehicleFuelType: 'DIESEL'});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -96,14 +92,13 @@ const DriverRegisterForm: React.FC = () => {
     const registrationData = {
       ...formData,
       role: Role.DRIVER,
-      preferredLoginType: 'EMAIL_PASSWORD',
-    };
+      preferredLoginType: 'EMAIL_PASSWORD'};
 
     // If a transporter is adding a driver, use the specialized endpoint
     if (user && user.role === 'TRANSPORTER') {
       try {
         setIsUploading(true); // Reuse uploading state for submit loading
-        const res = await protectedApi.post('/api/drivers/register-sub-driver', registrationData, {
+        await protectedApi.post('/api/drivers/register-sub-driver', registrationData, {
           params: { transporterId: user.id }
         });
         toast.success('Driver registered successfully under your agency!');

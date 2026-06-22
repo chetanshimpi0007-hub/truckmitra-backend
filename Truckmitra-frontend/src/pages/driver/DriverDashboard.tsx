@@ -1,19 +1,19 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/auth.hook';
 import { protectedApi } from '../../services/api/protectedAndPublicAPI';
 import { useGpsTracker } from '../../hooks/useGpsTracker';
+import DriverTrackingPanel from '../../Components/tracking/DriverTrackingPanel';
 import { tripService } from '../../services/api/trip.service';
 import { toast } from 'react-hot-toast';
 import {
   HiChartBar, HiTruck, HiCurrencyDollar, HiCog,
   HiLogout, HiDocumentText, HiLocationMarker,
   HiCheckCircle, HiXCircle, HiUpload,
-  HiChevronRight, HiDownload, HiRefresh, HiClock,
+  HiDownload, HiRefresh, HiClock,
   HiUser, HiExclamationCircle, HiClipboardList, HiSpeakerphone,
   HiPhotograph, HiX, HiPlay, HiPause, HiBadgeCheck,
-  HiShieldCheck, HiMap, HiLightningBolt, HiFire
-} from 'react-icons/hi';
+  HiMap} from 'react-icons/hi';
 import NotificationDropdown from '../../Components/common/NotificationDropdown';
 import LRPreview from '../../Components/common/LRPreview';
 import DriverOverview from '../../Components/dashboard/DriverOverview';
@@ -59,8 +59,7 @@ const STATUS_CFG: Record<string, string> = {
   COMPLETED:                     'bg-emerald-50 text-emerald-600 border-emerald-100',
   REJECTED:                      'bg-rose-50 text-rose-600 border-rose-100',
   REJECTED_BY_DRIVER:            'bg-rose-50 text-rose-600 border-rose-100',
-  CANCELLED:                     'bg-slate-100 text-slate-500 border-slate-200',
-};
+  CANCELLED:                     'bg-slate-100 text-slate-500 border-slate-200'};
 
 const StatusPill = ({ status, large }: { status: string; large?: boolean }) => (
   <span className={`px-3 ${large ? 'py-2 text-xs' : 'py-1 text-[10px]'} rounded-full font-black uppercase border tracking-tight ${STATUS_CFG[status] || 'bg-slate-50 text-slate-500 border-slate-100'}`}>
@@ -158,6 +157,19 @@ const DriverDashboard: React.FC = () => {
 
   type Menu = 'overview' | 'driver-management' | 'financial' | 'settings';
   const [activeMenu, setActiveMenu] = useState<Menu>('overview');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Stop background scrolling when sidebar is open
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isSidebarOpen]);
 
   const [trips, setTrips]               = useState<any[]>([]);
   const [activeTripId, setActiveTripId] = useState<number | null>(null);
@@ -182,7 +194,7 @@ const DriverDashboard: React.FC = () => {
   }, [user, navigate]);
 
   /* ── GPS TRACKING */
-  const { isTracking, startTracking, stopTracking } = useGpsTracker(activeTripId);
+  const { isTracking, gpsError, startTracking, stopTracking } = useGpsTracker(activeTripId);
 
   /* ── LOAD TRIPS */
   const fetchTrips = useCallback(async () => {
@@ -410,14 +422,7 @@ const DriverDashboard: React.FC = () => {
     } catch { toast.error('Final invoice not available'); }
   };
 
-  const downloadPdf = async (tripId: number) => {
-    try {
-      const res = await protectedApi.get(`/api/trips/${tripId}/pdf`, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
-      Object.assign(document.createElement('a'), { href: url, download: `invoice_trip_${tripId}.pdf` }).click();
-      window.URL.revokeObjectURL(url);
-    } catch { toast.error('Failed to download PDF'); }
-  };
+
 
   const triggerSOS = () => {
     if (!navigator.geolocation) return toast.error('Geolocation not supported');
@@ -427,8 +432,7 @@ const DriverDashboard: React.FC = () => {
         await protectedApi.post('/api/emergency/sos', {
           driverId: user?.id,
           latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-        });
+          longitude: pos.coords.longitude});
         toast.success('SOS Alert Sent!', { id: 'sos-toast' });
       } catch { toast.error('SOS failed', { id: 'sos-toast' }); }
     }, () => toast.error('Location error', { id: 'sos-toast' }));
@@ -441,16 +445,29 @@ const DriverDashboard: React.FC = () => {
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans">
 
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* ─── SIDEBAR */}
-      <aside className="w-64 bg-slate-50 min-h-screen text-slate-600 flex flex-col border-r border-slate-200 z-20">
-        <div className="p-8 border-b border-slate-200 bg-white">
+      <aside className={`fixed inset-y-0 left-0 z-50 w-[80vw] sm:w-80 lg:w-64 bg-slate-50 min-h-screen text-slate-600 flex flex-col border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+        isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+      }`}>
+        <div className="p-8 border-b border-slate-200 bg-white flex justify-between items-center">
           <div className="flex items-center justify-center">
             <img src="/logo-transparent.png" alt="TruckMitra" className="w-[180px] h-auto object-contain" />
           </div>
+          <button className="lg:hidden text-slate-400 hover:text-slate-600" onClick={() => setIsSidebarOpen(false)}>
+            <HiX className="w-6 h-6" />
+          </button>
         </div>
 
         {/* Driver Info */}
-        <div className="px-6 py-5 border-b border-slate-200 bg-white">
+        <div className="px-6 py-5 border-b border-slate-200 bg-white shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0">
               {user?.profileImageUrl
@@ -469,8 +486,8 @@ const DriverDashboard: React.FC = () => {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 mt-6 px-4 space-y-1">
-          <SLink icon={<HiChartBar />}      label="Overview"         active={activeMenu === 'overview'}          onClick={() => setActiveMenu('overview')} />
+        <nav className="flex-1 mt-6 px-4 space-y-1 overflow-y-auto">
+          <SLink icon={<HiChartBar />}      label="Overview"         active={activeMenu === 'overview'}          onClick={() => { setActiveMenu('overview'); setIsSidebarOpen(false); }} />
           <SLink
             icon={<HiClipboardList />}
             label={
@@ -482,10 +499,10 @@ const DriverDashboard: React.FC = () => {
               </span>
             }
             active={activeMenu === 'driver-management'}
-            onClick={() => setActiveMenu('driver-management')}
+            onClick={() => { setActiveMenu('driver-management'); setIsSidebarOpen(false); }}
           />
-          <SLink icon={<HiCurrencyDollar />} label="Financial"        active={activeMenu === 'financial'}         onClick={() => setActiveMenu('financial')} />
-          <SLink icon={<HiCog />}            label="Settings"         active={activeMenu === 'settings'}          onClick={() => setActiveMenu('settings')} />
+          <SLink icon={<HiCurrencyDollar />} label="Financial"        active={activeMenu === 'financial'}         onClick={() => { setActiveMenu('financial'); setIsSidebarOpen(false); }} />
+          <SLink icon={<HiCog />}            label="Settings"         active={activeMenu === 'settings'}          onClick={() => { setActiveMenu('settings'); setIsSidebarOpen(false); }} />
         </nav>
 
         {/* GPS Tracking Status */}
@@ -506,7 +523,7 @@ const DriverDashboard: React.FC = () => {
         </div>
 
         {/* Sign Out */}
-        <div className="p-4 border-t border-slate-200 bg-white">
+        <div className="p-4 border-t border-slate-200 bg-white shrink-0">
           <button onClick={() => { logout(); navigate('/login'); }}
             className="flex items-center w-full px-4 py-3 text-sm font-bold text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
             <HiLogout className="w-5 h-5 mr-3" /> Sign Out
@@ -515,12 +532,13 @@ const DriverDashboard: React.FC = () => {
       </aside>
 
       {/* ─── MAIN */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto w-full">
         <ProfileHeader
           user={user}
           roleBadgeText="Verified Driver"
           roleBadgeClasses="bg-emerald-50 text-emerald-600 border-emerald-100"
           welcomeMessage={`Welcome back, ${user?.fullName?.split(' ')[0] || 'Driver'}`}
+          onMenuToggle={() => setIsSidebarOpen(true)}
           stats={[
             { label: 'Assigned', value: trips.filter(t => t.status === 'ASSIGNED').length, icon: <HiTruck /> },
             { label: 'Completed', value: completedTrips.length, icon: <HiCheckCircle /> },
@@ -760,6 +778,11 @@ const DriverDashboard: React.FC = () => {
                   {activeTrip.status === 'IN_TRANSIT' && (
                     <StepCard step={6} title="On Trip — Active Tracking" color="emerald">
                       <div className="flex flex-col gap-4 mt-6">
+                        {/* Live GPS Panel */}
+                        <DriverTrackingPanel
+                          tripId={activeTrip.id}
+                          tripNumber={activeTrip.tripNumber}
+                        />
                         <button onClick={() => handlePause(activeTrip.id)}
                           className="w-full py-5 bg-slate-100 text-slate-700 rounded-2xl font-black text-lg hover:bg-slate-200 transition-all flex items-center justify-center space-x-2">
                           <HiPause className="w-5 h-5" /> <span>PAUSE TRIP</span>
@@ -1215,13 +1238,6 @@ const SLink = ({ icon, label, active, onClick }: any) => (
   </button>
 );
 
-const StatCard = ({ label, value, icon, color }: any) => (
-  <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 border-b-4 hover:border-emerald-500 transition-all group overflow-hidden relative">
-    <div className={`p-4 rounded-2xl ${color} text-white shadow-lg inline-flex mb-4`}>{icon}</div>
-    <div className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">{label}</div>
-    <div className="text-3xl font-black text-slate-900">{value}</div>
-  </div>
-);
 
 const StepCard = ({ step, title, color, children }: any) => {
   const borders: any = {
@@ -1232,8 +1248,7 @@ const StepCard = ({ step, title, color, children }: any) => {
     rose:   'border-b-rose-500',
     emerald:'border-b-emerald-500',
     pink:   'border-b-pink-500',
-    teal:   'border-b-teal-500',
-  };
+    teal:   'border-b-teal-500'};
   return (
     <div className={`bg-white rounded-3xl p-8 border border-slate-200 border-b-4 shadow-sm ${borders[color] || ''}`}>
       <div className="flex items-center space-x-3 mb-6">

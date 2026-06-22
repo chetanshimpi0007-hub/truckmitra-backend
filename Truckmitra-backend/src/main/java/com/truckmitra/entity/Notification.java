@@ -1,5 +1,7 @@
 package com.truckmitra.entity;
 
+import com.truckmitra.enums.NotificationType;
+
 import com.truckmitra.entity.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -30,16 +32,14 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     private NotificationType type;
 
-    private boolean readStatus = false;
+    private boolean isRead = false;
+
+    private Long relatedId; // e.g. loadId, tripId
 
     private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-    }
-
-    public enum NotificationType {
-        LOAD, BID, TRIP, WALLET, SYSTEM
     }
 }

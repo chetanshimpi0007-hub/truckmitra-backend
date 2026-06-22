@@ -13,6 +13,7 @@ import {
   HiUser
 } from 'react-icons/hi';
 import { LogisticsHero } from '../Components/illustrations/LogisticsHero';
+import { TestimonialWidget } from '../Components/common/TestimonialWidget';
 
 const fadeInUp: any = {
   initial: { opacity: 0, y: 40 },
@@ -206,7 +207,10 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. CTA SECTION */}
+      {/* 5. TESTIMONIALS SECTION */}
+      <TestimonialWidget />
+
+      {/* 6. CTA SECTION */}
       <section className="py-24 bg-gradient-to-t from-slate-900 to-slate-800 border-t border-slate-800">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}

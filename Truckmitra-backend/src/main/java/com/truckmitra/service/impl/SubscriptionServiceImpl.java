@@ -32,6 +32,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final com.truckmitra.service.common.BillingService billingService;
     private final com.truckmitra.service.common.AuditService auditService;
 
+    private final com.truckmitra.service.common.RazorpaySubscriptionService razorpaySubscriptionService;
+
     @Override
     public List<SubscriptionPlan> getAllPlans() {
         return planRepository.findAll();
@@ -43,21 +45,35 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         SubscriptionPlan plan = planRepository.findById(planId)
                 .orElseThrow(() -> new RuntimeException("Plan not found"));
 
+        if (plan.getPrice() == null || plan.getPrice() <= 0) {
+            // Free plan logic
+            UserSubscription sub = userSubscriptionRepository.findByUser(user)
+                    .orElse(UserSubscription.builder().user(user).build());
+            
+            sub.setPlan(plan);
+            sub.setStartDate(LocalDateTime.now());
+            sub.setEndDate(LocalDateTime.now().plusYears(100)); // Essentially lifetime
+            sub.setStatus("ACTIVE");
+            sub.setAutoRenew(false);
+            return userSubscriptionRepository.save(sub);
+        }
+
+        com.razorpay.Subscription razorpaySubscription = razorpaySubscriptionService.createSubscription(plan, user);
+
         UserSubscription sub = userSubscriptionRepository.findByUser(user)
                 .orElse(UserSubscription.builder().user(user).build());
 
         String action = sub.getPlan() == null ? "SUBSCRIPTION_START" : 
-                       (plan.getPrice() > sub.getPlan().getPrice() ? "SUBSCRIPTION_UPGRADE" : "SUBSCRIPTION_DOWNGRADE");
+                       (plan.getPrice() > (sub.getPlan().getPrice() != null ? sub.getPlan().getPrice() : 0) ? "SUBSCRIPTION_UPGRADE" : "SUBSCRIPTION_DOWNGRADE");
 
         sub.setPlan(plan);
-        sub.setStartDate(LocalDateTime.now());
-        sub.setEndDate(LocalDateTime.now().plusMonths(1));
-        sub.setStatus("ACTIVE");
+        sub.setRazorpaySubscriptionId(razorpaySubscription.get("id"));
+        sub.setStatus("PENDING"); // Will be ACTIVE when webhook fires
+        sub.setAutoRenew(true);
 
         UserSubscription savedSub = userSubscriptionRepository.save(sub);
-        billingService.generateInvoice(savedSub);
         
-        auditService.logAction(action, "User changed plan to " + plan.getName(), user);
+        auditService.logAction(action, "User initiated subscription to " + plan.getName(), user);
         
         return savedSub;
     }
@@ -90,36 +106,36 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         SubscriptionPlan plan = sub.getPlan();
         
         if ("LOAD_POST".equals(action)) {
-            if (plan.getLoadPostLimit() == -1) return true;
+            if (plan.getMaxLoads() == null || plan.getMaxLoads() == -1) return true;
             long count;
             if (user.getRole() == com.truckmitra.entity.common.enums.Role.SHIPPER) {
                 count = loadRepository.countByShipperId(user.getId());
             } else {
                 count = loadRepository.countByTransporterId(user.getId());
             }
-            return count < plan.getLoadPostLimit();
+            return count < plan.getMaxLoads();
         }
         
         if ("BID_LIMIT".equals(action)) {
-            if (plan.getBidLimit() == -1) return true;
+            if (plan.getMaxBids() == null || plan.getMaxBids() == -1) return true;
             long count = bidRepository.countByTransporterId(user.getId());
-            return count < plan.getBidLimit();
+            return count < plan.getMaxBids();
         }
 
         if ("VEHICLE_ADD".equals(action)) {
-            if (plan.getFleetLimit() == -1) return true;
+            if (plan.getMaxVehicles() == null || plan.getMaxVehicles() == -1) return true;
             long count = vehicleRepository.countByTransporterId(user.getId());
-            return count < plan.getFleetLimit();
+            return count < plan.getMaxVehicles();
         }
 
         if ("DRIVER_ADD".equals(action)) {
-            if (plan.getFleetLimit() == -1) return true;
+            if (plan.getMaxDrivers() == null || plan.getMaxDrivers() == -1) return true;
             long count = driverRepository.countByTransporterId(user.getId());
-            return count < plan.getFleetLimit();
+            return count < plan.getMaxDrivers();
         }
 
-        if ("ANALYTICS".equals(action)) return plan.getHasAnalytics();
-        if ("VOICE".equals(action)) return plan.getHasVoiceAssistant();
+        if ("ANALYTICS".equals(action)) return Boolean.TRUE.equals(plan.getHasAnalytics());
+        if ("VOICE".equals(action)) return Boolean.TRUE.equals(plan.getHasVoiceAssistant());
         
         return true;
     }

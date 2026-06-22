@@ -114,7 +114,7 @@ const ShipperProfileForm: React.FC<ShipperProfileFormProps> = ({ profile, onSave
       {/* Stats Display */}
       <div className="bg-gray-50 p-4 rounded-lg">
         <h4 className="text-sm font-medium text-gray-700 mb-2">Your Stats</h4>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <p className="text-xs text-gray-500">Total Spent</p>
             <p className="text-lg font-semibold text-gray-900">₹{profile.totalSpent}</p>

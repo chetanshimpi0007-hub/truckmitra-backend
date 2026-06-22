@@ -4,8 +4,8 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
-import ForgotPassword from '../pages/auth/ForgotPassword';
-import ResetPassword from '../pages/auth/ResetPassword';
+import ForgotPassword from '../pages/auth/ForgotPasswordPage';
+import ResetPassword from '../pages/auth/ResetPasswordPage';
 import PendingApproval from '../pages/auth/PendingApproval';
 import DriverLogin from '../pages/auth/DriverLogin';
 import DriverRegister from '../pages/auth/DriverRegister';
@@ -25,7 +25,7 @@ import SystemSettings from '../pages/admin/SystemSettings';
 import CreateLoad from '../pages/loads/CreateLoad';
 import Bids from '../pages/bids/Bids';
 import Trips from '../pages/trips/Trips';
-import Loads from '../pages/loads/Loads';
+
 
 import PublicRoute from './PublicRoute';
 import PrivateRoute from './PrivateRoute';
@@ -34,7 +34,7 @@ import StaticPage from '../pages/StaticPage';
 import ProfilePage from '../pages/profile/ProfilePage';
 import EditProfilePage from '../pages/profile/EditProfilePage';
 import DocumentsPage from '../pages/profile/DocumentsPage';
-import SubscriptionManagement from '../pages/profile/SubscriptionManagement';
+
 import MyRatingsPage from '../pages/rating/MyRatingsPage';
 import UserRatingsPage from '../pages/rating/UserRatingsPage';
 import CreateRatingPage from '../Components/rating/CreateRatingPage';

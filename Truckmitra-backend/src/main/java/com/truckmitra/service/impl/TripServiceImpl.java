@@ -45,6 +45,7 @@ public class TripServiceImpl implements TripService {
     private final com.truckmitra.repository.load.TripLocationRepository tripLocationRepository;
     private final com.truckmitra.service.notification.NotificationService notificationService;
     private final com.truckmitra.service.NotificationService emailNotificationService;
+    private final com.truckmitra.service.InAppNotificationService inAppNotificationService;
     private final com.truckmitra.service.LRService lrService;
     private final com.truckmitra.repository.load.DriverAssignmentRepository driverAssignmentRepository;
     private final com.truckmitra.repository.load.ReceiptVerificationRepository receiptVerificationRepository;
@@ -56,6 +57,7 @@ public class TripServiceImpl implements TripService {
     private final OsrmRouteProvider osrmRouteProvider;
     private final com.truckmitra.service.common.AuditService auditService;
     private final com.truckmitra.service.billing.BillingService billingService;
+    private final org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
 
     @Override
     @Transactional
@@ -213,11 +215,17 @@ public class TripServiceImpl implements TripService {
         loadRepository.save(load);
 
         // Notify driver
-        notificationService.sendNotification(
+        try {
+            inAppNotificationService.sendNotification(
                 driver.getId(),
-                "New Trip Assigned: #" + savedTrip.getTripNumber() + ". Please accept or reject.",
-                com.truckmitra.enums.ChannelType.PUSH
-        );
+                "New Trip Assigned",
+                "Trip #" + savedTrip.getTripNumber() + " assigned. From " + load.getSource() + " to " + load.getDestination() + ". Please accept or reject.",
+                com.truckmitra.enums.NotificationType.TRIP,
+                savedTrip.getId()
+            );
+        } catch (Exception e) {
+            log.error("Failed to notify driver of assignment: {}", e.getMessage());
+        }
 
         try {
             byte[] pdfBytes = pdfService.generateTripPdf(savedTrip);
@@ -309,11 +317,13 @@ public class TripServiceImpl implements TripService {
 
         // Notify driver of new assignment
         try {
-            notificationService.sendNotification(driver.getId(),
-                    com.truckmitra.enums.NotificationTemplate.NOTIFICATION,
-                    Map.of("tripId", tripId, "message",
-                            "New Trip Assigned: #" + trip.getTripNumber() + ". Please accept or reject."),
-                    "Trip Assigned");
+            inAppNotificationService.sendNotification(
+                driver.getId(),
+                "New Trip Assigned",
+                "Trip #" + trip.getTripNumber() + " assigned. Please accept or reject within 24 hours.",
+                com.truckmitra.enums.NotificationType.TRIP,
+                tripId
+            );
 
             // Email with PDF
             byte[] pdfBytes = pdfService.generateTripPdf(trip);
@@ -408,11 +418,13 @@ public class TripServiceImpl implements TripService {
 
         // Notify transporter
         try {
-            notificationService.sendNotification(trip.getTransporter().getId(),
-                    com.truckmitra.enums.NotificationTemplate.NOTIFICATION,
-                    Map.of("tripId", tripId, "message",
-                            "Driver " + trip.getDriver().getFullName() + " accepted trip #" + trip.getTripNumber()),
-                    "Trip Accepted");
+            inAppNotificationService.sendNotification(
+                trip.getTransporter().getId(),
+                "Driver Accepted Trip",
+                "Driver " + trip.getDriver().getFullName() + " accepted trip #" + trip.getTripNumber(),
+                com.truckmitra.enums.NotificationType.TRIP,
+                tripId
+            );
         } catch (Exception e) {
             log.error("Failed to notify transporter on accept: {}", e.getMessage());
         }
@@ -459,11 +471,13 @@ public class TripServiceImpl implements TripService {
         // Notify transporter
         try {
             String driverName = driver != null ? driver.getFullName() : "Driver";
-            notificationService.sendNotification(trip.getTransporter().getId(),
-                    com.truckmitra.enums.NotificationTemplate.NOTIFICATION,
-                    Map.of("tripId", tripId, "message",
-                            driverName + " rejected trip #" + trip.getTripNumber() + ". Please re-assign."),
-                    "Trip Rejected By Driver");
+            inAppNotificationService.sendNotification(
+                trip.getTransporter().getId(),
+                "Driver Rejected Trip",
+                driverName + " rejected trip #" + trip.getTripNumber() + ". Please re-assign.",
+                com.truckmitra.enums.NotificationType.TRIP,
+                tripId
+            );
         } catch (Exception e) {
             log.error("Failed to notify transporter on reject: {}", e.getMessage());
         }
@@ -514,14 +528,18 @@ public class TripServiceImpl implements TripService {
         Trip savedTrip = tripRepository.save(trip);
 
         try {
-            notificationService.sendNotification(trip.getShipper().getId(),
-                    com.truckmitra.enums.NotificationTemplate.NOTIFICATION,
-                    Map.of("tripId", tripId, "message", "Trip #" + trip.getTripNumber() + " has started!"),
-                    "Trip Started");
-            notificationService.sendNotification(trip.getTransporter().getId(),
-                    com.truckmitra.enums.NotificationTemplate.NOTIFICATION,
-                    Map.of("tripId", tripId, "message", "Trip #" + trip.getTripNumber() + " has started."),
-                    "Trip Started");
+            inAppNotificationService.sendNotification(
+                trip.getShipper().getId(),
+                "Trip Started",
+                "Trip #" + trip.getTripNumber() + " has started!",
+                com.truckmitra.enums.NotificationType.TRIP, tripId
+            );
+            inAppNotificationService.sendNotification(
+                trip.getTransporter().getId(),
+                "Trip Started",
+                "Trip #" + trip.getTripNumber() + " has started.",
+                com.truckmitra.enums.NotificationType.TRIP, tripId
+            );
         } catch (Exception e) {
             log.error("Failed to send start notifications for trip {}: {}", tripId, e.getMessage());
         }
@@ -631,11 +649,12 @@ public class TripServiceImpl implements TripService {
 
         // Notify transporter
         try {
-            notificationService.sendNotification(trip.getTransporter().getId(),
-                    com.truckmitra.enums.NotificationTemplate.NOTIFICATION,
-                    Map.of("tripId", tripId, "message",
-                            "Delivery submitted for trip #" + trip.getTripNumber() + ". Please review and approve."),
-                    "Delivery Submitted - Action Required");
+            inAppNotificationService.sendNotification(
+                trip.getTransporter().getId(),
+                "Delivery Submitted",
+                "Delivery submitted for trip #" + trip.getTripNumber() + ". Please review and approve.",
+                com.truckmitra.enums.NotificationType.TRIP, tripId
+            );
         } catch (Exception e) {
             log.error("Failed to notify transporter on delivery submission: {}", e.getMessage());
         }
@@ -722,16 +741,19 @@ public class TripServiceImpl implements TripService {
 
         // Notify all parties
         try {
-            notificationService.sendNotification(trip.getShipper().getId(),
-                    com.truckmitra.enums.NotificationTemplate.NOTIFICATION,
-                    Map.of("tripId", tripId, "message", "Trip #" + trip.getTripNumber() + " completed successfully!"),
-                    "Trip Completed");
+            inAppNotificationService.sendNotification(
+                trip.getShipper().getId(),
+                "Trip Completed",
+                "Trip #" + trip.getTripNumber() + " completed successfully!",
+                com.truckmitra.enums.NotificationType.TRIP, tripId
+            );
             if (trip.getDriver() != null) {
-                notificationService.sendNotification(trip.getDriver().getId(),
-                        com.truckmitra.enums.NotificationTemplate.NOTIFICATION,
-                        Map.of("tripId", tripId, "message",
-                                "Trip #" + trip.getTripNumber() + " has been accepted and marked as Completed!"),
-                        "Trip Completed");
+                inAppNotificationService.sendNotification(
+                    trip.getDriver().getId(),
+                    "Trip Completed",
+                    "Trip #" + trip.getTripNumber() + " has been marked as Completed!",
+                    com.truckmitra.enums.NotificationType.TRIP, tripId
+                );
             }
         } catch (Exception e) {
             log.error("Failed to send completion notifications: {}", e.getMessage());
@@ -786,12 +808,12 @@ public class TripServiceImpl implements TripService {
         // Notify driver of rejection with reason
         if (trip.getDriver() != null) {
             try {
-                notificationService.sendNotification(trip.getDriver().getId(),
-                        com.truckmitra.enums.NotificationTemplate.NOTIFICATION,
-                        Map.of("tripId", tripId,
-                                "message", "Trip Rejected By Transporter for trip #" + trip.getTripNumber()
-                                        + ". Reason: " + rejectionReason + ". Please upload corrected documents."),
-                        "Delivery Rejected - Action Required");
+                inAppNotificationService.sendNotification(
+                    trip.getDriver().getId(),
+                    "Delivery Rejected",
+                    "Trip #" + trip.getTripNumber() + " rejected. Reason: " + rejectionReason + ". Please upload corrected documents.",
+                    com.truckmitra.enums.NotificationType.TRIP, tripId
+                );
             } catch (Exception e) {
                 log.error("Failed to notify driver of rejection: {}", e.getMessage());
             }
@@ -1002,6 +1024,39 @@ public class TripServiceImpl implements TripService {
                     log.error("Failed to notify driver of rejection: {}", e.getMessage());
                 }
             }
+        } else if (newStatus == TripStatus.AT_PICKUP) {
+            try {
+                inAppNotificationService.sendNotification(
+                    trip.getShipper().getId(),
+                    "Reached Pickup",
+                    "Driver has reached pickup location for trip #" + trip.getTripNumber(),
+                    com.truckmitra.enums.NotificationType.TRIP, tripId
+                );
+            } catch (Exception e) {
+                log.error("Failed to notify shipper of AT_PICKUP: {}", e.getMessage());
+            }
+        } else if (newStatus == TripStatus.IN_TRANSIT) {
+            try {
+                inAppNotificationService.sendNotification(
+                    trip.getShipper().getId(),
+                    "In Transit",
+                    "Trip #" + trip.getTripNumber() + " is now in transit.",
+                    com.truckmitra.enums.NotificationType.TRIP, tripId
+                );
+            } catch (Exception e) {
+                log.error("Failed to notify shipper of IN_TRANSIT: {}", e.getMessage());
+            }
+        } else if (newStatus == TripStatus.AT_DESTINATION) {
+            try {
+                inAppNotificationService.sendNotification(
+                    trip.getShipper().getId(),
+                    "Reached Destination",
+                    "Driver has reached destination for trip #" + trip.getTripNumber(),
+                    com.truckmitra.enums.NotificationType.TRIP, tripId
+                );
+            } catch (Exception e) {
+                log.error("Failed to notify shipper of AT_DESTINATION: {}", e.getMessage());
+            }
         }
 
         return tripRepository.save(trip);
@@ -1012,21 +1067,48 @@ public class TripServiceImpl implements TripService {
     @Override
     @Transactional
     public void updateLocation(Long tripId, Double lat, Double lng, Double speed) {
+        updateLocationFull(tripId, lat, lng, speed, null, null);
+    }
+
+    @Override
+    @Transactional
+    public void updateLocationFull(Long tripId, Double lat, Double lng, Double speed, Double heading, Double accuracy) {
         Trip trip = getTripById(tripId);
         trip.setCurrentLat(lat);
         trip.setCurrentLng(lng);
-
         trip.setLastLocationUpdate(LocalDateTime.now());
         tripRepository.save(trip);
 
+        Long driverId = trip.getDriver() != null ? trip.getDriver().getId() : null;
+
         com.truckmitra.entity.load.TripLocation history = com.truckmitra.entity.load.TripLocation.builder()
                 .trip(trip)
+                .driverId(driverId)
                 .latitude(lat)
                 .longitude(lng)
                 .speed(speed)
+                .heading(heading)
+                .accuracy(accuracy)
                 .timestamp(LocalDateTime.now())
                 .build();
         tripLocationRepository.save(history);
+
+        // Broadcast live location via STOMP
+        com.truckmitra.dto.DriverLocationDTO dto = com.truckmitra.dto.DriverLocationDTO.builder()
+                .tripId(tripId)
+                .driverId(driverId)
+                .latitude(lat)
+                .longitude(lng)
+                .speed(speed)
+                .heading(heading)
+                .accuracy(accuracy)
+                .timestamp(LocalDateTime.now())
+                .build();
+        try {
+            messagingTemplate.convertAndSend("/topic/tracking/" + tripId, dto);
+        } catch (Exception e) {
+            log.warn("STOMP broadcast failed for trip {}: {}", tripId, e.getMessage());
+        }
     }
 
     @Override

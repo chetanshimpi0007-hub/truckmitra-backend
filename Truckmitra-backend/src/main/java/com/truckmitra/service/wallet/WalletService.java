@@ -57,4 +57,9 @@ public interface WalletService {
     void validateWalletPin(Long userId, String userRole, String pin);
 
     TransactionResponse creditWallet(Long userId, BigDecimal amount, String description);
+
+    // Razorpay Integration
+    Object createRazorpayOrder(Long userId, BigDecimal amount);
+    
+    TransactionResponse verifyRazorpayPayment(Long userId, String razorpayOrderId, String razorpayPaymentId, String razorpaySignature);
 }

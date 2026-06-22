@@ -33,4 +33,22 @@ public class AnalyticsController {
     public ResponseEntity<?> getTransporterStats(@RequestParam Long userId) {
         return ResponseEntity.ok(analyticsService.getTransporterAnalytics(userId));
     }
+
+    @PreAuthorize("hasRole('TRANSPORTER')")
+    @GetMapping("/transporter/monthly-loads")
+    public ResponseEntity<?> getTransporterMonthlyLoads(@RequestParam Long userId) {
+        return ResponseEntity.ok(analyticsService.getTransporterMonthlyLoads(userId));
+    }
+
+    @PreAuthorize("hasRole('TRANSPORTER')")
+    @GetMapping("/transporter/revenue")
+    public ResponseEntity<?> getTransporterRevenue(@RequestParam Long userId) {
+        return ResponseEntity.ok(analyticsService.getTransporterRevenue(userId));
+    }
+
+    @PreAuthorize("hasRole('TRANSPORTER')")
+    @GetMapping("/transporter/driver-performance")
+    public ResponseEntity<?> getTransporterDriverPerformance(@RequestParam Long userId) {
+        return ResponseEntity.ok(analyticsService.getTransporterDriverPerformance(userId));
+    }
 }

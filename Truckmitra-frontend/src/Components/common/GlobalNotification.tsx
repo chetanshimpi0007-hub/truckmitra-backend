@@ -1,6 +1,4 @@
 import React from 'react';
-import { useNotifications } from '../../hooks/useNotifications';
-export const GlobalNotification: React.FC = () => {
-  useNotifications();
-  return null;
-};
+// GlobalNotification is a no-op placeholder.
+// Real notifications are handled via NotificationBell in Navbar.
+export const GlobalNotification: React.FC = () => null;

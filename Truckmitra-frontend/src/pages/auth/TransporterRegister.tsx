@@ -8,7 +8,6 @@ import {
   HiMail, 
   HiLockClosed, 
   HiLocationMarker, 
-  HiOfficeBuilding,
   HiIdentification,
   HiCloudUpload,
   HiArrowRight,
@@ -54,8 +53,7 @@ const TransporterRegister: React.FC = () => {
     panCardImageUrl: '',
     fleetSize: '',
     experienceInYears: '',
-    serviceAreas: '',
-  });
+    serviceAreas: ''});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -90,8 +88,7 @@ const TransporterRegister: React.FC = () => {
       preferredLoginType: 'EMAIL_PASSWORD',
       fleetSize: parseInt(formData.fleetSize) || 0,
       experienceInYears: parseInt(formData.experienceInYears) || 0,
-      serviceAreas: formData.serviceAreas,
-    };
+      serviceAreas: formData.serviceAreas};
 
     const success = await registerUser(registrationData);
     if (success) {

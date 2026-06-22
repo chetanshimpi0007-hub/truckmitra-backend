@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { 
   HiOutlineCurrencyRupee, 
   HiOutlineDocumentText, 
-  HiOutlineExclamationCircle, 
   HiOutlineClock 
 } from 'react-icons/hi';
 import billingService, { BillingSummary } from '../../services/billing.service';

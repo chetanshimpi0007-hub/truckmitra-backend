@@ -17,6 +17,7 @@ export interface ProfileHeaderProps {
   welcomeMessage: string;
   stats: ProfileStat[];
   children?: React.ReactNode; // For notifications/refresh buttons
+  onMenuToggle?: () => void;
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -25,7 +26,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   roleBadgeClasses = 'bg-emerald-50 text-emerald-600 border-emerald-100',
   welcomeMessage,
   stats,
-  children
+  children,
+  onMenuToggle
 }) => {
   // Generate initials for avatar fallback
   const getInitials = (name?: string) => {
@@ -38,6 +40,18 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   return (
     <header className="bg-white px-6 md:px-10 py-6 border-b border-slate-200 sticky top-0 z-10 shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-6">
       <div className="flex items-center space-x-5">
+        {/* Mobile Hamburger Menu */}
+        {onMenuToggle && (
+          <button 
+            onClick={onMenuToggle}
+            className="md:hidden p-2 -ml-2 text-slate-500 hover:text-indigo-600 transition"
+          >
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        )}
+        
         {/* Profile Photo / Dynamic Avatar */}
         <div className="relative group w-16 h-16 md:w-20 md:h-20 bg-slate-100 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner border-2 border-white ring-2 ring-slate-100">
           {user?.profileImageUrl ? (

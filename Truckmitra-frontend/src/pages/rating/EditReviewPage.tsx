@@ -1,10 +1,11 @@
-// src/pages/rating/EditReviewPage.tsx
+// src/pages//EditReviewPage.tsx
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/auth.hook';
 import { HiArrowLeft, HiSave } from 'react-icons/hi';
 import toast from 'react-hot-toast';
+import { protectedApi } from '../../services/api/protectedAndPublicAPI';
 
 interface Review {
   id: number;
@@ -23,11 +24,11 @@ const EditReviewPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  const [review, setReview] = useState<Review | null>(null);
+  const [review, ] = useState<Review | null>(null);
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [rating, setRating] = useState<any>(null);
+  const [] = useState<any>(null);
 
   useEffect(() => {
     if (reviewId) {
@@ -37,9 +38,9 @@ const EditReviewPage: React.FC = () => {
 
   const loadReview = async () => {
     try {
-      // First, get the rating that contains this review
+      // First, get the that contains this review
       // Note: There's no direct endpoint to get a single review
-      // So we need to get the rating first
+      // So we need to get the first
       
       // Since we don't have reviewId endpoint, we'll simulate for demo
       // In real app, you'd need a backend endpoint like GET /api/ratings/reviews/{reviewId}
@@ -50,9 +51,9 @@ const EditReviewPage: React.FC = () => {
       
       // Mock implementation (replace with actual API call)
       // const response = await ratingService.getReviewById(parseInt(reviewId!));
-      // setReview(response);
+      // (response);
       // setContent(response.content);
-      // setRating(response.rating);
+      // (response.);
       
     } catch (error) {
       console.error('Failed to load review:', error);
@@ -78,14 +79,10 @@ const EditReviewPage: React.FC = () => {
 
     setSubmitting(true);
     try {
-      // In real app, you'd have a PUT endpoint like /api/ratings/reviews/{reviewId}
-      // await ratingService.updateReview(parseInt(reviewId!), { content });
-      
-      // For demo, we'll simulate success
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await protectedApi.put(`/api/reviews/${reviewId}`, { content });
       
       toast.success('Review updated successfully');
-      navigate(`/ratings/${review?.ratingId}`);
+      navigate(`/ratings/${review?.ratingId || ''}`);
       
     } catch (error) {
       console.error('Failed to update review:', error);
@@ -101,11 +98,10 @@ const EditReviewPage: React.FC = () => {
     }
 
     try {
-      // Admin can delete reviews
-      // await ratingService.deleteReview(parseInt(reviewId!));
+      await protectedApi.delete(`/api/reviews/${reviewId}`);
       
       toast.success('Review deleted successfully');
-      navigate(`/ratings/${review?.ratingId}`);
+      navigate(`/ratings/${review?.ratingId || ''}`);
       
     } catch (error) {
       console.error('Failed to delete review:', error);

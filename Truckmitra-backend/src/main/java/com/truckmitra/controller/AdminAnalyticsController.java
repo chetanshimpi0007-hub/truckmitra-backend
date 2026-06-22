@@ -1,5 +1,6 @@
 package com.truckmitra.controller;
 
+import com.truckmitra.dto.admin.AdminAnalyticsDTOs.*;
 import com.truckmitra.service.admin.AdminAnalyticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +17,48 @@ public class AdminAnalyticsController {
 
     private final AdminAnalyticsService analyticsService;
 
-    @GetMapping("/summary")
-    public ResponseEntity<AdminAnalyticsService.AnalyticsSummary> getSummary() {
-        return ResponseEntity.ok(analyticsService.getSummary());
+    @GetMapping("/overview")
+    public ResponseEntity<OverviewDTO> getOverview() {
+        return ResponseEntity.ok(analyticsService.getOverview());
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<UsersAnalyticsDTO> getUsers() {
+        return ResponseEntity.ok(analyticsService.getUsersAnalytics());
+    }
+
+    @GetMapping("/revenue")
+    public ResponseEntity<RevenueAnalyticsDTO> getRevenue() {
+        return ResponseEntity.ok(analyticsService.getRevenueAnalytics());
+    }
+
+    @GetMapping("/loads")
+    public ResponseEntity<LoadsAnalyticsDTO> getLoads() {
+        return ResponseEntity.ok(analyticsService.getLoadsAnalytics());
+    }
+
+    @GetMapping("/trips")
+    public ResponseEntity<TripsAnalyticsDTO> getTrips() {
+        return ResponseEntity.ok(analyticsService.getTripsAnalytics());
+    }
+
+    @GetMapping("/wallet")
+    public ResponseEntity<WalletAnalyticsDTO> getWallet() {
+        return ResponseEntity.ok(analyticsService.getWalletAnalytics());
+    }
+
+    @GetMapping("/subscriptions")
+    public ResponseEntity<SubscriptionAnalyticsDTO> getSubscriptions() {
+        return ResponseEntity.ok(analyticsService.getSubscriptionAnalytics());
+    }
+
+    @GetMapping("/push-notifications")
+    public ResponseEntity<PushNotificationAnalyticsDTO> getPushNotifications() {
+        return ResponseEntity.ok(analyticsService.getPushNotificationAnalytics());
+    }
+
+    @GetMapping("/ai")
+    public ResponseEntity<AIMatchingAnalyticsDTO> getAIMatching() {
+        return ResponseEntity.ok(analyticsService.getAIMatchingAnalytics());
     }
 }

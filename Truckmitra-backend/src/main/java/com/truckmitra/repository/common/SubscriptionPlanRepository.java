@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPlan, Long> {
     Optional<SubscriptionPlan> findByName(String name);
+    Optional<SubscriptionPlan> findByRazorpayPlanId(String razorpayPlanId);
 }

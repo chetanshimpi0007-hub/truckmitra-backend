@@ -19,27 +19,26 @@ import { publicApi } from '../../services/api/protectedAndPublicAPI';
 
 const AboutUs: React.FC = () => {
   const [stats, setStats] = useState({
-    users: 8500,
-    loads: 15200,
-    transporters: 1250,
-    drivers: 4300
+    users: 0,
+    loads: 0,
+    transporters: 0,
+    drivers: 0
   });
 
   useEffect(() => {
-    // Attempt to fetch real stats, fallback to realistic dummy data if API fails or doesn't exist
     const fetchStats = async () => {
       try {
         const res = await publicApi.get('/api/analytics/public/stats');
-        if (res.data?.data) {
+        if (res.data) {
           setStats({
-            users: res.data.data.totalUsers || 8500,
-            loads: res.data.data.totalLoads || 15200,
-            transporters: res.data.data.totalTransporters || 1250,
-            drivers: res.data.data.totalDrivers || 4300
+            users: res.data.totalUsers || 0,
+            loads: res.data.totalLoads || 0,
+            transporters: res.data.totalTransporters || 0,
+            drivers: res.data.totalDrivers || 0
           });
         }
       } catch (err) {
-        // Fallback to static numbers on error
+        console.error('Failed to fetch public stats', err);
       }
     };
     fetchStats();

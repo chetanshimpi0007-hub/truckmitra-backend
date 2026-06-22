@@ -29,6 +29,7 @@ public interface TripService {
     List<Trip> getTransporterTrips(Long transporterId);
     List<Trip> getShipperTrips(Long shipperId);
     void updateLocation(Long tripId, Double lat, Double lng, Double speed);
+    void updateLocationFull(Long tripId, Double lat, Double lng, Double speed, Double heading, Double accuracy);
     List<com.truckmitra.entity.load.TripLocation> getTrackingHistory(Long tripId);
 
     List<Trip> getActiveTripsForAdmin();

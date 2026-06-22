@@ -25,11 +25,14 @@ public class TripInvoiceDto {
     private String source;
     private String destination;
     
+    private Double amount;
+    private Double gstAmount;
     private Double totalAmount;
     private Double paidAmount;
     private Double pendingAmount;
     
     private InvoicePaymentStatus status;
+    private com.truckmitra.entity.common.enums.InvoiceStatus invoiceStatus;
     private LocalDate invoiceDate;
     private LocalDate dueDate;
     private String pdfUrl;

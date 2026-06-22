@@ -22,17 +22,26 @@ public class SubscriptionPlan {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String name; // FREE, BASIC, PRO, ENTERPRISE
+    private String name; // FREE, STARTER_MONTHLY, STARTER_YEARLY, PREMIUM_MONTHLY, PREMIUM_YEARLY, ENTERPRISE_MONTHLY, ENTERPRISE_YEARLY
 
     private String description;
 
-    private Double price; // Monthly price
+    private Double price;
 
-    private Integer loadPostLimit; // for Shippers
+    private String billingCycle; // MONTHLY, YEARLY
+
+    private String razorpayPlanId;
+
+    private Integer maxLoads;
     
-    private Integer bidLimit; // for Transporters
+    private Integer maxBids;
 
-    private Integer fleetLimit; // Max vehicles/drivers
+    private Integer maxVehicles;
+
+    private Integer maxDrivers;
+
+    @Builder.Default
+    private Boolean active = true;
 
     private Boolean hasAnalytics;
 

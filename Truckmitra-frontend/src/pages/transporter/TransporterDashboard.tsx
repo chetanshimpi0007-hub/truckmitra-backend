@@ -7,14 +7,12 @@ import {
   HiChartBar, HiTruck, HiCurrencyDollar, HiCog,
   HiLogout, HiDocumentText, HiLocationMarker,
   HiCheckCircle, HiXCircle,
-  HiDownload, HiRefresh, HiClock,
-  HiUser, HiClipboardList, HiPlus, HiIdentification,
-  HiEye, HiPhotograph, HiExclamationCircle, HiX,
-  HiTag, HiBadgeCheck,
-} from 'react-icons/hi';
+  HiDownload, HiRefresh, HiUser, HiClipboardList, HiPlus, HiIdentification,
+  HiEye, HiExclamationCircle, HiX,
+  HiTag, HiSparkles, HiAdjustments} from 'react-icons/hi';
 import NotificationDropdown from '../../Components/common/NotificationDropdown';
 import VoiceAssistant from '../../Components/common/VoiceAssistant';
-import LiveMap from '../../Components/common/LiveMap';
+
 import DriverSelectionModal from '../../Components/loads/DriverSelectionModal';
 import TransporterOverview from '../../Components/dashboard/TransporterOverview';
 import ProfileHeader from '../../Components/dashboard/ProfileHeader';
@@ -25,6 +23,8 @@ import DeliveryVerificationCenter from '../../Components/loads/DeliveryVerificat
 import { ProfitEstimatorWidget } from '../../Components/dashboard/ProfitEstimatorWidget';
 import { BusinessHealthWidget } from '../../Components/dashboard/BusinessHealthWidget';
 import BillingDashboard from '../billing/BillingDashboard';
+import RecommendedLoads from '../../Components/dashboard/RecommendedLoads';
+import PreferenceSettings from '../../Components/dashboard/PreferenceSettings';
 
 /* ─── STATUS PILL ────────────────────────────────────────────── */
 const STATUS_CFG: Record<string, string> = {
@@ -46,8 +46,7 @@ const STATUS_CFG: Record<string, string> = {
   LOADED:                        'bg-orange-50 text-orange-600 border-orange-100',
   AT_DESTINATION:                'bg-teal-50 text-teal-600 border-teal-100',
   POD_UPLOADED:                  'bg-purple-50 text-purple-600 border-purple-100',
-  AWAITING_TRANSPORTER_APPROVAL: 'bg-orange-50 text-orange-600 border-orange-200',
-};
+  AWAITING_TRANSPORTER_APPROVAL: 'bg-orange-50 text-orange-600 border-orange-200'};
 
 const StatusPill = ({ status }: { status: string }) => (
   <span className={`px-3 py-1 text-[10px] rounded-full font-black uppercase border tracking-tight ${STATUS_CFG[status] || 'bg-slate-50 text-slate-500 border-slate-100'}`}>
@@ -111,8 +110,21 @@ const TransporterDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  type Menu = 'overview' | 'tenders' | 'my-bids' | 'trips' | 'fleet' | 'financial' | 'settings' | 'calculator' | 'analytics';
+  type Menu = 'overview' | 'tenders' | 'my-bids' | 'trips' | 'fleet' | 'financial' | 'settings' | 'calculator' | 'analytics' | 'recommended-loads' | 'preferences';
   const [activeMenu, setActiveMenu] = useState<Menu>('overview');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Stop background scrolling when sidebar is open
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isSidebarOpen]);
 
   // Data states
   const [transporterProfile, setTransporterProfile] = useState<any>(null);
@@ -251,15 +263,13 @@ const TransporterDashboard: React.FC = () => {
     pendingReceipts: trips.filter(t => ['DELIVERED', 'POD_UPLOADED', 'AWAITING_TRANSPORTER_APPROVAL'].includes(t.status)).length,
     totalDrivers:    drivers.length,
     totalVehicles:   vehicles.length,
-    walletBalance:   wallet?.currentBalance || 0,
-  };
+    walletBalance:   wallet?.currentBalance || 0};
 
   const completedTripsArr = trips.filter(t => t.status === 'COMPLETED' || t.status === 'DELIVERED');
   const totalRevenue = completedTripsArr.reduce((s, t) => s + (t.shipperAmount || t.freightAmount || 0), 0);
   const totalDriverPayment = completedTripsArr.reduce((s, t) => s + (t.driverAmount || 0), 0);
   const totalProfitMargin = totalRevenue - totalDriverPayment;
 
-  const totalEarnings = totalProfitMargin;
 
   const winRate = myBids.length > 0
     ? Math.round((stats.wonTenders / myBids.length) * 100)
@@ -276,15 +286,28 @@ const TransporterDashboard: React.FC = () => {
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans">
 
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* ─── SIDEBAR */}
-      <aside className="w-64 bg-white min-h-screen border-r border-slate-200 flex flex-col z-20 sticky top-0">
-        <div className="p-8 border-b border-slate-200">
+      <aside className={`fixed inset-y-0 left-0 z-50 w-[80vw] sm:w-80 lg:w-64 bg-white min-h-screen border-r border-slate-200 flex flex-col transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+        isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+      }`}>
+        <div className="p-8 border-b border-slate-200 flex justify-between items-center">
           <div className="flex items-center justify-center">
             <img src="/logo-transparent.png" alt="TruckMitra" className="w-[180px] h-auto object-contain" />
           </div>
+          <button className="lg:hidden text-slate-400 hover:text-slate-600" onClick={() => setIsSidebarOpen(false)}>
+            <HiX className="w-6 h-6" />
+          </button>
         </div>
 
-        <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/50">
+        <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/50 shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center flex-shrink-0">
               <HiUser className="w-7 h-7 text-emerald-600" />
@@ -301,22 +324,24 @@ const TransporterDashboard: React.FC = () => {
           </div>
         </div>
 
-        <nav className="flex-1 mt-6 px-4 space-y-1">
-          <SLink icon={<HiChartBar />}       label="Overview"      active={activeMenu === 'overview'}    onClick={() => setActiveMenu('overview')} />
-          <SLink icon={<HiDocumentText />}   label="Open Tenders"  active={activeMenu === 'tenders'}     onClick={() => setActiveMenu('tenders')}
+        <nav className="flex-1 mt-6 px-4 space-y-1 overflow-y-auto">
+          <SLink icon={<HiChartBar />}       label="Overview"      active={activeMenu === 'overview'}    onClick={() => { setActiveMenu('overview'); setIsSidebarOpen(false); }} />
+          <SLink icon={<HiDocumentText />}   label="Open Tenders"  active={activeMenu === 'tenders'}     onClick={() => { setActiveMenu('tenders'); setIsSidebarOpen(false); }}
             badge={stats.openTenders > 0 ? stats.openTenders : undefined} />
-          <SLink icon={<HiTag />}            label="My Bids"       active={activeMenu === 'my-bids'}     onClick={() => setActiveMenu('my-bids')}
+          <SLink icon={<HiSparkles />}       label="Recommended Loads" active={activeMenu === 'recommended-loads'} onClick={() => { setActiveMenu('recommended-loads'); setIsSidebarOpen(false); }} />
+          <SLink icon={<HiAdjustments />}    label="AI Settings"    active={activeMenu === 'preferences'} onClick={() => { setActiveMenu('preferences'); setIsSidebarOpen(false); }} />
+          <SLink icon={<HiTag />}            label="My Bids"       active={activeMenu === 'my-bids'}     onClick={() => { setActiveMenu('my-bids'); setIsSidebarOpen(false); }}
             badge={stats.submittedBids > 0 ? stats.submittedBids : undefined} />
-          <SLink icon={<HiLocationMarker />} label="Awarded & Active Trips"  active={activeMenu === 'trips'}       onClick={() => setActiveMenu('trips')}
+          <SLink icon={<HiLocationMarker />} label="Awarded & Active Trips"  active={activeMenu === 'trips'}       onClick={() => { setActiveMenu('trips'); setIsSidebarOpen(false); }}
             badge={stats.pendingReceipts > 0 ? stats.pendingReceipts : undefined} />
-          <SLink icon={<HiIdentification />} label="My Fleet"      active={activeMenu === 'fleet'}       onClick={() => setActiveMenu('fleet')} />
-          <SLink icon={<HiCurrencyDollar />} label="Earnings"      active={activeMenu === 'financial'}   onClick={() => setActiveMenu('financial')} />
-          <SLink icon={<HiClipboardList />}  label="Calculator"    active={activeMenu === 'calculator'}  onClick={() => setActiveMenu('calculator')} />
-          <SLink icon={<HiChartBar />}       label="Analytics"     active={activeMenu === 'analytics'}   onClick={() => setActiveMenu('analytics')} />
-          <SLink icon={<HiCog />}            label="Settings"      active={activeMenu === 'settings'}    onClick={() => setActiveMenu('settings')} />
+          <SLink icon={<HiIdentification />} label="My Fleet"      active={activeMenu === 'fleet'}       onClick={() => { setActiveMenu('fleet'); setIsSidebarOpen(false); }} />
+          <SLink icon={<HiCurrencyDollar />} label="Earnings"      active={activeMenu === 'financial'}   onClick={() => { setActiveMenu('financial'); setIsSidebarOpen(false); }} />
+          <SLink icon={<HiClipboardList />}  label="Calculator"    active={activeMenu === 'calculator'}  onClick={() => { setActiveMenu('calculator'); setIsSidebarOpen(false); }} />
+          <SLink icon={<HiChartBar />}       label="Analytics"     active={activeMenu === 'analytics'}   onClick={() => { setActiveMenu('analytics'); setIsSidebarOpen(false); }} />
+          <SLink icon={<HiCog />}            label="Settings"      active={activeMenu === 'settings'}    onClick={() => { setActiveMenu('settings'); setIsSidebarOpen(false); }} />
         </nav>
 
-        <div className="p-4 border-t border-slate-200">
+        <div className="p-4 border-t border-slate-200 shrink-0">
           <button onClick={() => { logout(); navigate('/login'); }}
             className="flex items-center w-full px-4 py-3 text-sm font-bold text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
             <HiLogout className="w-5 h-5 mr-3" /> Sign Out
@@ -325,12 +350,13 @@ const TransporterDashboard: React.FC = () => {
       </aside>
 
       {/* ─── MAIN */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto w-full">
         <ProfileHeader
           user={transporterProfile || user}
           roleBadgeText="Fleet Owner"
           roleBadgeClasses="bg-emerald-50 text-emerald-600 border-emerald-100"
           welcomeMessage={`Welcome back, ${user?.fullName?.split(' ')[0] || 'Transporter'}`}
+          onMenuToggle={() => setIsSidebarOpen(true)}
           stats={[
             { label: 'Fleet', value: stats.totalVehicles, icon: <HiTruck /> },
             { label: 'Drivers', value: stats.totalDrivers, icon: <HiUser /> },
@@ -841,6 +867,23 @@ const TransporterDashboard: React.FC = () => {
                   myBids={myBids} 
                 />
               )}
+
+              {/* ══ RECOMMENDED LOADS ═══════════════════════════ */}
+              {activeMenu === 'recommended-loads' && (
+                <div className="animate-fadeIn">
+                  <RecommendedLoads 
+                    onBid={handlePlaceBid} 
+                    alreadyBid={alreadyBid} 
+                  />
+                </div>
+              )}
+
+              {/* ══ AI PREFERENCES ═══════════════════════════════ */}
+              {activeMenu === 'preferences' && (
+                <div className="animate-fadeIn">
+                  <PreferenceSettings />
+                </div>
+              )}
             </>
           )}
         </div>
@@ -991,8 +1034,7 @@ const TenderBidModal = ({ load, onBid }: {
     amount: '',
     vehicleType: 'TRUCK',
     estimatedDeliveryDays: '',
-    remarks: '',
-  });
+    remarks: ''});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1140,14 +1182,6 @@ const SLink = ({ icon, label, active, onClick, badge }: any) => (
   </button>
 );
 
-const StatCard = ({ label, value, icon, color, pulse, onClick }: any) => (
-  <button onClick={onClick}
-    className={`bg-white p-6 rounded-3xl shadow-sm border border-slate-200 border-b-4 hover:border-emerald-500 transition-all text-left w-full ${pulse ? 'ring-2 ring-rose-200' : ''}`}>
-    <div className={`p-3 rounded-xl ${color} text-white shadow-lg inline-flex mb-3 ${pulse ? 'animate-pulse' : ''}`}>{icon}</div>
-    <div className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">{label}</div>
-    <div className="text-3xl font-black text-slate-900">{value}</div>
-  </button>
-);
 
 const EmptyState = ({ icon, message }: any) => (
   <div className="bg-slate-50 rounded-3xl p-16 flex flex-col items-center justify-center text-center border border-slate-100">
@@ -1268,59 +1302,6 @@ const AssignFleetModal: React.FC<{
   );
 };
 
-const AddVehicleModal: React.FC<{ onAdd: (data: any) => void }> = ({ onAdd }) => {
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ vehicleNumber: '', vehicleType: 'TRUCK', capacity: 10, model: '', manufacturer: '' });
-  return (
-    <>
-      <button onClick={() => setOpen(true)} className="px-5 py-2 bg-slate-900 text-white rounded-xl font-black text-xs hover:bg-emerald-600 transition-all shadow-md uppercase">
-        + Add Vehicle
-      </button>
-      {open && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-6">
-          <div className="bg-white rounded-[32px] p-10 max-w-md w-full shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button onClick={() => setOpen(false)} className="absolute top-6 right-6 text-slate-300 hover:text-slate-900">
-              <HiXCircle className="w-8 h-8" />
-            </button>
-            <h3 className="text-2xl font-black text-slate-900 mb-2">Register Vehicle</h3>
-            <p className="text-slate-500 text-sm font-medium mb-8">Add a new truck to your agency fleet.</p>
-            <form onSubmit={e => { e.preventDefault(); onAdd(form); setOpen(false); }} className="space-y-4">
-              {[
-                { label: 'Vehicle Number', key: 'vehicleNumber', placeholder: 'e.g. MH01 AB 1234' },
-                { label: 'Model', key: 'model', placeholder: 'e.g. Tata 3118' },
-                { label: 'Manufacturer', key: 'manufacturer', placeholder: 'e.g. Tata Motors' },
-              ].map(f => (
-                <div key={f.key}>
-                  <label className="text-[10px] font-black uppercase text-slate-400 mb-1 block">{f.label}</label>
-                  <input required placeholder={f.placeholder}
-                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-emerald-500 outline-none font-bold"
-                    onChange={e => setForm({ ...form, [f.key]: e.target.value })} />
-                </div>
-              ))}
-              <div>
-                <label className="text-[10px] font-black uppercase text-slate-400 mb-1 block">Vehicle Type</label>
-                <select value={form.vehicleType} onChange={e => setForm({ ...form, vehicleType: e.target.value })}
-                  className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-emerald-500 outline-none font-bold">
-                  {['TRUCK', 'TRAILER', 'CONTAINER', 'TANKER', 'TIPPER', 'PICKUP'].map(t => <option key={t}>{t}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-[10px] font-black uppercase text-slate-400 mb-1 block">Capacity (Tons)</label>
-                <input type="number" min={1} max={100} value={form.capacity}
-                  onChange={e => setForm({ ...form, capacity: Number(e.target.value) })}
-                  className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-emerald-500 outline-none font-bold" />
-              </div>
-              <button type="submit"
-                className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-emerald-200 hover:bg-slate-900 transition-all mt-4">
-                Add Vehicle
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
 
 const FreightCalculator = () => {
   const [form, setForm] = useState({ distance: '', weight: '', fuelRate: 8 });

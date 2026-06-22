@@ -65,7 +65,6 @@ protectedApi.interceptors.request.use(
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log(`🔐 API Request: ${config.method?.toUpperCase()} ${config.url}`);
     } else {
       console.warn('⚠️ No access token found for protected API request');
     }

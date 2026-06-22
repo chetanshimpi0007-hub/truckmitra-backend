@@ -1,36 +1,58 @@
 package com.truckmitra.controller;
 
-import com.truckmitra.entity.Notification;
-import com.truckmitra.repository.NotificationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.truckmitra.dto.NotificationDTO;
+import com.truckmitra.security.CustomUserDetails;
+import com.truckmitra.service.InAppNotificationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Map;
 
-@RestController("legacyNotificationController")
-@RequestMapping("/api/notifications/legacy")
+@RestController
+@RequestMapping("/api/notifications")
+@RequiredArgsConstructor
 public class NotificationController {
 
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private final InAppNotificationService notificationService;
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Notification>> getUserNotifications(@PathVariable Long userId) {
-        return ResponseEntity.ok(notificationRepository.findByUserIdOrderByCreatedAtDesc(userId));
+    @GetMapping
+    public ResponseEntity<Page<NotificationDTO>> getNotifications(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(notificationService.getUserNotifications(userDetails.getId(), pageable));
     }
 
-    @PatchMapping("/{id}/read")
-    public ResponseEntity<?> markAsRead(@PathVariable Long id) {
-        return notificationRepository.findById(id).map(n -> {
-            n.setReadStatus(true);
-            notificationRepository.save(n);
-            return ResponseEntity.ok().build();
-        }).orElse(ResponseEntity.notFound().build());
+    @GetMapping("/unread-count")
+    public ResponseEntity<Map<String, Long>> getUnreadCount(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(Map.of("count", notificationService.getUnreadCount(userDetails.getId())));
     }
 
-    @GetMapping("/user/{userId}/unread-count")
-    public ResponseEntity<Long> getUnreadCount(@PathVariable Long userId) {
-        return ResponseEntity.ok(notificationRepository.countByUserIdAndReadStatusFalse(userId));
+    @PutMapping("/read/{id}")
+    public ResponseEntity<Void> markAsRead(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        notificationService.markAsRead(id, userDetails.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/read-all")
+    public ResponseEntity<Void> markAllAsRead(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        notificationService.markAllAsRead(userDetails.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNotification(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        notificationService.deleteNotification(id, userDetails.getId());
+        return ResponseEntity.ok().build();
     }
 }

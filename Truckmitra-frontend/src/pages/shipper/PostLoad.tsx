@@ -14,9 +14,7 @@ const PostLoad = ({ refreshLoads }: any) => {
     if (!weight || Number(weight) <= 0) return toast.error('Weight must be > 0');
     if (!pickupDate) return toast.error('Pickup date is required');
 
-    const payload = { refNo: String(refNo).trim(), weight: Number(weight), pickupDate };
-    console.log('Posting shipper load payload:', payload);
-
+    const payload = { refNo: String(refNo).trim(), weight: Number(weight), pickupDate };
     setLoading(true);
     try {
       const res = await protectedApi.post('/api/loads', payload);

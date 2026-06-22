@@ -25,8 +25,7 @@ import {
   HiDocumentText,
   HiDownload,
   HiDocumentDownload,
-  HiCash,
-} from 'react-icons/hi';
+  HiCash} from 'react-icons/hi';
 import { toast } from 'react-hot-toast';
 import { protectedApi } from '../../services/api/protectedAndPublicAPI';
 import LiveMap from '../../Components/common/LiveMap';
@@ -74,6 +73,7 @@ const ShipperDashboard: React.FC = () => {
   const { shipperProfile } = useProfile();
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState<'overview' | 'add-transporter' | 'bids' | 'tracking' | 'billing'>('overview');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [transporterSearch, setTransporterSearch] = useState('');
   const [transporters, setTransporters] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -91,6 +91,17 @@ const ShipperDashboard: React.FC = () => {
   const [documentTrip, setDocumentTrip] = useState<any>(null);
   const [documentLoading, setDocumentLoading] = useState(false);
 
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isSidebarOpen]);
+
   const [bidForm, setBidForm] = useState({
     itemNames: '',
     source: '',
@@ -101,6 +112,8 @@ const ShipperDashboard: React.FC = () => {
     endTime: '',
     weight: '',
     budget: '',
+    notes: '',
+    truckTypes: [] as string[],
     isBiddingEnabled: true
   });
 
@@ -284,12 +297,11 @@ const ShipperDashboard: React.FC = () => {
         pickupDate,
         weight:           parseFloat(bidForm.weight)  || 0,
         budget:           parseFloat(bidForm.budget)  || 0,
-        isBiddingEnabled: bidForm.isBiddingEnabled,
-      };
+        isBiddingEnabled: bidForm.isBiddingEnabled};
       await protectedApi.post('/api/loads', loadData);
       toast.success('Load posted! Transporters are being notified.');
       setBidForm({ itemNames:'', source:'', destination:'', startDate:'', endDate:'',
-                   startTime:'', endTime:'', weight:'', budget:'', isBiddingEnabled: true });
+                   startTime:'', endTime:'', weight:'', budget:'', notes: '', truckTypes: [], isBiddingEnabled: true });
       fetchLoads();
       setActiveMenu('overview');
     } catch (error: any) {
@@ -302,33 +314,47 @@ const ShipperDashboard: React.FC = () => {
 
   /* ── Derived stats ───────────────────────────────────────────────────────── */
   const totalBids    = loads.reduce((s, l) => s + (l.bidCount ?? 0), 0);
-  const pendingLoads = loads.filter(l => l.status === 'PENDING' || l.status === 'DRAFT' || l.status === 'PENDING_ACCEPTANCE').length;
-  const assignedLoads = loads.filter(l => ['ASSIGNED', 'DRIVER_ASSIGNMENT_PENDING', 'ACCEPTED'].includes(l.status)).length;
+
   const activeLoads = loads.filter(l => !['COMPLETED', 'DELIVERED', 'CANCELLED', 'REJECTED'].includes(l.status)).length;
   const totalSpend = completedTrips.reduce((s, t) => s + (t.shipperAmount || t.freightAmount || 0), 0);
 
   /* ── Sub-components ─────────────────────────────────────────────────────── */
   const Sidebar = () => (
-    <div className="w-64 bg-slate-50 min-h-screen text-slate-600 flex flex-col border-r border-slate-200 z-20">
-      <div className="p-8 border-b border-slate-200 bg-white">
-        <div className="flex items-center justify-center">
-          <img src="/logo-transparent.png" alt="TruckMitra" className="w-[180px] h-auto object-contain" />
+    <>
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+      
+      <div className={`fixed inset-y-0 left-0 z-50 w-[80vw] sm:w-80 lg:w-64 bg-slate-50 min-h-screen text-slate-600 flex flex-col border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+        isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+      }`}>
+        <div className="p-8 border-b border-slate-200 bg-white flex justify-between items-center">
+          <div className="flex items-center justify-center">
+            <img src="/logo-transparent.png" alt="TruckMitra" className="w-[180px] h-auto object-contain" />
+          </div>
+          <button className="lg:hidden text-slate-400 hover:text-slate-600" onClick={() => setIsSidebarOpen(false)}>
+            <HiXCircle className="w-6 h-6" />
+          </button>
+        </div>
+        <nav className="flex-1 mt-6 px-4 space-y-2 overflow-y-auto">
+          <SidebarLink icon={<HiChartBar />}       label="Overview"          active={activeMenu === 'overview'}        onClick={() => { setActiveMenu('overview'); setIsSidebarOpen(false); }} />
+          <SidebarLink icon={<HiLocationMarker />} label="Live Tracking"     active={activeMenu === 'tracking'}        onClick={() => { setActiveMenu('tracking'); setIsSidebarOpen(false); }} />
+          <SidebarLink icon={<HiUserAdd />}        label="Add Transporter"   active={activeMenu === 'add-transporter'} onClick={() => { setActiveMenu('add-transporter'); setIsSidebarOpen(false); }} />
+          <SidebarLink icon={<HiTag />}            label="Post New Load"     active={activeMenu === 'bids'}            onClick={() => { setActiveMenu('bids'); setIsSidebarOpen(false); }} />
+          <SidebarLink icon={<HiCash />}           label="Billing & Invoices" active={activeMenu === 'billing'}        onClick={() => { setActiveMenu('billing'); setIsSidebarOpen(false); }} />
+        </nav>
+        <div className="p-4 border-t border-slate-200 bg-white shrink-0">
+          <button onClick={() => { logout(); navigate('/login'); }}
+            className="flex items-center w-full px-4 py-3 text-sm font-bold text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
+            <HiLogout className="w-5 h-5 mr-3" /> Sign Out
+          </button>
         </div>
       </div>
-      <nav className="flex-1 mt-6 px-4 space-y-2">
-        <SidebarLink icon={<HiChartBar />}       label="Overview"          active={activeMenu === 'overview'}        onClick={() => setActiveMenu('overview')} />
-        <SidebarLink icon={<HiLocationMarker />} label="Live Tracking"     active={activeMenu === 'tracking'}        onClick={() => setActiveMenu('tracking')} />
-        <SidebarLink icon={<HiUserAdd />}        label="Add Transporter"   active={activeMenu === 'add-transporter'} onClick={() => setActiveMenu('add-transporter')} />
-        <SidebarLink icon={<HiTag />}            label="Post New Load"     active={activeMenu === 'bids'}            onClick={() => setActiveMenu('bids')} />
-        <SidebarLink icon={<HiCash />}           label="Billing & Invoices" active={activeMenu === 'billing'}        onClick={() => setActiveMenu('billing')} />
-      </nav>
-      <div className="p-4 border-t border-slate-200 bg-white">
-        <button onClick={() => { logout(); navigate('/login'); }}
-          className="flex items-center w-full px-4 py-3 text-sm font-bold text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
-          <HiLogout className="w-5 h-5 mr-3" /> Sign Out
-        </button>
-      </div>
-    </div>
+    </>
   );
 
   const SidebarLink = ({ icon, label, active, onClick }: any) => (
@@ -344,13 +370,14 @@ const ShipperDashboard: React.FC = () => {
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto w-full">
         {/* Header */}
         <ProfileHeader
           user={shipperProfile || user}
           roleBadgeText="Verified Shipper"
           roleBadgeClasses="bg-indigo-50 text-indigo-600 border-indigo-100"
           welcomeMessage={`Welcome back, ${user?.fullName?.split(' ')[0] || 'Shipper'}`}
+          onMenuToggle={() => setIsSidebarOpen(true)}
           stats={[
             { label: 'Active Loads', value: activeLoads, icon: <HiTruck /> },
             { label: 'Completed', value: completedTrips.length, icon: <HiCheckCircle /> },
@@ -759,7 +786,7 @@ const ShipperDashboard: React.FC = () => {
           {/* ── POST NEW LOAD ─────────────────────────────────────────────── */}
           {activeMenu === 'bids' && (
             <div className="animate-fadeIn max-w-4xl">
-              <div className="bg-white rounded-[40px] p-12 border border-slate-200 shadow-xl border-b-8 hover:border-indigo-600 transition-all">
+              <div className="bg-white rounded-[40px] p-6 md:p-12 border border-slate-200 shadow-xl border-b-8 hover:border-indigo-600 transition-all">
                 <div className="flex items-center space-x-4 mb-10">
                   <div className="p-4 bg-indigo-600 rounded-3xl text-white shadow-lg shadow-indigo-200">
                     <HiPlus className="w-8 h-8" />
@@ -808,8 +835,8 @@ const ShipperDashboard: React.FC = () => {
 
           {/* ── LIVE TRACKING ─────────────────────────────────────────────── */}
           {activeMenu === 'tracking' && (
-            <div className="animate-fadeIn max-w-5xl h-[600px] flex flex-col">
-              <div className="bg-white rounded-t-[32px] p-8 border-x border-t border-slate-200 shadow-sm flex items-center justify-between">
+            <div className="animate-fadeIn max-w-5xl h-[70vh] md:h-[600px] flex flex-col">
+              <div className="bg-white rounded-t-[32px] p-6 md:p-8 border-x border-t border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between">
                 <div>
                   <h3 className="text-xl font-black">Live Fleet Tracking</h3>
                   <p className="text-slate-500 text-sm">Monitor your ongoing shipments in real-time</p>
@@ -1018,8 +1045,7 @@ const StatusPill = ({ status }: any) => {
     'ASSIGNED':   'bg-blue-50 text-blue-600 border-blue-100',
     'IN_TRANSIT': 'bg-indigo-50 text-indigo-600 border-indigo-100',
     'COMPLETED':  'bg-emerald-50 text-emerald-600 border-emerald-100',
-    'CANCELLED':  'bg-rose-50 text-rose-600 border-rose-100',
-  };
+    'CANCELLED':  'bg-rose-50 text-rose-600 border-rose-100'};
   return (
     <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase border tracking-tight ${styles[status] || 'bg-slate-50 text-slate-500'}`}>
       {status}

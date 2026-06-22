@@ -2,6 +2,7 @@ package com.truckmitra.service.impl;
 
 import com.truckmitra.entity.Notification;
 import com.truckmitra.entity.user.User;
+import com.truckmitra.enums.NotificationType;
 import com.truckmitra.repository.NotificationRepository;
 import com.truckmitra.service.NotificationService;
 import org.slf4j.Logger;
@@ -24,17 +25,26 @@ public class NotificationServiceImpl implements NotificationService {
     private SimpMessagingTemplate messagingTemplate;
 
     @Autowired
+    private com.truckmitra.service.notification.PushNotificationService pushNotificationService;
+
+    @Autowired
     private JavaMailSender mailSender;
 
     @Override
-    public void sendNotification(User user, String title, String message, Notification.NotificationType type) {
+    public void sendNotification(User user, String title, String message, NotificationType type) {
+        sendNotification(user, title, message, type, null);
+    }
+
+    @Override
+    public void sendNotification(User user, String title, String message, NotificationType type, Long relatedId) {
         // 1. Save to Database
         Notification notification = Notification.builder()
                 .user(user)
                 .title(title)
                 .message(message)
                 .type(type)
-                .readStatus(false)
+                .isRead(false)
+                .relatedId(relatedId)
                 .build();
         notificationRepository.save(notification);
 
@@ -46,9 +56,19 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         // 3. Optional: Trigger External Channels based on priority or type
-        if (type == Notification.NotificationType.TRIP || type == Notification.NotificationType.WALLET) {
+        if (type == NotificationType.TRIP || type == NotificationType.WALLET) {
             sendWhatsApp(user.getMobile(), message);
             sendEmail(user.getEmail(), title, message);
+        }
+        
+        // 4. FCM Push Notification
+        try {
+            java.util.Map<String, String> data = new java.util.HashMap<>();
+            data.put("type", type != null ? type.name() : "");
+            if (relatedId != null) data.put("relatedId", relatedId.toString());
+            pushNotificationService.sendPushNotificationToUser(user, title, message, data);
+        } catch (Exception e) {
+            log.error("Failed to send push notification to user {}", user.getId(), e);
         }
     }
 

@@ -57,7 +57,7 @@ public class LRServiceImpl implements LRService {
             Map qrUpload = cloudinary.uploader().upload(qrImage, ObjectUtils.asMap("folder", "truckmitra/qrcodes", "public_id", lrNumber));
             qrUrl = (String) qrUpload.get("secure_url");
         } catch (Exception e) {
-            qrUrl = "https://res.cloudinary.com/dummy/image/upload/v1234567890/mocked_qrcode_" + lrNumber + ".png";
+            throw new IllegalStateException("Cloudinary configuration missing or invalid. Failed to upload QR Code.", e);
         }
 
         // 2. Initial LR Entity
@@ -75,7 +75,7 @@ public class LRServiceImpl implements LRService {
             Map pdfUpload = cloudinary.uploader().upload(pdfBytes, ObjectUtils.asMap("folder", "truckmitra/lrs", "public_id", lrNumber, "resource_type", "auto"));
             pdfUrl = (String) pdfUpload.get("secure_url");
         } catch (Exception e) {
-            pdfUrl = "/uploads/mocked_lr_" + lrNumber + ".pdf";
+            throw new IllegalStateException("Cloudinary configuration missing or invalid. Failed to upload PDF.", e);
         }
 
         lr.setPdfUrl(pdfUrl);

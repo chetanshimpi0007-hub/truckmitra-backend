@@ -12,7 +12,8 @@ import com.truckmitra.exception.ResourceNotFoundException;
 import com.truckmitra.repository.wallet.TransactionRepository;
 import com.truckmitra.repository.wallet.WalletRepository;
 import com.truckmitra.service.wallet.WalletService;
-import com.truckmitra.service.notification.NotificationService;
+import com.truckmitra.service.InAppNotificationService;
+import com.truckmitra.enums.NotificationType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,7 +31,7 @@ public class WalletServiceImpl implements WalletService {
 
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
-    private final NotificationService notificationService;
+    private final InAppNotificationService notificationService;
 
     @Override
     @Transactional
@@ -249,11 +250,71 @@ public class WalletServiceImpl implements WalletService {
         transactionRepository.save(transaction);
         walletRepository.save(wallet);
         try {
-            notificationService.sendNotification(userId, "Your wallet has been credited with ₹" + amount);
+            notificationService.sendNotification(userId, "Wallet Credited", "Your wallet has been credited with ₹" + amount, NotificationType.WALLET, wallet.getId());
         } catch (Exception e) {
             log.warn("Notification failed: {}", e.getMessage());
         }
         return mapToTransactionResponse(transaction);
+    }
+
+    @Override
+    public Object createRazorpayOrder(Long userId, BigDecimal amount) {
+        try {
+            String keyId = System.getenv("RAZORPAY_KEY_ID");
+            String keySecret = System.getenv("RAZORPAY_KEY_SECRET");
+            if(keyId == null || keySecret == null) {
+                log.error("Razorpay credentials not found in env vars.");
+                throw new IllegalStateException("Payment Gateway is not configured. Razorpay keys are missing.");
+            }
+            com.razorpay.RazorpayClient razorpay = new com.razorpay.RazorpayClient(keyId, keySecret);
+            org.json.JSONObject orderRequest = new org.json.JSONObject();
+            orderRequest.put("amount", amount.multiply(new BigDecimal(100)).intValue()); // amount in the smallest currency unit
+            orderRequest.put("currency", "INR");
+            orderRequest.put("receipt", "txn_" + System.currentTimeMillis());
+            
+            com.razorpay.Order order = razorpay.orders.create(orderRequest);
+            return order.toJson().toMap();
+        } catch (Exception e) {
+            throw new RuntimeException("Error creating Razorpay order: " + e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public TransactionResponse verifyRazorpayPayment(Long userId, String razorpayOrderId, String razorpayPaymentId, String razorpaySignature) {
+        try {
+            String keyId = System.getenv("RAZORPAY_KEY_ID");
+            String keySecret = System.getenv("RAZORPAY_KEY_SECRET");
+            if(keyId == null || keySecret == null) {
+                throw new IllegalStateException("Payment Gateway is not configured. Razorpay keys are missing.");
+            }
+            
+            org.json.JSONObject options = new org.json.JSONObject();
+            options.put("razorpay_order_id", razorpayOrderId);
+            options.put("razorpay_payment_id", razorpayPaymentId);
+            options.put("razorpay_signature", razorpaySignature);
+            
+            boolean status = com.razorpay.Utils.verifyPaymentSignature(options, keySecret);
+            if (!status) {
+                throw new RuntimeException("Payment signature verification failed");
+            }
+            
+            com.razorpay.RazorpayClient razorpay = new com.razorpay.RazorpayClient(keyId, keySecret);
+            com.razorpay.Order order = razorpay.orders.fetch(razorpayOrderId);
+            
+            if (order == null || !order.has("amount")) {
+                throw new RuntimeException("Invalid order or order amount missing");
+            }
+
+            int amountInPaise = order.get("amount");
+            BigDecimal amount = new BigDecimal(amountInPaise).divide(new BigDecimal(100));
+            
+            WalletRechargeRequest req = new WalletRechargeRequest(amount, "Razorpay", "RAZORPAY", "TRANSPORTER");
+            return rechargeWallet(userId, req);
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Error verifying payment: " + e.getMessage());
+        }
     }
 
     private WalletResponse mapToWalletResponse(Wallet wallet) {

@@ -23,11 +23,10 @@ public class CloudinaryService {
             return uploadResult.get("url").toString();
         } catch (IOException e) {
             log.error("Failed to upload file to Cloudinary: {}", e.getMessage(), e);
-            // Fallback for mocked Cloudinary to avoid breaking flow since keys are missing
-            return "/uploads/mocked_" + file.getOriginalFilename();
+            throw new IllegalStateException("Failed to upload file to Cloudinary", e);
         } catch (Exception e) {
             log.error("Cloudinary configuration missing or invalid: {}", e.getMessage());
-            return "/uploads/mocked_" + file.getOriginalFilename();
+            throw new IllegalStateException("Cloudinary configuration missing or invalid", e);
         }
     }
 
@@ -37,7 +36,7 @@ public class CloudinaryService {
             return uploadResult.get("secure_url").toString();
         } catch (Exception e) {
             log.error("Failed to upload bytes to Cloudinary: {}", e.getMessage());
-            return "/uploads/mocked_" + filename + ".pdf";
+            throw new IllegalStateException("Failed to upload bytes to Cloudinary", e);
         }
     }
 }

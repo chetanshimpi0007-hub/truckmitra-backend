@@ -16,7 +16,7 @@ import {
   verifyOtpAndLogin
 } from '../slices/authSlice';
 import { useNavigate } from 'react-router-dom';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   RegisterRequest,
   LoginRequest,
@@ -34,6 +34,12 @@ export const useAuth = () => {
   const { user, isAuthenticated, isLoading, error, otpSent, otpMobile, otpExpiry } = useAppSelector(
     (state) => state.auth
   );
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('accessToken'));
+
+  // Sync token whenever auth state changes
+  useEffect(() => {
+    setToken(localStorage.getItem('accessToken'));
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (error) {
@@ -258,6 +264,7 @@ export const useAuth = () => {
 
   return {
     user,
+    token,
     isAuthenticated,
     isLoading,
     otpSent,
@@ -267,9 +274,9 @@ export const useAuth = () => {
     register: handleRegister,
     login: handleLogin,
     loginWithGoogle: handleGoogleLogin,
-    loginWithFacebook: handleFacebookLogin, // ✅ Add this
-     forgotPassword: handleForgotPassword,    // Add this
-    resetPassword: handleResetPassword,      // Add this
+    loginWithFacebook: handleFacebookLogin,
+    forgotPassword: handleForgotPassword,
+    resetPassword: handleResetPassword,
     verifyOtp: handleVerifyOtp,
     logout: handleLogout,
     resetOtp,

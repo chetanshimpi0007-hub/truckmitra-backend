@@ -14,7 +14,7 @@ interface MyRatingsPageProps {
 }
 
 const MyRatingsPage: React.FC<MyRatingsPageProps> = ({ type }) => {
-  const { user } = useAuth();
+  const { } = useAuth();
   const {
     receivedRatings,
     givenRatings,

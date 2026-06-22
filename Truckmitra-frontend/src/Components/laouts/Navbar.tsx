@@ -20,21 +20,33 @@ import {
   HiDocumentText,
   HiPhotograph,
   HiCheckCircle,
-  HiExclamationCircle
+  HiExclamationCircle,
+  HiChevronRight
 } from 'react-icons/hi';
 import { HiWallet, HiCurrencyDollar } from 'react-icons/hi2';
 import { AccountStatus } from '../../interfaces/auth.interface';
 import ThemeToggle from '../ui/ThemeToggle';
+import NotificationBell from '../notifications/NotificationBell';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [showProfileTooltip, setShowProfileTooltip] = useState(false);
+
+  // Stop background scrolling when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isOpen]);
   
-  const { user, logout } = useAuth();
+  const { user, logout, token } = useAuth();
   const { profileComplete, documents, hasDocument } = useProfile();
-  
-  console.log('Navbar Rendered - User:', user);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -78,6 +90,7 @@ const Navbar: React.FC = () => {
       { label: 'Dashboard', path: getDashboardLink(), icon: <HiDashboard className="w-5 h-5" /> },
       { label: 'Profile', path: '/profile', icon: <HiUser className="w-5 h-5" /> },
       { label: 'Wallet', path: '/wallet', icon: <HiWallet className="w-5 h-5" /> },
+      { label: 'Contact', path: '/contact', icon: <HiPhone className="w-5 h-5" /> },
     ];
 
     const roleSpecificItems: Record<string, any[]> = {
@@ -211,8 +224,11 @@ const Navbar: React.FC = () => {
             ))}
 
             {user ? (
-              <div className="relative ml-2 flex items-center gap-4">
+              <div className="relative ml-2 flex items-center gap-3">
                 <ThemeToggle />
+                {user && token && (
+                  <NotificationBell userId={user.id} token={token} />
+                )}
                 <button 
                   onClick={toggleProfileMenu} 
                   className="flex items-center focus:outline-none ring-2 ring-blue-400 rounded-full relative"
@@ -335,6 +351,9 @@ const Navbar: React.FC = () => {
 
           {/* Mobile menu toggle */}
           <div className="md:hidden flex items-center space-x-2">
+            {user && token && (
+              <NotificationBell userId={user.id} token={token} />
+            )}
             <ThemeToggle />
             <button onClick={toggleMenu} className="text-white p-2 ml-2">
               {isOpen ? <HiX size={24}/> : <HiMenu size={24}/>}
@@ -343,106 +362,130 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Content */}
+      {/* Mobile Overlay */}
       {isOpen && (
-        <div className="md:hidden bg-blue-700 border-t border-blue-500 pb-4">
-          <div className="px-2 pt-2 space-y-1">
+        <div 
+          className="fixed inset-0 bg-slate-900/60 z-40 md:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Mobile Drawer */}
+      <div className={`fixed inset-y-0 right-0 z-50 w-[80vw] sm:w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out md:hidden flex flex-col ${
+        isOpen ? 'translate-x-0' : 'translate-x-full'
+      }`}>
+        <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-blue-600">
+          <span className="font-bold text-white text-lg">Menu</span>
+          <button onClick={() => setIsOpen(false)} className="text-blue-200 hover:text-white p-1">
+            <HiX className="w-6 h-6" />
+          </button>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto flex flex-col bg-slate-50">
+          {user && (
+            <div className="px-6 py-6 border-b border-slate-200 bg-white">
+              <div className="flex items-center space-x-3">
+                {user.profileImageUrl ? (
+                  <img className="h-12 w-12 rounded-full border-2 border-blue-100" src={user.profileImageUrl} alt="" />
+                ) : (
+                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                    {getInitials(user.fullName)}
+                  </div>
+                )}
+                <div>
+                  <p className="text-base font-black text-slate-900">{user.fullName}</p>
+                  <p className="text-xs text-slate-500">{user.email}</p>
+                </div>
+              </div>
+              
+              {/* Mobile Profile Stats */}
+              {!profileComplete && (
+                <div className="mt-4 bg-amber-50 rounded-xl p-4 border border-amber-100">
+                  <p className="text-xs font-black text-amber-800 uppercase tracking-widest mb-2">Complete your profile</p>
+                  <div className="w-full bg-amber-200 rounded-full h-1.5 mb-2">
+                    <div className="bg-amber-500 h-1.5 rounded-full" style={{ width: '60%' }}></div>
+                  </div>
+                  <Link 
+                    to="/profile" 
+                    className="text-xs font-bold text-amber-700 hover:text-amber-900 inline-flex items-center"
+                    onClick={toggleMenu}
+                  >
+                    Complete Now <HiChevronRight className="ml-1 w-3 h-3" />
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="px-4 py-4 space-y-1">
+            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 mb-2">Navigation</div>
             {(user ? getProtectedNavItems() : publicNavItems).map((item) => (
               <Link 
                 key={item.path} 
                 to={item.path} 
                 onClick={toggleMenu} 
-                className="flex items-center px-3 py-3 text-white hover:bg-blue-800 rounded-md"
+                className={`flex items-center px-4 py-3 rounded-xl font-bold transition-all ${
+                  isActive(item.path) ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                }`}
               >
-                <span className="mr-4 text-blue-200">{item.icon}</span> 
+                <span className={`mr-3 ${isActive(item.path) ? 'text-blue-500' : 'text-slate-400'}`}>{item.icon}</span> 
                 {item.label}
               </Link>
             ))}
             
             {user && (
               <>
-                {/* User Info in Mobile Menu */}
-                <div className="px-3 py-3 border-t border-blue-500 mt-2">
-                  <div className="flex items-center">
-                    {user.profileImageUrl ? (
-                      <img className="h-10 w-10 rounded-full" src={user.profileImageUrl} alt="" />
-                    ) : (
-                      <div className="h-10 w-10 rounded-full bg-blue-800 flex items-center justify-center text-white font-medium">
-                        {getInitials(user.fullName)}
-                      </div>
-                    )}
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-white">{user.fullName}</p>
-                      <p className="text-xs text-blue-200">{user.email}</p>
-                    </div>
-                  </div>
-                  
-                  {/* Mobile Profile Stats */}
-                  {!profileComplete && (
-                    <div className="mt-3 bg-blue-800 rounded-lg p-3">
-                      <p className="text-xs text-blue-200 mb-1">Complete your profile</p>
-                      <div className="w-full bg-blue-600 rounded-full h-1.5">
-                        <div className="bg-yellow-400 h-1.5 rounded-full" style={{ width: '60%' }}></div>
-                      </div>
-                      <Link 
-                        to="/profile" 
-                        className="mt-2 text-xs text-yellow-300 block"
-                        onClick={toggleMenu}
-                      >
-                        Complete Now →
-                      </Link>
-                    </div>
-                  )}
-                </div>
-
-                {/* Mobile Menu Actions */}
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 mt-6 mb-2">Account</div>
                 <Link 
                   to="/profile" 
-                  className="flex items-center px-3 py-3 text-white hover:bg-blue-800 rounded-md"
+                  className={`flex items-center justify-between px-4 py-3 rounded-xl font-bold transition-all ${
+                    isActive('/profile') ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
                   onClick={toggleMenu}
                 >
-                  <HiUser className="mr-4 text-blue-200" />
-                  Profile
+                  <div className="flex items-center">
+                    <HiUser className={`mr-3 ${isActive('/profile') ? 'text-blue-500' : 'text-slate-400'}`} />
+                    Profile Settings
+                  </div>
                   {!profileComplete && (
-                    <span className="ml-2 bg-yellow-500 text-xs px-2 py-0.5 rounded-full">!</span>
+                    <span className="bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-black">ACTION NEEDED</span>
                   )}
                 </Link>
 
                 <Link 
                   to="/profile/documents" 
-                  className="flex items-center px-3 py-3 text-white hover:bg-blue-800 rounded-md"
+                  className={`flex items-center justify-between px-4 py-3 rounded-xl font-bold transition-all ${
+                    isActive('/profile/documents') ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
                   onClick={toggleMenu}
                 >
-                  <HiDocumentText className="mr-4 text-blue-200" />
-                  Documents
+                  <div className="flex items-center">
+                    <HiDocumentText className={`mr-3 ${isActive('/profile/documents') ? 'text-blue-500' : 'text-slate-400'}`} />
+                    Documents
+                  </div>
                   {documents.length > 0 && (
-                    <span className="ml-2 bg-blue-500 text-xs px-2 py-0.5 rounded-full">
+                    <span className="bg-slate-200 text-slate-600 text-xs px-2 py-0.5 rounded-full font-bold">
                       {documents.length}
                     </span>
                   )}
                 </Link>
-
-                <Link 
-                  to="/wallet" 
-                  className="flex items-center px-3 py-3 text-white hover:bg-blue-800 rounded-md"
-                  onClick={toggleMenu}
-                >
-                  <HiWallet className="mr-4 text-blue-200" />
-                  Wallet
-                </Link>
-
-                <button 
-                  onClick={handleLogout} 
-                  className="w-full flex items-center px-3 py-3 text-red-200 hover:bg-red-900 rounded-md"
-                >
-                  <HiLogout className="mr-4" /> 
-                  Sign out
-                </button>
               </>
             )}
           </div>
+          
+          {user && (
+            <div className="mt-auto p-4 border-t border-slate-200 bg-white">
+              <button 
+                onClick={handleLogout} 
+                className="w-full flex items-center justify-center px-4 py-3 text-sm font-bold text-rose-500 hover:bg-rose-50 hover:text-rose-600 rounded-xl transition-all border border-rose-100"
+              >
+                <HiLogout className="mr-2 w-5 h-5" /> 
+                Sign out
+              </button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </nav>
   );
 };

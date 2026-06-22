@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, Legend
@@ -6,9 +6,10 @@ import {
 import { HiTruck, HiCurrencyDollar, HiCheckCircle, HiClock, HiDocumentText, HiUser, HiBadgeCheck, HiGlobe, HiChartBar } from 'react-icons/hi';
 import StatWidget from '../ui/StatWidget';
 import GlassCard from '../ui/GlassCard';
-import { format, subMonths } from 'date-fns';
 import { ReturnLoadSuggestionsWidget } from '../loads/ReturnLoadSuggestionsWidget';
 import { LiveDriverAvailabilityWidget } from './LiveDriverAvailabilityWidget';
+import { protectedApi } from '../../services/api/protectedAndPublicAPI';
+import { useAuth } from '../../hooks/auth.hook';
 
 interface TransporterOverviewProps {
   stats: any;
@@ -25,42 +26,30 @@ const COLORS = ['#4F46E5', '#10B981', '#06B6D4', '#F59E0B', '#EF4444'];
 const TransporterOverview: React.FC<TransporterOverviewProps> = ({
   stats, trips, openTenders, myBids, drivers, vehicles, setActiveMenu
 }) => {
-
-  // --- Mock Data Generation based on Real Data for Charts ---
-  // In a real scenario, this would come pre-aggregated from the backend.
+  const { user } = useAuth();
   
-  const revenueData = useMemo(() => {
-    return Array.from({ length: 6 }).map((_, i) => ({
-      name: format(subMonths(new Date(), 5 - i), 'MMM'),
-      revenue: Math.floor(Math.random() * 500000) + 100000 + (stats.totalEarnings ? stats.totalEarnings / 6 : 0),
-    }));
-  }, [stats.totalEarnings]);
+  const [revenueData, setRevenueData] = useState<any[]>([]);
+  const [loadData, setLoadData] = useState<any[]>([]);
+  const [driverPerformance, setDriverPerformance] = useState<any[]>([]);
 
-  const loadData = useMemo(() => {
-    return Array.from({ length: 6 }).map((_, i) => ({
-      name: format(subMonths(new Date(), 5 - i), 'MMM'),
-      completed: Math.floor(Math.random() * 50) + 10,
-      cancelled: Math.floor(Math.random() * 10),
-    }));
-  }, []);
+  useEffect(() => {
+    if (user?.id) {
+      protectedApi.get(`/api/analytics/transporter/revenue?userId=${user.id}`).then(res => setRevenueData(res.data)).catch(() => {});
+      protectedApi.get(`/api/analytics/transporter/monthly-loads?userId=${user.id}`).then(res => setLoadData(res.data)).catch(() => {});
+      protectedApi.get(`/api/analytics/transporter/driver-performance?userId=${user.id}`).then(res => setDriverPerformance(res.data)).catch(() => {});
+    }
+  }, [user?.id]);
 
   const fleetUtilization = useMemo(() => {
-    const active = stats.ongoingTrips;
-    const idle = Math.max(0, stats.totalVehicles - active);
-    const maintenance = Math.floor(stats.totalVehicles * 0.1);
+    const active = stats.ongoingTrips || 0;
+    const idle = Math.max(0, (stats.totalVehicles || 0) - active);
+    const maintenance = Math.floor((stats.totalVehicles || 0) * 0.1);
     return [
-      { name: 'Active', value: active || 5 },
-      { name: 'Idle', value: idle || 3 },
-      { name: 'Maintenance', value: maintenance || 1 },
+      { name: 'Active', value: active },
+      { name: 'Idle', value: idle },
+      { name: 'Maintenance', value: maintenance },
     ];
   }, [stats.ongoingTrips, stats.totalVehicles]);
-
-  const driverPerformance = useMemo(() => {
-    return drivers.slice(0, 5).map(d => ({
-      name: d.fullName.split(' ')[0],
-      score: Math.floor(Math.random() * 20) + 80,
-    }));
-  }, [drivers]);
 
   // --- Calculations ---
   const totalRevenue = trips.filter(t => t.status === 'COMPLETED').reduce((sum, t) => sum + (t.load?.budget || 0), 0);

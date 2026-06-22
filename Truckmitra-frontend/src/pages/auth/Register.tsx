@@ -35,8 +35,7 @@ const Register: React.FC = () => {
     agencyName: '',
     fleetSize: '',
     serviceAreas: '',
-    experienceInYears: '',
-  });
+    experienceInYears: ''});
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -50,11 +49,7 @@ const Register: React.FC = () => {
     });
   };
 
-  const handleRoleSelect = (selectedRole: Role) => {
-    setRole(selectedRole);
-    setStep(2);
-    setError('');
-  };
+
 
   const validateStep1 = () => {
     if (!role) {
@@ -176,10 +171,7 @@ const Register: React.FC = () => {
       agencyName: formData.agencyName,
       fleetSize: formData.fleetSize ? parseInt(formData.fleetSize) : undefined,
       serviceAreas: formData.serviceAreas,
-      experienceInYears: formData.experienceInYears ? parseInt(formData.experienceInYears) : undefined,
-    };
-
-    console.log('Submitting data:', data);
+      experienceInYears: formData.experienceInYears ? parseInt(formData.experienceInYears) : undefined};
     const success = await registerUser(data);
     if (success) {
       // After registration, user will have REGISTERED status

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TripInvoice, InvoicePaymentStatus } from '../../services/billing.service';
 import billingService from '../../services/billing.service';
 import { format } from 'date-fns';
-import { HiDownload, HiSearch, HiFilter } from 'react-icons/hi';
+import { HiDownload, HiSearch} from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
 interface InvoiceListProps {
@@ -14,7 +14,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({ rolePath }) => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [page, setPage] = useState(0);
+  const [page, ] = useState(0);
 
   const fetchInvoices = async () => {
     try {

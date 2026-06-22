@@ -63,4 +63,35 @@ public class WalletController {
             @RequestParam(defaultValue = "10") int size) {
         return getMyTransactions(userDetails, page, size);
     }
+
+    @PostMapping("/create-order")
+    public ResponseEntity<ApiResponse<Object>> createOrder(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody java.util.Map<String, Object> payload) {
+        
+        User user = userRepository.findByMobile(userDetails.getUsername())
+                .orElseGet(() -> userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found")));
+
+        java.math.BigDecimal amount = new java.math.BigDecimal(payload.get("amount").toString());
+        Object order = walletService.createRazorpayOrder(user.getId(), amount);
+        
+        return ResponseEntity.ok(ApiResponse.success("Order created successfully", order));
+    }
+
+    @PostMapping("/verify-payment")
+    public ResponseEntity<ApiResponse<TransactionResponse>> verifyPayment(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody java.util.Map<String, String> payload) {
+        
+        User user = userRepository.findByMobile(userDetails.getUsername())
+                .orElseGet(() -> userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found")));
+
+        String orderId = payload.get("razorpay_order_id");
+        String paymentId = payload.get("razorpay_payment_id");
+        String signature = payload.get("razorpay_signature");
+        
+        TransactionResponse response = walletService.verifyRazorpayPayment(user.getId(), orderId, paymentId, signature);
+        
+        return ResponseEntity.ok(ApiResponse.success("Payment verified successfully", response));
+    }
 }

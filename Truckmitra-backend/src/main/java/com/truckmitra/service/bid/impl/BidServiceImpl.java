@@ -1,8 +1,8 @@
 package com.truckmitra.service.bid.impl;
 
 import com.truckmitra.dto.response.BidResponseDto;
-import com.truckmitra.entity.Notification;
 import com.truckmitra.entity.common.enums.BidStatus;
+import com.truckmitra.enums.NotificationType;
 import com.truckmitra.entity.load.Bid;
 import com.truckmitra.entity.load.Load;
 import com.truckmitra.entity.user.Transporter;
@@ -68,7 +68,8 @@ public class BidServiceImpl implements BidService {
                     "New Bid Received",
                     transporter.getFullName() + " placed a bid of ₹" + amount + " on your load: "
                         + load.getMaterialType() + " (" + load.getSource() + " → " + load.getDestination() + ")",
-                    Notification.NotificationType.BID
+                    NotificationType.BID,
+                    saved.getId()
                 );
             }
         } catch (Exception ignored) {}
@@ -125,7 +126,8 @@ public class BidServiceImpl implements BidService {
                         "Bid Not Selected",
                         "Your bid of ₹" + b.getAmount() + " for load '"
                             + accepted.getLoad().getMaterialType() + "' was not selected. Keep bidding!",
-                        Notification.NotificationType.BID
+                        NotificationType.BID,
+                        b.getId()
                     );
                 } catch (Exception ignored) {}
             }
@@ -144,7 +146,8 @@ public class BidServiceImpl implements BidService {
                 "Congratulations! Your bid of ₹" + accepted.getAmount() + " for '"
                     + load.getMaterialType() + "' (" + load.getSource() + " → " + load.getDestination()
                     + ") has been accepted. Please assign a driver.",
-                Notification.NotificationType.BID
+                NotificationType.BID,
+                accepted.getId()
             );
         } catch (Exception ignored) {}
 
@@ -156,7 +159,8 @@ public class BidServiceImpl implements BidService {
                     "Transporter Assigned",
                     "You accepted a bid from " + accepted.getTransporter().getFullName()
                         + " for your load '" + load.getMaterialType() + "'. Trip will begin shortly.",
-                    Notification.NotificationType.TRIP
+                    NotificationType.TRIP,
+                    accepted.getId()
                 );
             }
         } catch (Exception ignored) {}
@@ -186,7 +190,8 @@ public class BidServiceImpl implements BidService {
                 rejected.getTransporter(),
                 "Bid Rejected",
                 "Your bid of ₹" + rejected.getAmount() + " was rejected by the shipper.",
-                Notification.NotificationType.BID
+                NotificationType.BID,
+                rejected.getId()
             );
         } catch (Exception ignored) {}
         return rejected;

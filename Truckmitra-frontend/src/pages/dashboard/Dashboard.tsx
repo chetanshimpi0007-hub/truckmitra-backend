@@ -30,7 +30,6 @@ const Dashboard: React.FC = () => {
   };
 
   // Debug: Log user object to see what's coming
-  console.log('Dashboard - User Data:', user);
 
   // Get status-specific styles and messages
   const getStatusInfo = () => {

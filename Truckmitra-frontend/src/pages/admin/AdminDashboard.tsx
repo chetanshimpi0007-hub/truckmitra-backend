@@ -6,15 +6,11 @@ import {
   HiUsers, 
   HiUserGroup, 
   HiCheckCircle, 
-  HiXCircle,
-  HiClock,
   HiBan,
-  HiTrash,
   HiSearch,
   HiEye,
   HiCheck,
   HiX,
-  HiUser,
   HiUserCircle,
   HiDocumentText,
   HiExclamationCircle,
@@ -23,16 +19,13 @@ import {
   HiCash,
   HiCog,
   HiLogout,
-  HiChevronRight,
   HiDownload,
   HiTruck,
   HiShoppingCart,
-  HiLockClosed,
-  HiLockOpen,
   HiRefresh
 } from 'react-icons/hi';
 import toast from 'react-hot-toast';
-import adminService from '../../services/admin.service';
+// adminService imported via useAdmin hook
 import { protectedApi } from '../../services/api/protectedAndPublicAPI';
 import LiveMap from '../../Components/common/LiveMap';
 import NotificationDropdown from '../../Components/common/NotificationDropdown';
@@ -41,7 +34,8 @@ import { EmptyState } from '../../Components/illustrations/EmptyState';
 import BillingDashboard from '../billing/BillingDashboard';
 import { AdminUser360 } from './AdminUser360';
 import ProfileHeader from '../../Components/dashboard/ProfileHeader';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+// Recharts used in AdminAnalyticsDashboard
+import AdminAnalyticsDashboard from './AdminAnalyticsDashboard';
 
 // ... other imports
 // (Note: Since I'm using replace_file_content, I'll just find the exact places)
@@ -55,6 +49,20 @@ const AdminDashboard: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<'overview' | 'activity' | 'users' | 'kyc' | 'financials' | 'settings' | 'tracking' | 'trips'>(
     location.pathname.includes('/users') ? 'users' : 'overview'
   );
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Stop background scrolling when sidebar is open
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isSidebarOpen]);
+
   const [kycTab, setKycTab] = useState<'DRIVER' | 'SHIPPER' | 'TRANSPORTER'>('DRIVER');
   const [searchTerm, setSearchTerm] = useState('');
   const [userStatusFilter, setUserStatusFilter] = useState<'ALL' | 'PENDING_VERIFICATION' | 'VERIFIED' | 'REJECTED' | 'SUSPENDED'>(
@@ -190,31 +198,46 @@ const AdminDashboard: React.FC = () => {
 
   // Sidebar Component
   const Sidebar = () => (
-    <div className="w-64 bg-slate-50 min-h-screen text-slate-600 flex flex-col border-r border-slate-200 z-20">
-      <div className="p-8 border-b border-slate-200 bg-white">
-        <div className="flex items-center justify-center">
-          <img src="/logo-transparent.png" alt="TruckMitra" className="w-[180px] h-auto object-contain" />
+    <>
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <div className={`fixed inset-y-0 left-0 z-50 w-[80vw] sm:w-80 lg:w-64 bg-slate-50 min-h-screen text-slate-600 flex flex-col border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+        isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
+      }`}>
+        <div className="p-8 border-b border-slate-200 bg-white flex justify-between items-center">
+          <div className="flex items-center justify-center">
+            <img src="/logo-transparent.png" alt="TruckMitra" className="w-[180px] h-auto object-contain" />
+          </div>
+          <button className="lg:hidden text-slate-400 hover:text-slate-600" onClick={() => setIsSidebarOpen(false)}>
+            <HiX className="w-6 h-6" />
+          </button>
+        </div>
+        
+        <nav className="flex-1 mt-6 px-4 space-y-2 overflow-y-auto">
+          <SidebarLink icon={<HiChartBar />} label="Overview" active={activeMenu === 'overview'} onClick={() => {setActiveMenu('overview'); setViewing360UserId(null); setIsSidebarOpen(false);}} />
+          <SidebarLink icon={<HiChartBar />} label="Activity Monitoring" active={activeMenu === 'activity'} onClick={() => {setActiveMenu('activity'); setViewing360UserId(null); setIsSidebarOpen(false);}} />
+          <SidebarLink icon={<HiUsers />} label="User Management" active={activeMenu === 'users'} onClick={() => {setActiveMenu('users'); setViewing360UserId(null); setIsSidebarOpen(false);}} />
+          <SidebarLink icon={<HiIdentification />} label="KYC Verification" active={activeMenu === 'kyc'} onClick={() => {setActiveMenu('kyc'); setIsSidebarOpen(false);}} />
+          <SidebarLink icon={<HiTruck />} label="Live Fleet Tracking" active={activeMenu === 'tracking'} onClick={() => {setActiveMenu('tracking'); setIsSidebarOpen(false);}} />
+          <SidebarLink icon={<HiDocumentText />} label="Trip Verifications" active={activeMenu === 'trips'} onClick={() => {setActiveMenu('trips'); setIsSidebarOpen(false);}} />
+          <SidebarLink icon={<HiDocumentText />} label="Advanced Reports" onClick={() => {navigate('/admin/reports'); setIsSidebarOpen(false);}} />
+          <SidebarLink icon={<HiCash />} label="Financials" active={activeMenu === 'financials'} onClick={() => {setActiveMenu('financials'); setIsSidebarOpen(false);}} />
+          <SidebarLink icon={<HiCog />} label="Settings" onClick={() => {navigate('/admin/settings'); setIsSidebarOpen(false);}} />
+        </nav>
+        
+        <div className="p-4 border-t border-slate-200 bg-white shrink-0">
+          <button onClick={handleLogout} className="flex items-center w-full px-4 py-3 text-sm font-bold text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all group">
+            <HiLogout className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" /> Sign Out
+          </button>
         </div>
       </div>
-      
-      <nav className="flex-1 mt-6 px-4 space-y-2">
-        <SidebarLink icon={<HiChartBar />} label="Overview" active={activeMenu === 'overview'} onClick={() => {setActiveMenu('overview'); setViewing360UserId(null);}} />
-        <SidebarLink icon={<HiChartBar />} label="Activity Monitoring" active={activeMenu === 'activity'} onClick={() => {setActiveMenu('activity'); setViewing360UserId(null);}} />
-        <SidebarLink icon={<HiUsers />} label="User Management" active={activeMenu === 'users'} onClick={() => {setActiveMenu('users'); setViewing360UserId(null);}} />
-        <SidebarLink icon={<HiIdentification />} label="KYC Verification" active={activeMenu === 'kyc'} onClick={() => setActiveMenu('kyc')} />
-        <SidebarLink icon={<HiTruck />} label="Live Fleet Tracking" active={activeMenu === 'tracking'} onClick={() => setActiveMenu('tracking')} />
-        <SidebarLink icon={<HiDocumentText />} label="Trip Verifications" active={activeMenu === 'trips'} onClick={() => setActiveMenu('trips')} />
-        <SidebarLink icon={<HiDocumentText />} label="Advanced Reports" onClick={() => navigate('/admin/reports')} />
-        <SidebarLink icon={<HiCash />} label="Financials" active={activeMenu === 'financials'} onClick={() => setActiveMenu('financials')} />
-        <SidebarLink icon={<HiCog />} label="Settings" onClick={() => navigate('/admin/settings')} />
-      </nav>
-      
-      <div className="p-4 border-t border-slate-200 bg-white">
-        <button onClick={handleLogout} className="flex items-center w-full px-4 py-3 text-sm font-bold text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all group">
-          <HiLogout className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" /> Sign Out
-        </button>
-      </div>
-    </div>
+    </>
   );
 
   const SidebarLink = ({ icon, label, active, onClick }: any) => (
@@ -236,13 +259,14 @@ const AdminDashboard: React.FC = () => {
     <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900">
       <Sidebar />
       
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto w-full">
         {/* Top Header */}
         <ProfileHeader
           user={user}
           roleBadgeText="Super Admin"
           roleBadgeClasses="bg-indigo-50 text-indigo-600 border-indigo-100"
           welcomeMessage={`Welcome back, ${user?.fullName?.split(' ')[0] || 'Admin'}`}
+          onMenuToggle={() => setIsSidebarOpen(true)}
           stats={[
             { label: 'Total Users', value: platformAnalytics?.totalUsers || 0, icon: <HiUsers /> },
             { label: 'Total Loads', value: platformAnalytics?.totalLoads || 0, icon: <HiShoppingCart /> },
@@ -259,58 +283,7 @@ const AdminDashboard: React.FC = () => {
         <div className="p-10">
           {/* Overview Section */}
           {activeMenu === 'overview' && (
-            <div className="animate-fadeIn">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                <StatCard label="Total Loads" value={platformAnalytics?.totalLoads || 0} icon={<HiShoppingCart />} color="bg-indigo-600" />
-                <StatCard label="Trips Lifecycle" value={platformAnalytics?.totalTrips || 0} icon={<HiTruck />} color="bg-emerald-500" />
-                <StatCard label="Platform Users" value={platformAnalytics?.totalUsers || 0} icon={<HiUsers />} color="bg-amber-500" />
-                <StatCard label="Active Bids" value={platformAnalytics?.totalBids || 0} icon={<HiCash />} color="bg-purple-600" />
-              </div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-                <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-200">
-                  <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-xl font-black">Revenue Analytics</h3>
-                    <span className="text-[10px] font-black uppercase text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Last 6 Months</span>
-                  </div>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={(platformAnalytics?.revenueTrends || []).map((val: number, i: number) => ({ name: `Mon ${i+1}`, revenue: val }))}>
-                        <defs>
-                          <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
-                        <YAxis axisLine={false} tickLine={false} tickFormatter={(val) => `₹${val/1000}k`} tick={{fill: '#64748b'}} />
-                        <Tooltip formatter={(value: any) => [`₹${value.toLocaleString()}`, 'Revenue']} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                        <Area type="monotone" dataKey="revenue" stroke="#4F46E5" strokeWidth={4} fill="url(#colorRev)" />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-200">
-                  <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-xl font-black">Platform Load Volume</h3>
-                    <span className="text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Growth Rate</span>
-                  </div>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={(platformAnalytics?.loadVolumes || []).map((val: number, i: number) => ({ name: `Wk ${i+1}`, volume: val }))}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
-                        <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
-                        <Tooltip formatter={(value: any) => [`${value} Loads`, 'Volume']} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} cursor={{fill: '#f1f5f9'}} />
-                        <Bar dataKey="volume" fill="#10B981" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <AdminAnalyticsDashboard />
           )}
 
           {/* Activity Monitoring Section */}

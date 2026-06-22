@@ -30,10 +30,6 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         metrics.put("totalBids", bidRepository.count());
         metrics.put("totalUsers", userRepository.count());
         
-        // Trends (Mocked for dashboard charts)
-        metrics.put("revenueTrends", new int[]{5000, 12000, 8000, 15000, 22000, 18000});
-        metrics.put("loadVolumes", new int[]{10, 25, 15, 30, 45, 40});
-        
         return metrics;
     }
 
@@ -52,5 +48,30 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         metrics.put("completedTrips", tripRepository.countByTransporterId(userId)); // assuming repo has this
         metrics.put("fleetSize", driverRepository.countByTransporterId(userId) + vehicleRepository.countByTransporterId(userId));
         return metrics;
+    }
+
+    @Override
+    public Map<String, Object> getPublicAnalytics() {
+        Map<String, Object> metrics = new HashMap<>();
+        metrics.put("totalUsers", userRepository.count());
+        metrics.put("totalLoads", loadRepository.count());
+        metrics.put("totalTransporters", userRepository.count()); // Approximate unless we filter by role
+        metrics.put("totalDrivers", driverRepository.count());
+        return metrics;
+    }
+
+    @Override
+    public Object getTransporterMonthlyLoads(Long userId) {
+        throw new UnsupportedOperationException("Monthly loads analytics not implemented with real data");
+    }
+
+    @Override
+    public Object getTransporterRevenue(Long userId) {
+        throw new UnsupportedOperationException("Revenue analytics not implemented with real data");
+    }
+
+    @Override
+    public Object getTransporterDriverPerformance(Long userId) {
+        throw new UnsupportedOperationException("Driver performance analytics not implemented with real data");
     }
 }
