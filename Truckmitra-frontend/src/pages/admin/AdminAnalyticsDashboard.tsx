@@ -7,7 +7,7 @@ import { protectedApi } from '../../services/api/protectedAndPublicAPI';
 import { exportToCSV, exportToExcel, exportToPDF } from '../../utils/exportUtils';
 import { 
     HiUsers, HiTruck, HiCash, HiShoppingCart, HiDocumentText, 
-    HiDownload, HiSearch, HiRefresh, HiCheckCircle 
+    HiDownload, HiSearch, HiRefresh
 } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 

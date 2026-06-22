@@ -7,6 +7,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Register: React.FC = () => {
   const [step, setStep] = useState(1);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [role, setRole] = useState<Role | ''>('');
   const [formData, setFormData] = useState({
     fullName: '',

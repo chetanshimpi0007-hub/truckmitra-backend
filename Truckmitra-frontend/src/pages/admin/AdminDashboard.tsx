@@ -36,6 +36,7 @@ import { AdminUser360 } from './AdminUser360';
 import ProfileHeader from '../../Components/dashboard/ProfileHeader';
 // Recharts used in AdminAnalyticsDashboard
 import AdminAnalyticsDashboard from './AdminAnalyticsDashboard';
+import PredictiveDashboard from './PredictiveDashboard';
 
 // ... other imports
 // (Note: Since I'm using replace_file_content, I'll just find the exact places)
@@ -46,7 +47,7 @@ const AdminDashboard: React.FC = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  const [activeMenu, setActiveMenu] = useState<'overview' | 'activity' | 'users' | 'kyc' | 'financials' | 'settings' | 'tracking' | 'trips'>(
+  const [activeMenu, setActiveMenu] = useState<'overview' | 'activity' | 'predictive' | 'users' | 'kyc' | 'financials' | 'settings' | 'tracking' | 'trips'>(
     location.pathname.includes('/users') ? 'users' : 'overview'
   );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -79,19 +80,16 @@ const AdminDashboard: React.FC = () => {
   const [viewing360UserId, setViewing360UserId] = useState<number | null>(null);
 
   const { 
-    stats: userStats, 
     allUsers, 
     pendingUsers,
     selectedUser, 
-    loading,
     getStats,
     getUsers,
     getUserDetails,
     verifyUser,
     rejectUser,
     suspendUser,
-    activateUser,
-    clearSelectedUser
+    activateUser
   } = useAdmin();
 
   const [platformAnalytics, setPlatformAnalytics] = useState<any>({
@@ -127,6 +125,7 @@ const AdminDashboard: React.FC = () => {
     } else if (activeMenu === 'kyc') {
       getUsers({ role: kycTab });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu, kycTab, searchTerm, userStatusFilter]);
   
   const fetchAllTrips = async () => {
@@ -222,6 +221,7 @@ const AdminDashboard: React.FC = () => {
         <nav className="flex-1 mt-6 px-4 space-y-2 overflow-y-auto">
           <SidebarLink icon={<HiChartBar />} label="Overview" active={activeMenu === 'overview'} onClick={() => {setActiveMenu('overview'); setViewing360UserId(null); setIsSidebarOpen(false);}} />
           <SidebarLink icon={<HiChartBar />} label="Activity Monitoring" active={activeMenu === 'activity'} onClick={() => {setActiveMenu('activity'); setViewing360UserId(null); setIsSidebarOpen(false);}} />
+          <SidebarLink icon={<HiChartBar />} label="Predictive Analytics" active={activeMenu === 'predictive'} onClick={() => {setActiveMenu('predictive'); setViewing360UserId(null); setIsSidebarOpen(false);}} />
           <SidebarLink icon={<HiUsers />} label="User Management" active={activeMenu === 'users'} onClick={() => {setActiveMenu('users'); setViewing360UserId(null); setIsSidebarOpen(false);}} />
           <SidebarLink icon={<HiIdentification />} label="KYC Verification" active={activeMenu === 'kyc'} onClick={() => {setActiveMenu('kyc'); setIsSidebarOpen(false);}} />
           <SidebarLink icon={<HiTruck />} label="Live Fleet Tracking" active={activeMenu === 'tracking'} onClick={() => {setActiveMenu('tracking'); setIsSidebarOpen(false);}} />
@@ -289,6 +289,11 @@ const AdminDashboard: React.FC = () => {
           {/* Activity Monitoring Section */}
           {activeMenu === 'activity' && (
             <AdminActivityDashboard />
+          )}
+
+          {/* Predictive Analytics Section */}
+          {activeMenu === 'predictive' && (
+            <PredictiveDashboard />
           )}
 
           {/* User Management Section */}
@@ -645,6 +650,7 @@ const AdminDashboard: React.FC = () => {
 };
 
 // Sub-components
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const StatCard = ({ label, value, icon, color }: any) => (
   <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 border-b-4 hover:border-indigo-600 transition-all group overflow-hidden relative">
     <div className={`absolute top-0 right-0 w-24 h-24 ${color} opacity-[0.03] rounded-bl-[100px] -mr-8 -mt-8 transition-all group-hover:scale-110`} />

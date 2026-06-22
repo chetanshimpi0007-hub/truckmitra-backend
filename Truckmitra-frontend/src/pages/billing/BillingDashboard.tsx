@@ -14,6 +14,7 @@ interface BillingDashboardProps {
 
 const BillingDashboard: React.FC<BillingDashboardProps> = ({ rolePath }) => {
   const [summary, setSummary] = useState<BillingSummary | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSummary = async () => {

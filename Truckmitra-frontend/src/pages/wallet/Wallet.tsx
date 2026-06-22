@@ -94,26 +94,6 @@ const Wallet: React.FC = () => {
       const { data } = await protectedApi.post('/api/wallet/create-order', { amount: Number(amountToAdd) });
       const order = data.data;
 
-      // Check if it's a mock order due to missing env vars
-      if (order.id && order.id.startsWith('order_mock_')) {
-        toast.success('Mock Order Created. Simulating Payment Redirect...', { id: 'payment' });
-        window.open('https://razorpay.me/@chetandevidasshimpi', '_blank');
-        
-        // Simulate backend verification
-        setTimeout(async () => {
-          await protectedApi.post('/api/wallet/verify-payment', { 
-            razorpay_order_id: order.id,
-            razorpay_payment_id: 'mock_pay_id',
-            razorpay_signature: 'mock_sig'
-          });
-          toast.success(`Verification complete (Simulated). Your balance is updated.`);
-          setShowAddMoney(false);
-          setAmountToAdd('');
-          fetchWalletData();
-        }, 3000);
-        return;
-      }
-
       // 2. Open Razorpay Checkout Modal
       const options = {
         key: process.env.REACT_APP_RAZORPAY_KEY_ID || '', // Frontend key (public)

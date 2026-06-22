@@ -83,14 +83,7 @@ const Login: React.FC = () => {
   };
 
   const handleFacebookLogin = async () => {
-    try {
-      // For development, we'll use a mock token
-      const mockFacebookToken = 'mock-facebook-token';
-      const result = await loginWithFacebook(mockFacebookToken);
-      handlePostLogin(result);
-    } catch (err) {
-      setError('Facebook login failed. Please try again.');
-    }
+    toast.error('Facebook login is not configured. Please use Email or Google login.');
   };
 
 const handlePostLogin = (result: any) => {

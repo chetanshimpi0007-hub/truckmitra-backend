@@ -1,6 +1,6 @@
 // src/components/profile/DocumentUpload.tsx
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { DocumentType, VerificationStatus } from '../../interfaces/profile.interface';
 import { HiUpload, HiX, HiCheckCircle, HiClock, HiExclamationCircle, HiPhotograph } from 'react-icons/hi';
 import toast from 'react-hot-toast';
@@ -50,10 +50,6 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUpload, existingDocum
     return existingDocuments.some(doc => doc.docType === type);
   };
 
-  const getDocumentStatus = (type: DocumentType) => {
-    const doc = existingDocuments.find(d => d.docType === type);
-    return doc?.verificationStatus;
-  };
 
   const getStatusBadge = (status?: VerificationStatus) => {
     switch (status) {

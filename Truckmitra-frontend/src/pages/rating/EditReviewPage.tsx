@@ -45,15 +45,9 @@ const EditReviewPage: React.FC = () => {
       // Since we don't have reviewId endpoint, we'll simulate for demo
       // In real app, you'd need a backend endpoint like GET /api/ratings/reviews/{reviewId}
       
-      // For demo, we'll show a message
-      toast.error('Direct review editing not available in demo. Please implement backend endpoint.');
+      // Real API endpoint is missing, explicitly failing
+      toast.error('Direct review editing API is not configured.');
       navigate(-1);
-      
-      // Mock implementation (replace with actual API call)
-      // const response = await ratingService.getReviewById(parseInt(reviewId!));
-      // (response);
-      // setContent(response.content);
-      // (response.);
       
     } catch (error) {
       console.error('Failed to load review:', error);

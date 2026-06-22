@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ReturnLoadSuggestionResponse } from '../../types/load';
 import { tripService } from '../../services/api/trip.service';
-import { HiLocationMarker, HiOutlineCube, HiOutlineCurrencyRupee, HiChevronRight } from 'react-icons/hi';
+import { HiOutlineCube, HiOutlineCurrencyRupee, HiChevronRight } from 'react-icons/hi';
 import { format } from 'date-fns';
 
 interface Props {

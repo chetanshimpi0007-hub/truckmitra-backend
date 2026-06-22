@@ -54,8 +54,7 @@ export const TokenStorage = {
   },
 
   generateDeviceToken: (): string => {
-    const token = 'device_' + Math.random().toString(36).substring(2, 15) + 
-                  Math.random().toString(36).substring(2, 15);
+    const token = 'device_' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36));
     localStorage.setItem('deviceToken', token);
     return token;
   },

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   HiDownload, 
-  HiDocumentReport, 
   HiOutlineDocumentReport,
   HiTable,
   HiFilter,

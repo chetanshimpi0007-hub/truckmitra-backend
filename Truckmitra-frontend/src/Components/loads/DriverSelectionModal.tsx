@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { HiX, HiTruck, HiUser, HiPhone } from 'react-icons/hi';
 import protectedApi from '../../services/api/protectedAndPublicAPI';
 import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 import { ProfitEstimatorWidget } from '../dashboard/ProfitEstimatorWidget';
 
 interface DriverSelectionModalProps {
@@ -13,7 +12,6 @@ interface DriverSelectionModalProps {
 }
 
 const DriverSelectionModal: React.FC<DriverSelectionModalProps> = ({ loadId, shipperAmount, onClose, onSuccess }) => {
-  const navigate = useNavigate();
   const [drivers, setDrivers] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -207,7 +205,7 @@ const DriverSelectionModal: React.FC<DriverSelectionModalProps> = ({ loadId, shi
           )}
         </div>
 
-        <div className="px-8 py-6 border-t border-slate-100 bg-slate-50 flex space-x-3">
+        <div className="px-8 py-6 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
           <button 
             onClick={handleSkip}
             className="flex-1 py-4 text-slate-500 font-bold hover:bg-slate-200 bg-slate-100 rounded-2xl transition-all"

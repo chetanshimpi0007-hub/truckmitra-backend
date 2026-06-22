@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  HiX, HiCheckCircle, HiXCircle, HiDownload, HiZoomIn, 
+  HiX, HiCheckCircle, HiDownload, HiZoomIn, 
   HiDocumentText, HiPhotograph, HiClipboardList, HiInformationCircle,
   HiGlobe, HiClock, HiCurrencyDollar, HiUser
 } from 'react-icons/hi';
@@ -13,7 +13,6 @@ type TabOption = 'summary' | 'lr' | 'pod' | 'pickup_receipt' | 'delivery_receipt
 export default function DeliveryVerificationCenter({ trip, onClose, onDone }: any) {
   const [activeTab, setActiveTab] = useState<TabOption>('summary');
   const [photos, setPhotos] = useState<any[]>([]);
-  const [loadingPhotos, setLoadingPhotos] = useState(false);
   
   const [reason, setReason] = useState('');
   const [reasonError, setReasonError] = useState(false);
@@ -26,11 +25,9 @@ export default function DeliveryVerificationCenter({ trip, onClose, onDone }: an
   const lrUrl      = trip.lrPdfUrl || null;
 
   useEffect(() => {
-    setLoadingPhotos(true);
     protectedApi.get(`/api/trips/${trip.id}/photos`)
       .then(r => setPhotos(Array.isArray(r.data) ? r.data : (r.data?.data || [])))
-      .catch(() => setPhotos([]))
-      .finally(() => setLoadingPhotos(false));
+      .catch(() => setPhotos([]));
   }, [trip.id]);
 
   const pickupPhotos      = photos.filter(p => p.photoType === 'PICKUP' || p.type === 'PICKUP');
@@ -398,7 +395,7 @@ export default function DeliveryVerificationCenter({ trip, onClose, onDone }: an
               />
             </div>
 
-            <div className="flex space-x-4 w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
               <button 
                 onClick={handleReject} disabled={loading}
                 className="flex-1 md:flex-none px-8 py-4 bg-white dark:bg-slate-800 text-rose-500 border-2 border-rose-100 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-2xl font-black tracking-widest uppercase transition-colors disabled:opacity-50"

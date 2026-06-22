@@ -8,6 +8,7 @@ import StatWidget from '../ui/StatWidget';
 import GlassCard from '../ui/GlassCard';
 import { ReturnLoadSuggestionsWidget } from '../loads/ReturnLoadSuggestionsWidget';
 import { LiveDriverAvailabilityWidget } from './LiveDriverAvailabilityWidget';
+import { PredictiveInsightsWidget } from './PredictiveInsightsWidget';
 import { protectedApi } from '../../services/api/protectedAndPublicAPI';
 import { useAuth } from '../../hooks/auth.hook';
 
@@ -63,10 +64,10 @@ const TransporterOverview: React.FC<TransporterOverviewProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatWidget 
           title="Total Revenue" 
-          value={totalRevenue || 1245000} 
+          value={totalRevenue || 0} 
           prefix="₹" 
           icon={<HiCurrencyDollar className="w-8 h-8" />} 
-          trend={12.5} 
+          trend={0} 
           trendText="vs last month" 
           color="success" 
         />
@@ -97,7 +98,7 @@ const TransporterOverview: React.FC<TransporterOverviewProps> = ({
         <StatWidget title="Fleet Count" value={stats.totalVehicles} icon={<HiTruck className="w-6 h-6" />} color="secondary" delay={0.1} />
         <StatWidget title="Total Drivers" value={stats.totalDrivers} icon={<HiUser className="w-6 h-6" />} color="secondary" delay={0.2} />
         <StatWidget title="Open Tenders" value={stats.openTenders} icon={<HiChartBar className="w-6 h-6" />} color="primary" delay={0.3} />
-        <StatWidget title="CO₂ Saved (kg)" value={1450} icon={<HiGlobe className="w-6 h-6" />} trend={8} color="success" delay={0.4} />
+        <StatWidget title="CO₂ Saved (kg)" value={0} icon={<HiGlobe className="w-6 h-6" />} trend={0} color="success" delay={0.4} />
       </div>
 
       {/* 2. PROFESSIONAL ANALYTICS */}
@@ -178,7 +179,7 @@ const TransporterOverview: React.FC<TransporterOverviewProps> = ({
           <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Top Driver Performance</h3>
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={driverPerformance.length > 0 ? driverPerformance : [{name: 'John', score: 95}, {name: 'Doe', score: 88}]} margin={{ top: 10, right: 30, left: -20, bottom: 0 }}>
+              <LineChart data={driverPerformance} margin={{ top: 10, right: 30, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} />
                 <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} />
@@ -272,6 +273,10 @@ const TransporterOverview: React.FC<TransporterOverviewProps> = ({
         <div className="lg:col-span-2">
           <LiveDriverAvailabilityWidget />
         </div>
+      </div>
+
+      <div className="mt-8">
+        <PredictiveInsightsWidget />
       </div>
 
       {/* 4. RETURN LOAD SUGGESTIONS */}

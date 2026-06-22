@@ -2,12 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   HiSave, 
   HiOfficeBuilding, 
-  HiIdentification, 
   HiColorSwatch, 
-  HiLightningBolt,
   HiUpload,
-  HiGlobeAlt,
-  HiLocationMarker,
   HiDocumentText,
   HiKey
 } from 'react-icons/hi';

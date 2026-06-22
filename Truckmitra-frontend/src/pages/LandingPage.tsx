@@ -9,7 +9,6 @@ import {
   HiLightningBolt,
   HiShieldCheck,
   HiChartBar,
-  HiPhone,
   HiUser
 } from 'react-icons/hi';
 import { LogisticsHero } from '../Components/illustrations/LogisticsHero';
@@ -22,11 +21,6 @@ const fadeInUp: any = {
   transition: { duration: 0.7, ease: "easeOut" }
 };
 
-const staggerContainer = {
-  initial: {},
-  whileInView: { transition: { staggerChildren: 0.1 } },
-  viewport: { once: true, margin: "-100px" }
-};
 
 const LandingPage: React.FC = () => {
   return (
