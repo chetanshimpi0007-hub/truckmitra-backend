@@ -30,7 +30,11 @@ import Trips from '../pages/trips/Trips';
 import PublicRoute from './PublicRoute';
 import PrivateRoute from './PrivateRoute';
 import LandingPage from '../pages/LandingPage';
-import StaticPage from '../pages/StaticPage';
+import HelpCenter from '../pages/footer/HelpCenter';
+import ContactUs from '../pages/footer/ContactUs';
+import Faqs from '../pages/footer/Faqs';
+import TermsOfService from '../pages/footer/TermsOfService';
+import PrivacyPolicy from '../pages/footer/PrivacyPolicy';
 import ProfilePage from '../pages/profile/ProfilePage';
 import EditProfilePage from '../pages/profile/EditProfilePage';
 import DocumentsPage from '../pages/profile/DocumentsPage';
@@ -53,11 +57,11 @@ const AppRoutes = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/about" element={<AboutUs />} />
       <Route path="/pricing" element={<PricingPage />} />
-      <Route path="/help" element={<StaticPage title="Help Center" />} />
-      <Route path="/contact" element={<StaticPage title="Contact Us" />} />
-      <Route path="/faqs" element={<StaticPage title="FAQs" />} />
-      <Route path="/terms" element={<StaticPage title="Terms of Service" />} />
-      <Route path="/privacy" element={<StaticPage title="Privacy Policy" />} />
+      <Route path="/help" element={<HelpCenter />} />
+      <Route path="/contact" element={<ContactUs />} />
+      <Route path="/faqs" element={<Faqs />} />
+      <Route path="/terms" element={<TermsOfService />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/verify/lr/:lrNumber" element={<VerifyLR />} />
 
       {/* Role Landing Redirects */}

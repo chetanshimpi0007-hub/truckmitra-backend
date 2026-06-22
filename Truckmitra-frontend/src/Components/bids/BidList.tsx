@@ -23,7 +23,7 @@ const BidList = ({ loadId }: any) => {
   const accept = async (bidId: number) => {
     setAccepting(bidId);
     try {
-      await protectedApi.post(`/api/bids/${bidId}/accept`);
+      await protectedApi.put(`/api/bids/${bidId}/accept`);
       toast.success('Bid accepted');
       fetchBids();
     } catch (err: any) {

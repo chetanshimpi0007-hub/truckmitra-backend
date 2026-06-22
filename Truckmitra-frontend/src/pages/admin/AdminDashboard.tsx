@@ -37,7 +37,7 @@ import ProfileHeader from '../../Components/dashboard/ProfileHeader';
 // Recharts used in AdminAnalyticsDashboard
 import AdminAnalyticsDashboard from './AdminAnalyticsDashboard';
 import PredictiveDashboard from './PredictiveDashboard';
-
+import ErrorBoundary from '../../Components/common/ErrorBoundary';
 // ... other imports
 // (Note: Since I'm using replace_file_content, I'll just find the exact places)
 
@@ -260,6 +260,7 @@ const AdminDashboard: React.FC = () => {
       <Sidebar />
       
       <main className="flex-1 overflow-y-auto w-full">
+        <ErrorBoundary componentName="Admin Dashboard">
         {/* Top Header */}
         <ProfileHeader
           user={user}
@@ -270,7 +271,7 @@ const AdminDashboard: React.FC = () => {
           stats={[
             { label: 'Total Users', value: platformAnalytics?.totalUsers || 0, icon: <HiUsers /> },
             { label: 'Total Loads', value: platformAnalytics?.totalLoads || 0, icon: <HiShoppingCart /> },
-            { label: 'Recent Revenue', value: `₹${(platformAnalytics?.revenueTrends?.[platformAnalytics?.revenueTrends?.length - 1] || 0).toLocaleString('en-IN')}`, icon: <HiCash /> },
+            { label: 'Recent Revenue', value: `₹${(platformAnalytics?.revenueTrends?.length ? platformAnalytics.revenueTrends[platformAnalytics.revenueTrends.length - 1] : 0).toLocaleString('en-IN')}`, icon: <HiCash /> },
             { label: 'Pending Approvals', value: pendingUsers?.length || 0, icon: <HiExclamationCircle /> }
           ]}
         >
@@ -521,6 +522,7 @@ const AdminDashboard: React.FC = () => {
             </div>
           )}
         </div>
+        </ErrorBoundary>
       </main>
 
       {/* User Detail Modal */}
