@@ -1,6 +1,5 @@
 // src/hooks/auth.hook.ts
 import { useAppSelector, useAppDispatch } from './redux.hook';
-import authService from '../services/api/auth.service';
 import {
   clearError,
   login,
@@ -22,7 +21,6 @@ import {
   LoginRequest,
   OtpRequest,
   OtpVerificationRequest,
-  ResetPasswordRequest,
   AuthResponse
 } from '../interfaces/auth.interface';
 import toast from 'react-hot-toast';
@@ -223,23 +221,6 @@ export const useAuth = () => {
     [dispatch, navigate]
   );
 
-
-  // const handleResetPassword = useCallback(
-  //   async (data: ResetPasswordRequest) => {
-  //     try {
-  //       const response = await authService.resetPassword(data);
-  //       if (response.success) {
-  //         toast.success('Password reset successfully');
-  //         return true;
-  //       }
-  //       return false;
-  //     } catch (error: any) {
-  //       toast.error(error.response?.data?.message || 'Failed to reset password');
-  //       return false;
-  //     }
-  //   },
-  //   []
-  // );
 
   const handleLogout = useCallback(async () => {
   await dispatch(logout());

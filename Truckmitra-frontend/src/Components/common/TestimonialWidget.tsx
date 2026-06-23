@@ -17,7 +17,7 @@ export const TestimonialWidget: React.FC = () => {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
 
   useEffect(() => {
-    publicApi.get('/api/testimonials')
+    publicApi.get('/testimonials')
       .then(res => {
         if (res.data) setTestimonials(res.data);
       })

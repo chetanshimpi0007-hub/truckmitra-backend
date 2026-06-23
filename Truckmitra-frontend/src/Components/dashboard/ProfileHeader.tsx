@@ -92,7 +92,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   
                   if (!userId) throw new Error('User ID not found');
                   
-                  const res = await protectedApi.post(`/api/profile/${userId}/upload-image`, formData, {
+                  const res = await protectedApi.post(`/profile/${userId}/upload-image`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                   });
                   

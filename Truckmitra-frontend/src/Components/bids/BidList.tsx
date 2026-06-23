@@ -11,7 +11,7 @@ const BidList = ({ loadId }: any) => {
     if (!loadId) return;
     setLoading(true);
     try {
-      const res = await protectedApi.get(`/api/bids/load/${loadId}`);
+      const res = await protectedApi.get(`/bids/load/${loadId}`);
       setBids(res.data || []);
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to load bids');
@@ -23,7 +23,7 @@ const BidList = ({ loadId }: any) => {
   const accept = async (bidId: number) => {
     setAccepting(bidId);
     try {
-      await protectedApi.put(`/api/bids/${bidId}/accept`);
+      await protectedApi.put(`/bids/${bidId}/accept`);
       toast.success('Bid accepted');
       fetchBids();
     } catch (err: any) {

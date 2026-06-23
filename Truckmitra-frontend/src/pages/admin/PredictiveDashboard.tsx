@@ -88,10 +88,10 @@ export default function PredictiveDashboard() {
         setLoading(true);
         try {
             const [lf, rf, ra, ut] = await Promise.all([
-                protectedApi.get<LoadForecastDTO>('/api/analytics/predictive/load-volume').catch(() => ({ data: null as unknown as LoadForecastDTO })),
-                protectedApi.get<RevenueForecastDTO>('/api/analytics/predictive/revenue').catch(() => ({ data: null as unknown as RevenueForecastDTO })),
-                protectedApi.get<RouteAnalyticsDTO>('/api/analytics/predictive/routes').catch(() => ({ data: null as unknown as RouteAnalyticsDTO })),
-                protectedApi.get<UtilizationDTO>('/api/analytics/predictive/utilization').catch(() => ({ data: null as unknown as UtilizationDTO })),
+                protectedApi.get<LoadForecastDTO>('/analytics/predictive/load-volume').catch(() => ({ data: null as unknown as LoadForecastDTO })),
+                protectedApi.get<RevenueForecastDTO>('/analytics/predictive/revenue').catch(() => ({ data: null as unknown as RevenueForecastDTO })),
+                protectedApi.get<RouteAnalyticsDTO>('/analytics/predictive/routes').catch(() => ({ data: null as unknown as RouteAnalyticsDTO })),
+                protectedApi.get<UtilizationDTO>('/analytics/predictive/utilization').catch(() => ({ data: null as unknown as UtilizationDTO })),
             ]);
             setLoadForecast(lf.data);
             setRevenueForecast(rf.data);

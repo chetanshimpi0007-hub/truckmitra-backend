@@ -129,7 +129,7 @@ const ShipperDashboard: React.FC = () => {
   /* ── Data fetch ──────────────────────────────────────────────────────────── */
   const fetchShipperTrips = async () => {
     try {
-      const response = await protectedApi.get('/api/trips/shipper');
+      const response = await protectedApi.get('/trips/shipper');
       const allTrips = response.data || [];
       const completed = allTrips.filter((t: any) => t.status === 'COMPLETED' || t.status === 'DELIVERED');
       setCompletedTrips(completed);
@@ -138,14 +138,14 @@ const ShipperDashboard: React.FC = () => {
 
   const fetchLoads = async () => {
     try {
-      const response = await protectedApi.get('/api/loads/shipper');
+      const response = await protectedApi.get('/loads/shipper');
       const rawLoads: any[] = response.data || [];
 
       // Fetch bid counts for all loads in parallel
       const loadsWithCounts = await Promise.all(
         rawLoads.map(async (load: any) => {
           try {
-            const countRes = await protectedApi.get(`/api/bids/load/${load.id}/count`);
+            const countRes = await protectedApi.get(`/bids/load/${load.id}/count`);
             return { ...load, bidCount: Number(countRes.data?.data ?? 0) };
           } catch {
             return { ...load, bidCount: 0 };
@@ -160,7 +160,7 @@ const ShipperDashboard: React.FC = () => {
 
   const fetchActiveTrips = async () => {
     try {
-      const response = await protectedApi.get('/api/tracking/shipper/active');
+      const response = await protectedApi.get('/tracking/shipper/active');
       setActiveTrips(response.data || []);
     } catch { /* silent */ }
   };
@@ -179,7 +179,7 @@ const ShipperDashboard: React.FC = () => {
     setDocumentLoading(true);
     setDocumentTrip(null);
     try {
-      const response = await protectedApi.get(`/api/trips/load/${load.id}`);
+      const response = await protectedApi.get(`/trips/load/${load.id}`);
       setDocumentTrip(response.data);
     } catch {
       toast.error('Failed to fetch trip documents. Trip may not be fully initialized.');
@@ -190,7 +190,7 @@ const ShipperDashboard: React.FC = () => {
 
   const handleDownloadLr = async (tripId: number) => {
     try {
-      const response = await protectedApi.get(`/api/lr/trip/${tripId}/pdf`, { responseType: 'blob' });
+      const response = await protectedApi.get(`/lr/trip/${tripId}/pdf`, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -204,7 +204,7 @@ const ShipperDashboard: React.FC = () => {
 
   const handleDownloadInvoice = async (tripId: number) => {
     try {
-      const response = await protectedApi.get(`/api/trips/${tripId}/final-invoice`, { responseType: 'blob' });
+      const response = await protectedApi.get(`/trips/${tripId}/final-invoice`, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -222,7 +222,7 @@ const ShipperDashboard: React.FC = () => {
     setBidsLoading(true);
     setLoadBids([]);
     try {
-      const response = await protectedApi.get(`/api/bids/load/${load.id}`);
+      const response = await protectedApi.get(`/bids/load/${load.id}`);
       const bids: BidDto[] = response.data?.data || [];
       // Sort: PENDING first, then by amount ASC
       bids.sort((a, b) => {
@@ -241,7 +241,7 @@ const ShipperDashboard: React.FC = () => {
   const handleAcceptBid = async (bidId: number) => {
     setAcceptingBidId(bidId);
     try {
-      await protectedApi.put(`/api/bids/${bidId}/accept`);
+      await protectedApi.put(`/bids/${bidId}/accept`);
       toast.success('✅ Bid accepted! Transporter assigned to load.');
       setShowBidsModal(false);
       setSelectedLoad(null);
@@ -255,7 +255,7 @@ const ShipperDashboard: React.FC = () => {
 
   const handleRejectBid = async (bidId: number) => {
     try {
-      await protectedApi.put(`/api/bids/${bidId}/reject`);
+      await protectedApi.put(`/bids/${bidId}/reject`);
       toast.success('Bid rejected.');
       if (selectedLoad) await fetchBidsForLoad(selectedLoad);
     } catch {
@@ -267,7 +267,7 @@ const ShipperDashboard: React.FC = () => {
     if (!transporterSearch) return;
     setLoading(true);
     try {
-      const response = await protectedApi.get(`/api/search/transporters?query=${transporterSearch}`);
+      const response = await protectedApi.get(`/search/transporters?query=${transporterSearch}`);
       setTransporters(response.data || []);
       if ((response.data || []).length === 0) toast.error('No transporters found');
     } catch {
@@ -298,7 +298,7 @@ const ShipperDashboard: React.FC = () => {
         weight:           parseFloat(bidForm.weight)  || 0,
         budget:           parseFloat(bidForm.budget)  || 0,
         isBiddingEnabled: bidForm.isBiddingEnabled};
-      await protectedApi.post('/api/loads', loadData);
+      await protectedApi.post('/loads', loadData);
       toast.success('Load posted! Transporters are being notified.');
       setBidForm({ itemNames:'', source:'', destination:'', startDate:'', endDate:'',
                    startTime:'', endTime:'', weight:'', budget:'', notes: '', truckTypes: [], isBiddingEnabled: true });
@@ -672,7 +672,7 @@ const ShipperDashboard: React.FC = () => {
                         <h4 className="font-black text-slate-900 mb-1">Lorry Receipt (LR)</h4>
                         <p className="text-xs text-slate-500 font-medium mb-6">Generated on assignment</p>
                         <div className="flex w-full space-x-2 mt-auto">
-                          <button onClick={() => window.open(`/api/lr/trip/${documentTrip.id}/pdf`, '_blank')}
+                          <button onClick={() => window.open(`/lr/trip/${documentTrip.id}/pdf`, '_blank')}
                             className="flex-1 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-200 transition">
                             View
                           </button>
@@ -713,7 +713,7 @@ const ShipperDashboard: React.FC = () => {
                         <p className="text-xs text-slate-500 font-medium mb-6">Available after completion</p>
                         {documentTrip.finalInvoicePdfUrl || documentTrip.status === 'COMPLETED' ? (
                           <div className="flex w-full space-x-2 mt-auto">
-                            <button onClick={() => window.open(`/api/trips/${documentTrip.id}/final-invoice`, '_blank')}
+                            <button onClick={() => window.open(`/trips/${documentTrip.id}/final-invoice`, '_blank')}
                               className="flex-1 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-200 transition">
                               View
                             </button>

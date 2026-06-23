@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { protectedApi } from '../services/api/protectedAndPublicAPI';
 
-const LOCATION_ENDPOINT = '/api/driver-location/update';
+const LOCATION_ENDPOINT = '/driver-location/update';
 const GPS_QUEUE_KEY = 'gps_offline_queue';
 const MIN_INTERVAL_MS = 5000; // min 5s between updates
 

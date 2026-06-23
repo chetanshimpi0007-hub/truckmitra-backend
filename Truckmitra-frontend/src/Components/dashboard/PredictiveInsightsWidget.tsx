@@ -13,8 +13,8 @@ export const PredictiveInsightsWidget: React.FC = () => {
         const fetchPredictiveData = async () => {
             try {
                 const [utilRes, revRes] = await Promise.all([
-                    protectedApi.get('/api/analytics/predictive/utilization'),
-                    protectedApi.get('/api/analytics/predictive/revenue')
+                    protectedApi.get('/analytics/predictive/utilization'),
+                    protectedApi.get('/analytics/predictive/revenue')
                 ]);
                 setUtilization(utilRes.data);
                 setRevenue(revRes.data);

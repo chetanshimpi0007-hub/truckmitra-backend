@@ -67,15 +67,15 @@ class BillingService {
     if (search) params.append('search', search);
     if (status) params.append('status', status);
     
-    return api.get<PageResponse<TripInvoice>>(`/api/invoices${rolePath}?${params.toString()}`);
+    return api.get<PageResponse<TripInvoice>>(`/invoices${rolePath}?${params.toString()}`);
   }
 
   getInvoiceDetails(id: number) {
-    return api.get<TripInvoice>(`/api/invoices/${id}`);
+    return api.get<TripInvoice>(`/invoices/${id}`);
   }
 
   getSummary() {
-    return api.get<BillingSummary>('/api/invoices/summary');
+    return api.get<BillingSummary>('/invoices/summary');
   }
 
   recordPayment(invoiceId: number, amount: number, paymentMethod: string, transactionId?: string, remarks?: string) {
@@ -86,11 +86,11 @@ class BillingService {
     if (transactionId) params.append('transactionId', transactionId);
     if (remarks) params.append('remarks', remarks);
     
-    return api.post<PaymentRecord>(`/api/invoices/${invoiceId}/payments?${params.toString()}`);
+    return api.post<PaymentRecord>(`/invoices/${invoiceId}/payments?${params.toString()}`);
   }
 
   getPaymentHistory(invoiceId: number) {
-    return api.get<PaymentRecord[]>(`/api/invoices/${invoiceId}/payments`);
+    return api.get<PaymentRecord[]>(`/invoices/${invoiceId}/payments`);
   }
 
   exportInvoicesUrl(rolePath: string, search = '', status = '') {

@@ -194,14 +194,14 @@ const DriverDashboard: React.FC = () => {
   }, [user, navigate]);
 
   /* ── GPS TRACKING */
-  const { isTracking, gpsError, startTracking, stopTracking } = useGpsTracker(activeTripId);
+  const { isTracking, startTracking, stopTracking } = useGpsTracker(activeTripId);
 
   /* ── LOAD TRIPS */
   const fetchTrips = useCallback(async () => {
     if (!user?.id) return;
     setLoading(true);
     try {
-      const res = await protectedApi.get(`/api/trips/driver/${user.id}`);
+      const res = await protectedApi.get(`/trips/driver/${user.id}`);
       const data: any[] = res.data || [];
       setTrips(data);
       const active = data.find(t =>
@@ -228,7 +228,7 @@ const DriverDashboard: React.FC = () => {
   /* ── TRIP ACTION HANDLERS */
   const handleAccept = async (tripId: number) => {
     try {
-      await protectedApi.post(`/api/trips/${tripId}/accept-assignment`);
+      await protectedApi.post(`/trips/${tripId}/accept-assignment`);
       toast.success('Trip accepted! Assignment PDF is being generated.');
       fetchTrips();
     } catch (err: any) { toast.error(err.response?.data?.message || 'Failed to accept trip'); }
@@ -236,7 +236,7 @@ const DriverDashboard: React.FC = () => {
 
   const handleReject = async (tripId: number) => {
     try {
-      await protectedApi.post(`/api/trips/${tripId}/reject-assignment`);
+      await protectedApi.post(`/trips/${tripId}/reject-assignment`);
       toast.success('Trip rejected.');
       setActiveTripId(null);
       fetchTrips();
@@ -255,13 +255,13 @@ const DriverDashboard: React.FC = () => {
     try {
       if (pickupReceiptUrl && !activeTrip?.pickupReceiptUrl) {
         await tripService.uploadTripPhoto(tripId, pickupReceiptUrl, 'PICKUP');
-        await protectedApi.post(`/api/trips/${tripId}/upload-pickup-receipt`, null, {
+        await protectedApi.post(`/trips/${tripId}/upload-pickup-receipt`, null, {
           params: { receiptUrl: pickupReceiptUrl }
         });
         toast.success('Pickup receipt saved.');
       }
-      await protectedApi.post(`/api/trips/${tripId}/location-enabled`);
-      await protectedApi.post(`/api/trips/${tripId}/start`);
+      await protectedApi.post(`/trips/${tripId}/location-enabled`);
+      await protectedApi.post(`/trips/${tripId}/start`);
       toast.success('Trip started! GPS tracking enabled.');
       setPickupReceiptUrl('');
       fetchTrips();
@@ -279,7 +279,7 @@ const DriverDashboard: React.FC = () => {
 
   const handleUpdateStatus = async (tripId: number, status: string) => {
     try {
-      await protectedApi.patch(`/api/trips/${tripId}/status`, null, { params: { status } });
+      await protectedApi.patch(`/trips/${tripId}/status`, null, { params: { status } });
       toast.success(`Status updated to ${status.replace(/_/g, ' ')}`);
       fetchTrips();
     } catch (err: any) {
@@ -289,7 +289,7 @@ const DriverDashboard: React.FC = () => {
 
   const handlePause = async (tripId: number) => {
     try {
-      await protectedApi.post(`/api/trips/${tripId}/pause`);
+      await protectedApi.post(`/trips/${tripId}/pause`);
       toast.success('Trip paused.');
       fetchTrips();
     } catch (err: any) {
@@ -299,7 +299,7 @@ const DriverDashboard: React.FC = () => {
 
   const handleResume = async (tripId: number) => {
     try {
-      await protectedApi.post(`/api/trips/${tripId}/resume`);
+      await protectedApi.post(`/trips/${tripId}/resume`);
       toast.success('Trip resumed.');
       fetchTrips();
     } catch (err: any) {
@@ -309,7 +309,7 @@ const DriverDashboard: React.FC = () => {
 
   const handleDeliver = async (tripId: number) => {
     try {
-      await protectedApi.post(`/api/trips/${tripId}/deliver`);
+      await protectedApi.post(`/trips/${tripId}/deliver`);
       toast.success('Cargo marked as delivered.');
       fetchTrips();
     } catch (err: any) {
@@ -318,12 +318,12 @@ const DriverDashboard: React.FC = () => {
   };
 
   const handleFileUpload = async (file: File, type: 'pod' | 'signature' | 'deliveryReceipt' | 'deliveryPod' | 'pickup' | 'resubmitReceipt' | 'resubmitPod') => {
-    const formData = new FormData();
-    formData.append('file', file);
     setUploading(true);
     try {
-      const res = await protectedApi.post('/api/cloudinary/upload', formData);
-      const url = res.data.url || res.data;
+      // Use the frontend cloudinary service directly to bypass any protectedApi interceptor issues
+      const { default: cloudinaryService } = await import('../../services/profile/cloudinary.service');
+      const url = await cloudinaryService.uploadImage(file);
+      
       if (type === 'pod') setPodData(prev => ({ ...prev, imageUrl: url }));
       else if (type === 'signature') setPodData(prev => ({ ...prev, signatureUrl: url }));
       else if (type === 'deliveryReceipt') setDeliveryData(prev => ({ ...prev, deliveryReceiptUrl: url }));
@@ -332,7 +332,9 @@ const DriverDashboard: React.FC = () => {
       else if (type === 'resubmitReceipt') setResubmitData(prev => ({ ...prev, deliveryReceiptUrl: url }));
       else if (type === 'resubmitPod') setResubmitData(prev => ({ ...prev, podUrl: url }));
       toast.success('File uploaded!');
-    } catch { toast.error('Upload failed'); }
+    } catch (error: any) {
+      toast.error('Upload failed');
+    }
     finally { setUploading(false); }
   };
 
@@ -340,7 +342,7 @@ const DriverDashboard: React.FC = () => {
     if (!podData.imageUrl) { toast.error('Please upload a delivery photo first'); return; }
     setUploading(true);
     try {
-      await protectedApi.post(`/api/trips/${tripId}/pod`, podData);
+      await protectedApi.post(`/trips/${tripId}/pod`, podData);
       toast.success('Delivery proof submitted!');
       setPodOpen(false);
       setPodData({ imageUrl: '', signatureUrl: '', remarks: '' });
@@ -355,8 +357,12 @@ const DriverDashboard: React.FC = () => {
     if (!deliveryData.podUrl) { toast.error('POD (Proof of Delivery) is required'); return; }
     setUploading(true);
     try {
-      // Upload Destination Photo
-      await tripService.uploadTripPhoto(tripId, deliveryData.deliveryReceiptUrl, 'DESTINATION');
+      // Upload Destination Photo (Optional, don't block if it fails)
+      try {
+        await tripService.uploadTripPhoto(tripId, deliveryData.deliveryReceiptUrl, 'DESTINATION');
+      } catch (e) {
+        console.warn("Failed to upload destination photo to gallery", e);
+      }
       
       // Submit Delivery
       await tripService.submitDelivery(tripId, {
@@ -375,8 +381,14 @@ const DriverDashboard: React.FC = () => {
   const handlePickupReceiptSave = async (tripId: number) => {
     if (!pickupReceiptUrl) { toast.error('Please upload pickup receipt first'); return; }
     try {
-      await tripService.uploadTripPhoto(tripId, pickupReceiptUrl, 'PICKUP');
-      await protectedApi.post(`/api/trips/${tripId}/upload-pickup-receipt`, null, {
+      // Upload to photo gallery (Optional, don't block if it fails)
+      try {
+        await tripService.uploadTripPhoto(tripId, pickupReceiptUrl, 'PICKUP');
+      } catch (e) {
+        console.warn("Failed to upload pickup photo to gallery", e);
+      }
+      
+      await protectedApi.post(`/trips/${tripId}/upload-pickup-receipt`, null, {
         params: { receiptUrl: pickupReceiptUrl }
       });
       toast.success('Pickup receipt saved! Now enable GPS and start trip.');
@@ -391,7 +403,12 @@ const DriverDashboard: React.FC = () => {
     if (!resubmitData.podUrl) { toast.error('Corrected POD required'); return; }
     setUploading(true);
     try {
-      await tripService.uploadTripPhoto(tripId, resubmitData.deliveryReceiptUrl, 'DESTINATION');
+      try {
+        await tripService.uploadTripPhoto(tripId, resubmitData.deliveryReceiptUrl, 'DESTINATION');
+      } catch (e) {
+        console.warn("Failed to upload destination photo", e);
+      }
+      
       await tripService.driverResubmit(tripId, {
         deliveryReceiptUrl: resubmitData.deliveryReceiptUrl,
         podUrl: resubmitData.podUrl
@@ -406,7 +423,7 @@ const DriverDashboard: React.FC = () => {
 
   const downloadAssignmentPdf = async (tripId: number) => {
     try {
-      const res = await protectedApi.get(`/api/trips/${tripId}/assignment-pdf`, { responseType: 'blob' });
+      const res = await protectedApi.get(`/trips/${tripId}/assignment-pdf`, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
       Object.assign(document.createElement('a'), { href: url, download: `assignment_${tripId}.pdf` }).click();
       window.URL.revokeObjectURL(url);
@@ -415,7 +432,7 @@ const DriverDashboard: React.FC = () => {
 
   const downloadFinalInvoice = async (tripId: number) => {
     try {
-      const res = await protectedApi.get(`/api/trips/${tripId}/final-invoice`, { responseType: 'blob' });
+      const res = await protectedApi.get(`/trips/${tripId}/final-invoice`, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
       Object.assign(document.createElement('a'), { href: url, download: `final_invoice_${tripId}.pdf` }).click();
       window.URL.revokeObjectURL(url);
@@ -429,7 +446,7 @@ const DriverDashboard: React.FC = () => {
     toast.loading('Sending SOS…', { id: 'sos-toast' });
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
-        await protectedApi.post('/api/emergency/sos', {
+        await protectedApi.post('/emergency/sos', {
           driverId: user?.id,
           latitude: pos.coords.latitude,
           longitude: pos.coords.longitude});
@@ -623,17 +640,15 @@ const DriverDashboard: React.FC = () => {
                           onClick={async () => {
                             try {
                               // Fetch LR metadata first
-                              const res = await protectedApi.get(`/api/lr/trip/${activeTrip.id}`);
+                              const res = await protectedApi.get(`/lr/trip/${activeTrip.id}`);
                               const lr = res.data;
                               if (lr?.pdfUrl) {
                                 // Cloudinary URL exists — open directly in new tab
                                 window.open(lr.pdfUrl, '_blank', 'noopener,noreferrer');
                               } else {
                                 // Fallback: stream PDF directly from backend (no Cloudinary dependency)
-                                const token = localStorage.getItem('accessToken') ?? localStorage.getItem('token');
-                                const pdfUrl = `http://localhost:8080/api/lr/trip/${activeTrip.id}/pdf`;
                                 // Open with auth — use anchor trick with blob
-                                const pdfRes = await protectedApi.get(`/api/lr/trip/${activeTrip.id}/pdf`, {
+                                const pdfRes = await protectedApi.get(`/lr/trip/${activeTrip.id}/pdf`, {
                                   responseType: 'blob'
                                 });
                                 const blob = new Blob([pdfRes.data], { type: 'application/pdf' });
@@ -995,7 +1010,12 @@ const DriverDashboard: React.FC = () => {
                               <HiPhotograph className="w-10 h-10 text-slate-300 mb-2" />
                               <span className="text-sm font-bold text-slate-400">Click to upload pickup receipt</span>
                               <input type="file" accept="image/*" className="hidden"
-                                onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'pickup')} />
+                                onChange={e => {
+                                  if (e.target.files?.[0]) {
+                                    handleFileUpload(e.target.files[0], 'pickup');
+                                    e.target.value = '';
+                                  }
+                                }} />
                             </label>
                           )}
                           <button
@@ -1037,7 +1057,12 @@ const DriverDashboard: React.FC = () => {
                                 <HiPhotograph className="w-10 h-10 text-slate-300 mb-2" />
                                 <span className="text-sm font-bold text-slate-400">Upload delivery receipt</span>
                                 <input type="file" accept="image/*" className="hidden"
-                                  onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'deliveryReceipt')} />
+                                  onChange={e => {
+                                    if (e.target.files?.[0]) {
+                                      handleFileUpload(e.target.files[0], 'deliveryReceipt');
+                                      e.target.value = '';
+                                    }
+                                  }} />
                               </label>
                             )}
                           </div>
@@ -1059,7 +1084,12 @@ const DriverDashboard: React.FC = () => {
                                 <HiPhotograph className="w-10 h-10 text-slate-300 mb-2" />
                                 <span className="text-sm font-bold text-slate-400">Upload POD photo</span>
                                 <input type="file" accept="image/*" className="hidden"
-                                  onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'deliveryPod')} />
+                                  onChange={e => {
+                                    if (e.target.files?.[0]) {
+                                      handleFileUpload(e.target.files[0], 'deliveryPod');
+                                      e.target.value = '';
+                                    }
+                                  }} />
                               </label>
                             )}
                           </div>
@@ -1100,7 +1130,12 @@ const DriverDashboard: React.FC = () => {
                                 <HiPhotograph className="w-10 h-10 text-slate-300 mb-2" />
                                 <span className="text-sm font-bold text-slate-400">Upload corrected receipt</span>
                                 <input type="file" accept="image/*" className="hidden"
-                                  onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'resubmitReceipt')} />
+                                  onChange={e => {
+                                    if (e.target.files?.[0]) {
+                                      handleFileUpload(e.target.files[0], 'resubmitReceipt');
+                                      e.target.value = '';
+                                    }
+                                  }} />
                               </label>
                             )}
                           </div>
@@ -1118,7 +1153,12 @@ const DriverDashboard: React.FC = () => {
                                 <HiPhotograph className="w-10 h-10 text-slate-300 mb-2" />
                                 <span className="text-sm font-bold text-slate-400">Upload corrected POD</span>
                                 <input type="file" accept="image/*" className="hidden"
-                                  onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'resubmitPod')} />
+                                  onChange={e => {
+                                    if (e.target.files?.[0]) {
+                                      handleFileUpload(e.target.files[0], 'resubmitPod');
+                                      e.target.value = '';
+                                    }
+                                  }} />
                               </label>
                             )}
                           </div>
@@ -1156,7 +1196,12 @@ const DriverDashboard: React.FC = () => {
                                 <HiPhotograph className="w-10 h-10 text-slate-300 mb-2" />
                                 <span className="text-sm font-bold text-slate-400">Click to upload photo</span>
                                 <input type="file" accept="image/*" className="hidden"
-                                  onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'pod')} />
+                                  onChange={e => {
+                                    if (e.target.files?.[0]) {
+                                      handleFileUpload(e.target.files[0], 'pod');
+                                      e.target.value = '';
+                                    }
+                                  }} />
                               </label>
                             )}
                           </div>

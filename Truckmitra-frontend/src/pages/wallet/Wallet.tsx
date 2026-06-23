@@ -42,10 +42,10 @@ const Wallet: React.FC = () => {
 
   const fetchWalletData = async () => {
     try {
-      const walletRes = await protectedApi.get('/api/wallet/my');
+      const walletRes = await protectedApi.get('/wallet/my');
       setWallet(walletRes.data.data);
       
-      const transRes = await protectedApi.get('/api/wallet/my/transactions');
+      const transRes = await protectedApi.get('/wallet/my/transactions');
       setTransactions(transRes.data.data.content || []);
     } catch (error: any) {
       console.error('Wallet fetch error:', error);
@@ -91,7 +91,7 @@ const Wallet: React.FC = () => {
       }
 
       // 1. Create order on backend
-      const { data } = await protectedApi.post('/api/wallet/create-order', { amount: Number(amountToAdd) });
+      const { data } = await protectedApi.post('/wallet/create-order', { amount: Number(amountToAdd) });
       const order = data.data;
 
       // 2. Open Razorpay Checkout Modal
@@ -106,7 +106,7 @@ const Wallet: React.FC = () => {
           try {
             toast.loading('Verifying payment...', { id: 'payment' });
             // 3. Verify payment on backend
-            await protectedApi.post('/api/wallet/verify-payment', {
+            await protectedApi.post('/wallet/verify-payment', {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature

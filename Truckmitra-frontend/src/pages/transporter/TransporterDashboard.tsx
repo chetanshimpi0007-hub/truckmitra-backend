@@ -157,14 +157,14 @@ const TransporterDashboard: React.FC = () => {
     setLoading(true);
     try {
       const [profileRes, loadsRes, tendersRes, bidsRes, tripsRes, driversRes, vehiclesRes, walletRes] = await Promise.allSettled([
-        protectedApi.get('/api/transporters/me'),
-        protectedApi.get(`/api/loads/transporter/${user.id}`),
-        protectedApi.get('/api/loads/status/PENDING?isBiddingEnabled=true'),
-        protectedApi.get('/api/bids/my'),
-        protectedApi.get(`/api/trips/transporter/${user.id}`),
-        protectedApi.get('/api/drivers/me'),
-        protectedApi.get('/api/vehicles/me'),
-        protectedApi.get('/api/wallet/me'),
+        protectedApi.get('/transporters/me'),
+        protectedApi.get(`/loads/transporter/${user.id}`),
+        protectedApi.get('/loads/status/PENDING?isBiddingEnabled=true'),
+        protectedApi.get('/bids/my'),
+        protectedApi.get(`/trips/transporter/${user.id}`),
+        protectedApi.get('/drivers/me'),
+        protectedApi.get('/vehicles/me'),
+        protectedApi.get('/wallet/me'),
       ]);
 
       if (profileRes.status === 'fulfilled') setTransporterProfile(profileRes.value.data?.data || profileRes.value.data || null);
@@ -208,7 +208,7 @@ const TransporterDashboard: React.FC = () => {
     remarks: string
   ) => {
     try {
-      await protectedApi.post('/api/bids', { loadId, amount, vehicleType, estimatedDeliveryDays, remarks });
+      await protectedApi.post('/bids', { loadId, amount, vehicleType, estimatedDeliveryDays, remarks });
       toast.success('🎉 Bid submitted successfully! Waiting for shipper review.');
       fetchData();
     } catch (err: any) {
@@ -218,7 +218,7 @@ const TransporterDashboard: React.FC = () => {
 
   const handleAssignFleet = async (tripId: number, driverId: number, vehicleId: number, driverAmount: number) => {
     try {
-      await protectedApi.post('/api/trips/assign-fleet', null, { params: { tripId, driverId, vehicleId, driverAmount } });
+      await protectedApi.post('/trips/assign-fleet', null, { params: { tripId, driverId, vehicleId, driverAmount } });
       toast.success('Fleet assigned! Driver notified via email.');
       fetchData();
     } catch (err: any) {
@@ -228,7 +228,7 @@ const TransporterDashboard: React.FC = () => {
 
   const handleDownloadPdf = async (tripId: number) => {
     try {
-      const res = await protectedApi.get(`/api/trips/${tripId}/pdf`, { responseType: 'blob' });
+      const res = await protectedApi.get(`/trips/${tripId}/pdf`, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
       Object.assign(document.createElement('a'), { href: url, download: `Invoice_Trip_${tripId}.pdf` }).click();
       window.URL.revokeObjectURL(url);
@@ -237,12 +237,12 @@ const TransporterDashboard: React.FC = () => {
 
   const handleDownloadLr = async (tripId: number) => {
     try {
-      const res = await protectedApi.get(`/api/lr/trip/${tripId}`);
+      const res = await protectedApi.get(`/lr/trip/${tripId}`);
       const pdfUrl = res.data?.pdfUrl;
       if (pdfUrl && pdfUrl.startsWith('http')) {
         window.open(pdfUrl, '_blank');
       } else {
-        const response = await protectedApi.get(`/api/lr/trip/${tripId}/pdf`, { responseType: 'blob' });
+        const response = await protectedApi.get(`/lr/trip/${tripId}/pdf`, { responseType: 'blob' });
         const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
         Object.assign(document.createElement('a'), { href: url, download: `LR_Trip_${tripId}.pdf` }).click();
         window.URL.revokeObjectURL(url);
@@ -266,10 +266,6 @@ const TransporterDashboard: React.FC = () => {
     walletBalance:   wallet?.currentBalance || 0};
 
   const completedTripsArr = trips.filter(t => t.status === 'COMPLETED' || t.status === 'DELIVERED');
-  const totalRevenue = completedTripsArr.reduce((s, t) => s + (t.shipperAmount || t.freightAmount || 0), 0);
-  const totalDriverPayment = completedTripsArr.reduce((s, t) => s + (t.driverAmount || 0), 0);
-  const totalProfitMargin = totalRevenue - totalDriverPayment;
-
 
   const winRate = myBids.length > 0
     ? Math.round((stats.wonTenders / myBids.length) * 100)
@@ -688,7 +684,7 @@ const TransporterDashboard: React.FC = () => {
                                   </div>
                                 </div>
                                 <div className="flex items-center space-x-3 flex-wrap gap-2">
-                                  {['DELIVERED', 'POD_UPLOADED', 'AWAITING_TRANSPORTER_APPROVAL'].includes(trip.status) && (
+                                  {['DELIVERED', 'POD_UPLOADED', 'AWAITING_TRANSPORTER_APPROVAL'].includes(trip.status) ? (
                                     <button onClick={() => setVerifyModalTrip(trip)}
                                       className={`px-5 py-3 text-white rounded-2xl font-black text-sm hover:bg-slate-900 transition-all shadow-lg flex items-center space-x-1.5 ${
                                         trip.status === 'AWAITING_TRANSPORTER_APPROVAL'
@@ -697,6 +693,12 @@ const TransporterDashboard: React.FC = () => {
                                       }`}>
                                       <HiCheckCircle className="w-4 h-4" />
                                       <span>{trip.status === 'AWAITING_TRANSPORTER_APPROVAL' ? 'Review & Approve' : 'Verify Receipt'}</span>
+                                    </button>
+                                  ) : (
+                                    <button onClick={() => setVerifyModalTrip(trip)}
+                                      className="px-5 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black text-sm hover:bg-slate-200 transition-all border border-slate-200 flex items-center space-x-1.5">
+                                      <HiEye className="w-4 h-4" />
+                                      <span>View Evidence</span>
                                     </button>
                                   )}
                                   {!['ASSIGNED', 'REJECTED_BY_DRIVER', 'CANCELLED'].includes(trip.status) && (
@@ -787,6 +789,10 @@ const TransporterDashboard: React.FC = () => {
                                         a.download = `POD_Trip_${trip.id}`;
                                         a.click();
                                       }} className="p-2 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-600 hover:text-white transition-all border border-amber-100" title="Download POD"><HiDownload className="w-4 h-4" /></button>
+                                      <button onClick={() => setVerifyModalTrip(trip)} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold text-xs hover:bg-slate-200 transition-all border border-slate-200 flex items-center space-x-1">
+                                        <HiEye className="w-3 h-3" />
+                                        <span>Evidence</span>
+                                      </button>
                                     </div>
                                   )}
                                   {/* Invoice Actions */}
@@ -1217,7 +1223,7 @@ const AssignFleetModal: React.FC<{
     
     if (newDriverId !== '') {
       try {
-        const response = await protectedApi.get(`/api/vehicles/driver/${newDriverId}`);
+        const response = await protectedApi.get(`/vehicles/driver/${newDriverId}`);
         const vList = response.data;
         setDriverVehicles(vList);
         

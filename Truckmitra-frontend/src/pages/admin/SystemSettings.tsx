@@ -37,7 +37,7 @@ const SystemSettings: React.FC = () => {
 
   const fetchSettings = async () => {
     try {
-      const response = await protectedApi.get('/api/admin/settings');
+      const response = await protectedApi.get('/admin/settings');
       if (response.data) {
         setSettings(response.data);
       }
@@ -53,7 +53,7 @@ const SystemSettings: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await protectedApi.post('/api/admin/settings', settings);
+      await protectedApi.post('/admin/settings', settings);
       toast.success('Enterprise configuration updated successfully!');
     } catch (error) {
       toast.error('Failed to update settings. Please try again.');

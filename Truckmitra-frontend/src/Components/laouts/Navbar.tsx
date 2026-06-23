@@ -18,7 +18,6 @@ import {
   HiClock,
   HiViewGrid as HiDashboard,
   HiDocumentText,
-  HiPhotograph,
   HiCheckCircle,
   HiExclamationCircle,
   HiChevronRight
@@ -46,7 +45,7 @@ const Navbar: React.FC = () => {
   }, [isOpen]);
   
   const { user, logout, token } = useAuth();
-  const { profileComplete, documents, hasDocument } = useProfile();
+  const { profileComplete, documents } = useProfile();
   
   const navigate = useNavigate();
   const location = useLocation();

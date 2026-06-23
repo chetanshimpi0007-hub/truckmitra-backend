@@ -17,7 +17,7 @@ const PostLoad = ({ refreshLoads }: any) => {
     const payload = { refNo: String(refNo).trim(), weight: Number(weight), pickupDate };
     setLoading(true);
     try {
-      const res = await protectedApi.post('/api/loads', payload);
+      const res = await protectedApi.post('/loads', payload);
       const msg = res?.data?.message || 'Load posted';
       toast.success(msg);
       // clear form

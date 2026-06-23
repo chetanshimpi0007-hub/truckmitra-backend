@@ -17,7 +17,7 @@ const BillingPage: React.FC = () => {
   const fetchInvoices = async () => {
     setLoading(true);
     try {
-      const response = await protectedApi.get('/api/billing/invoices');
+      const response = await protectedApi.get('/billing/invoices');
       if (response.data.success) {
         setInvoices(response.data.data);
       }
@@ -30,7 +30,7 @@ const BillingPage: React.FC = () => {
 
   const handleDownload = async (invoiceNumber: string) => {
     try {
-      const response = await protectedApi.get(`/api/billing/invoices/${invoiceNumber}/download`, {
+      const response = await protectedApi.get(`/billing/invoices/${invoiceNumber}/download`, {
         responseType: 'blob'
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));

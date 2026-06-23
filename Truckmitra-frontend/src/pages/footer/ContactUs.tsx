@@ -20,7 +20,7 @@ const ContactUs: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await publicApi.post('/api/support/contact', formData);
+      await publicApi.post('/support/contact', formData);
       toast.success('Your message has been sent successfully!');
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error) {

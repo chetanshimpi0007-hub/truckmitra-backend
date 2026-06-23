@@ -33,7 +33,7 @@ const CreateLoad: React.FC = () => {
 
   React.useEffect(() => {
     if (assignmentType === 'DIRECT_TRANSPORTER') {
-      protectedApi.get('/api/transporters').then(res => {
+      protectedApi.get('/transporters').then(res => {
         setTransporters(res.data);
       }).catch(err => {
         console.error("Failed to load transporters", err);
@@ -151,7 +151,7 @@ const CreateLoad: React.FC = () => {
         payload.transporterId = selectedTransporterId;
         payload.isBiddingEnabled = false;
       }
-      const response = await protectedApi.post('/api/loads', payload);
+      const response = await protectedApi.post('/loads', payload);
       toast.success('Load posted successfully!');
       
       if (user?.role === 'TRANSPORTER') {

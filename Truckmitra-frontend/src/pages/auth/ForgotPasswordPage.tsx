@@ -19,7 +19,7 @@ const ForgotPasswordPage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await publicApi.post('/api/auth/forgot-password', { identifier });
+      await publicApi.post('/auth/forgot-password', { identifier });
       setIsSent(true);
       toast.success('Reset link sent!');
     } catch (error: any) {

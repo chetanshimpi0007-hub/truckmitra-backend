@@ -24,8 +24,8 @@ const DriverSelectionModal: React.FC<DriverSelectionModalProps> = ({ loadId, shi
     const fetchData = async () => {
       try {
         const [driversRes, vehiclesRes] = await Promise.all([
-          protectedApi.get('/api/fleet/drivers'),
-          protectedApi.get('/api/fleet/vehicles')
+          protectedApi.get('/fleet/drivers'),
+          protectedApi.get('/fleet/vehicles')
         ]);
         setDrivers(driversRes.data?.data || driversRes.data || []);
         setVehicles(vehiclesRes.data?.data || vehiclesRes.data || []);
@@ -69,7 +69,7 @@ const DriverSelectionModal: React.FC<DriverSelectionModalProps> = ({ loadId, shi
     }
     setSubmitting(true);
     try {
-      await protectedApi.post('/api/trips/direct-assign', null, {
+      await protectedApi.post('/trips/direct-assign', null, {
         params: { loadId, driverId: selectedDriverId, vehicleId: selectedVehicleId, driverAmount: Number(driverAmount) }
       });
       toast.success('Driver assigned successfully!');

@@ -98,7 +98,7 @@ const DriverRegisterForm: React.FC = () => {
     if (user && user.role === 'TRANSPORTER') {
       try {
         setIsUploading(true); // Reuse uploading state for submit loading
-        await protectedApi.post('/api/drivers/register-sub-driver', registrationData, {
+        await protectedApi.post('/drivers/register-sub-driver', registrationData, {
           params: { transporterId: user.id }
         });
         toast.success('Driver registered successfully under your agency!');

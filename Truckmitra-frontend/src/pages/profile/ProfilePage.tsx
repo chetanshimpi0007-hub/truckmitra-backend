@@ -60,6 +60,7 @@ const ProfilePage: React.FC = () => {
     loadMySummary();
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [user, navigate, loadProfile]);
 
   if (loading && !profile) {

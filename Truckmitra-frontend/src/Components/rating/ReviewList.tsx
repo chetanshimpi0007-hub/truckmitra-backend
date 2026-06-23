@@ -19,6 +19,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ ratingId }) => {
 
   useEffect(() => {
     loadReviews();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ratingId, page]);
 
   const loadReviews = async () => {

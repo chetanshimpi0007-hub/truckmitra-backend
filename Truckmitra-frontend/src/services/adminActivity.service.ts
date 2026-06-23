@@ -32,17 +32,17 @@ export interface PageResponse<T> {
 
 class AdminActivityService {
   async getDashboardStats(): Promise<AdminActivityStats> {
-    const response = await protectedApi.get('/api/admin/activity/dashboard-stats');
+    const response = await protectedApi.get('/admin/activity/dashboard-stats');
     return response.data;
   }
 
   async getTimeline(limit = 50): Promise<AuditLog[]> {
-    const response = await protectedApi.get('/api/admin/activity/timeline', { params: { limit } });
+    const response = await protectedApi.get('/admin/activity/timeline', { params: { limit } });
     return response.data;
   }
 
   async getTripsMaster(search = '', page = 0, size = 20): Promise<PageResponse<any>> {
-    const response = await protectedApi.get('/api/admin/activity/trips-master', {
+    const response = await protectedApi.get('/admin/activity/trips-master', {
       params: { search, page, size }
     });
     return response.data;

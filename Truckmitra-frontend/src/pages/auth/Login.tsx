@@ -20,7 +20,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const { login, sendOtp, verifyOtp, loginWithGoogle, loginWithFacebook, isLoading } = useAuth();
+  const { login, sendOtp, verifyOtp, loginWithGoogle, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleSendOtp = async (e: React.MouseEvent) => {

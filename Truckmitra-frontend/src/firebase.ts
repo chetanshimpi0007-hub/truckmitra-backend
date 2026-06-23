@@ -21,15 +21,12 @@ export const requestForToken = async () => {
   try {
     const currentToken = await getToken(messaging, { vapidKey: 'YOUR_PUBLIC_VAPID_KEY_HERE' });
     if (currentToken) {
-      console.log('Firebase Token:', currentToken);
       // Here you would typically send this token to your backend server
       return currentToken;
     } else {
-      console.log('No registration token available. Request permission to generate one.');
       return null;
     }
   } catch (err) {
-    console.log('An error occurred while retrieving token. ', err);
     return null;
   }
 };

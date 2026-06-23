@@ -73,7 +73,7 @@ const EditReviewPage: React.FC = () => {
 
     setSubmitting(true);
     try {
-      await protectedApi.put(`/api/reviews/${reviewId}`, { content });
+      await protectedApi.put(`/reviews/${reviewId}`, { content });
       
       toast.success('Review updated successfully');
       navigate(`/ratings/${review?.ratingId || ''}`);
@@ -92,7 +92,7 @@ const EditReviewPage: React.FC = () => {
     }
 
     try {
-      await protectedApi.delete(`/api/reviews/${reviewId}`);
+      await protectedApi.delete(`/reviews/${reviewId}`);
       
       toast.success('Review deleted successfully');
       navigate(`/ratings/${review?.ratingId || ''}`);

@@ -23,7 +23,7 @@ const ReportsPage: React.FC = () => {
     try {
       // In a real app, we'd pass IDs or filters based on selection
       // For now, exporting all for the selected type
-      const endpoint = reportType === 'TRIPS' ? '/api/reports/trips/csv' : '/api/reports/invoices/csv';
+      const endpoint = reportType === 'TRIPS' ? '/reports/trips/csv' : '/reports/invoices/csv';
       
       const response = await protectedApi.post(endpoint, [], {
         responseType: 'blob'

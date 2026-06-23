@@ -28,7 +28,7 @@ const AboutUs: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await publicApi.get('/api/analytics/public/stats');
+        const res = await publicApi.get('/analytics/public/stats');
         if (res.data) {
           setStats({
             users: res.data.totalUsers || 0,

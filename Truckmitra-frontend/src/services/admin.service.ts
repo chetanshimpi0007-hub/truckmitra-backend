@@ -86,7 +86,7 @@ class AdminService {
    * Get users by status
    */
   async getUsersByStatus(status: string, page = 0, size = 20) {
-    const response = await protectedApi.get(`/api/admin/users/status/${status}?page=${page}&size=${size}`);
+    const response = await protectedApi.get(`/admin/users/status/${status}?page=${page}&size=${size}`);
     return response.data;
   }
 
@@ -94,7 +94,7 @@ class AdminService {
    * Get user details by ID
    */
   async getUserDetails(userId: number) {
-    const response = await protectedApi.get(`/api/admin/users/${userId}`);
+    const response = await protectedApi.get(`/admin/users/${userId}`);
     return response.data;
   }
 
@@ -102,7 +102,7 @@ class AdminService {
    * Get user financial snapshot by ID
    */
   async getUserFinancialSnapshot(userId: number) {
-    const response = await protectedApi.get(`/api/admin/users/${userId}/snapshot`);
+    const response = await protectedApi.get(`/admin/users/${userId}/snapshot`);
     return response.data;
   }
 
@@ -110,7 +110,7 @@ class AdminService {
    * Get user trips by ID with pagination
    */
   async getUserTrips(userId: number, page = 0, size = 10) {
-    const response = await protectedApi.get(`/api/admin/users/${userId}/trips?page=${page}&size=${size}`);
+    const response = await protectedApi.get(`/admin/users/${userId}/trips?page=${page}&size=${size}`);
     return response.data;
   }
 
@@ -118,7 +118,7 @@ class AdminService {
    * Get user payments by ID with pagination
    */
   async getUserPayments(userId: number, page = 0, size = 10) {
-    const response = await protectedApi.get(`/api/admin/users/${userId}/payments?page=${page}&size=${size}`);
+    const response = await protectedApi.get(`/admin/users/${userId}/payments?page=${page}&size=${size}`);
     return response.data;
   }
 
@@ -126,7 +126,7 @@ class AdminService {
    * Get user timeline by ID with pagination
    */
   async getUserTimeline(userId: number, page = 0, size = 10) {
-    const response = await protectedApi.get(`/api/admin/users/${userId}/timeline?page=${page}&size=${size}`);
+    const response = await protectedApi.get(`/admin/users/${userId}/timeline?page=${page}&size=${size}`);
     return response.data;
   }
 
@@ -134,7 +134,7 @@ class AdminService {
    * Get user invoices by ID with pagination
    */
   async getUserInvoices(userId: number, page = 0, size = 10) {
-    const response = await protectedApi.get(`/api/admin/users/${userId}/invoices?page=${page}&size=${size}`);
+    const response = await protectedApi.get(`/admin/users/${userId}/invoices?page=${page}&size=${size}`);
     return response.data;
   }
 
@@ -166,7 +166,7 @@ class AdminService {
    * Verify a user (PENDING_VERIFICATION → VERIFIED)
    */
   async verifyUser(userId: number) {
-    const response = await protectedApi.put(`/api/admin/users/${userId}/approve`);
+    const response = await protectedApi.put(`/admin/users/${userId}/approve`);
     return response.data;
   }
 
@@ -174,7 +174,7 @@ class AdminService {
    * Reject a user (PENDING_VERIFICATION → REJECTED)
    */
   async rejectUser(userId: number, data: RejectRequest) {
-    const response = await protectedApi.put(`/api/admin/users/${userId}/reject`, data);
+    const response = await protectedApi.put(`/admin/users/${userId}/reject`, data);
     return response.data;
   }
 
@@ -182,7 +182,7 @@ class AdminService {
    * Suspend a user (VERIFIED → SUSPENDED)
    */
   async suspendUser(userId: number, data: SuspendRequest) {
-    const response = await protectedApi.put(`/api/admin/users/${userId}/suspend`, data);
+    const response = await protectedApi.put(`/admin/users/${userId}/suspend`, data);
     return response.data;
   }
 
@@ -190,7 +190,7 @@ class AdminService {
    * Activate a suspended user (SUSPENDED → VERIFIED)
    */
   async activateUser(userId: number) {
-    const response = await protectedApi.put(`/api/admin/users/${userId}/activate`);
+    const response = await protectedApi.put(`/admin/users/${userId}/activate`);
     return response.data;
   }
 
@@ -198,7 +198,7 @@ class AdminService {
    * Delete a user (soft delete) (any status → DELETED)
    */
   async deleteUser(userId: number) {
-    const response = await protectedApi.delete(`/api/admin/users/${userId}`);
+    const response = await protectedApi.delete(`/admin/users/${userId}`);
     return response.data;
   }
 
@@ -206,7 +206,7 @@ class AdminService {
    * Restore a deleted user (DELETED → PENDING_VERIFICATION)
    */
   async restoreUser(userId: number) {
-    const response = await protectedApi.put(`/api/admin/users/${userId}/restore`);
+    const response = await protectedApi.put(`/admin/users/${userId}/restore`);
     return response.data;
   }
 
@@ -214,13 +214,13 @@ class AdminService {
    * Update user status (generic method)
    */
   // async updateUserStatus(userId: number, data: StatusUpdateRequest) {
-  //   const response = await protectedApi.put(`/api/admin/users/${userId}/status`, data);
+  //   const response = await protectedApi.put(`/admin/users/${userId}/status`, data);
   //   return response.data;
   // }
 
 // Add to AdminService class
 async updateUserStatus(userId: number, data: StatusUpdateRequest) {
-  const response = await protectedApi.put(`/api/admin/users/${userId}/status`, data);
+  const response = await protectedApi.put(`/admin/users/${userId}/status`, data);
   return response.data;
 }
   // ==================== BULK OPERATIONS ====================
@@ -229,7 +229,7 @@ async updateUserStatus(userId: number, data: StatusUpdateRequest) {
    * Bulk verify multiple users
    */
   async bulkVerifyUsers(data: BulkUserIdsRequest) {
-    const response = await protectedApi.put('/api/admin/users/bulk/verify', data);
+    const response = await protectedApi.put('/admin/users/bulk/verify', data);
     return response.data;
   }
 }

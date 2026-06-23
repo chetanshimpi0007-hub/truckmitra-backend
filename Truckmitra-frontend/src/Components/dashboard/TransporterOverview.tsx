@@ -35,9 +35,9 @@ const TransporterOverview: React.FC<TransporterOverviewProps> = ({
 
   useEffect(() => {
     if (user?.id) {
-      protectedApi.get(`/api/analytics/transporter/revenue?userId=${user.id}`).then(res => setRevenueData(res.data)).catch(() => {});
-      protectedApi.get(`/api/analytics/transporter/monthly-loads?userId=${user.id}`).then(res => setLoadData(res.data)).catch(() => {});
-      protectedApi.get(`/api/analytics/transporter/driver-performance?userId=${user.id}`).then(res => setDriverPerformance(res.data)).catch(() => {});
+      protectedApi.get(`/analytics/transporter/revenue?userId=${user.id}`).then(res => setRevenueData(res.data)).catch(() => {});
+      protectedApi.get(`/analytics/transporter/monthly-loads?userId=${user.id}`).then(res => setLoadData(res.data)).catch(() => {});
+      protectedApi.get(`/analytics/transporter/driver-performance?userId=${user.id}`).then(res => setDriverPerformance(res.data)).catch(() => {});
     }
   }, [user?.id]);
 

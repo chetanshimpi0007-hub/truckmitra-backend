@@ -17,9 +17,9 @@ const SubscriptionPage: React.FC = () => {
         setLoading(true);
         try {
             const [plansRes, subRes, historyRes] = await Promise.allSettled([
-                protectedApi.get('/api/subscription/plans'),
-                protectedApi.get('/api/subscription/current'),
-                protectedApi.get('/api/subscription/history'),
+                protectedApi.get('/subscription/plans'),
+                protectedApi.get('/subscription/current'),
+                protectedApi.get('/subscription/history'),
             ]);
 
             if (plansRes.status === 'fulfilled') setPlans(plansRes.value.data);
@@ -38,7 +38,7 @@ const SubscriptionPage: React.FC = () => {
 
     const handleSubscribe = async (planId: number) => {
         try {
-            const response = await protectedApi.post('/api/subscription/create', { planId });
+            const response = await protectedApi.post('/subscription/create', { planId });
             const sub = response.data;
 
             if (sub.razorpaySubscriptionId && (window as any).Razorpay) {
@@ -67,7 +67,7 @@ const SubscriptionPage: React.FC = () => {
     const handleCancel = async () => {
         if (!window.confirm('Are you sure you want to cancel your subscription?')) return;
         try {
-            await protectedApi.post('/api/subscription/cancel');
+            await protectedApi.post('/subscription/cancel');
             toast.success('Subscription cancelled');
             fetchData();
         } catch (err) {

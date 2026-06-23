@@ -47,7 +47,7 @@ export const RecommendedLoads: React.FC<RecommendedLoadsProps> = ({ onBid, alrea
   const fetchRecommendations = async () => {
     setLoading(true);
     try {
-      const response = await protectedApi.get('/api/ai/recommendations');
+      const response = await protectedApi.get('/ai/recommendations');
       if (response.data) {
         setRecs(response.data);
       }

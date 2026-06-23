@@ -27,6 +27,7 @@ const HelpfulButton: React.FC<HelpfulButtonProps> = ({
     if (isAuthenticated) {
       checkIfHelpful();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ratingId, isAuthenticated]);
 
   const checkIfHelpful = async () => {

@@ -21,7 +21,7 @@ const PlaceBid = ({ loadId, onSuccess }: PlaceBidProps) => {
 
     setLoading(true);
     try {
-      const res = await protectedApi.post('/api/bids', payload);
+      const res = await protectedApi.post('/bids', payload);
       toast.success(res?.data?.message || 'Bid placed');
       if (typeof onSuccess === 'function') onSuccess(res?.data);
     } catch (err: any) {

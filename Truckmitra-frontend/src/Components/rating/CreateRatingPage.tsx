@@ -1,8 +1,7 @@
 // src/pages/rating/CreateRatingPage.tsx
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../../hooks/auth.hook';
 import { useRating } from '../../hooks/useRating';
 import { HiArrowLeft } from 'react-icons/hi';
 import RatingForm from './RatingForm';
@@ -13,7 +12,6 @@ interface CreateRatingPageProps {
 
 const CreateRatingPage: React.FC<CreateRatingPageProps> = ({ type = 'rating' }) => {
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
   const navigate = useNavigate();
   const { submitRating } = useRating();
 

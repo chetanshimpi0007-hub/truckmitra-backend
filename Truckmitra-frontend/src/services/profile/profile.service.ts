@@ -30,36 +30,36 @@ class ProfileService {
   // ==================== DRIVER PROFILE ====================
   
   async getDriverProfile(): Promise<DriverProfile> {
-    const response = await protectedApi.get(`/api/profile/driver/${this.getUserId()}`);
+    const response = await protectedApi.get(`/profile/driver/${this.getUserId()}`);
     return response.data.data;
   }
   
   async updateDriverProfile(data: DriverProfileUpdateRequest): Promise<DriverProfile> {
-    const response = await protectedApi.put(`/api/profile/driver/${this.getUserId()}`, data);
+    const response = await protectedApi.put(`/profile/driver/${this.getUserId()}`, data);
     return response.data.data;
   }
   
   // ==================== TRANSPORTER PROFILE ====================
   
   async getTransporterProfile(): Promise<TransporterProfile> {
-    const response = await protectedApi.get(`/api/profile/transporter/${this.getUserId()}`);
+    const response = await protectedApi.get(`/profile/transporter/${this.getUserId()}`);
     return response.data.data;
   }
   
   async updateTransporterProfile(data: TransporterProfileUpdateRequest): Promise<TransporterProfile> {
-    const response = await protectedApi.put(`/api/profile/transporter/${this.getUserId()}`, data);
+    const response = await protectedApi.put(`/profile/transporter/${this.getUserId()}`, data);
     return response.data.data;
   }
   
   // ==================== SHIPPER PROFILE ====================
   
   async getShipperProfile(): Promise<ShipperProfile> {
-    const response = await protectedApi.get(`/api/profile/shipper/${this.getUserId()}`);
+    const response = await protectedApi.get(`/profile/shipper/${this.getUserId()}`);
     return response.data.data;
   }
   
   async updateShipperProfile(data: ShipperProfileUpdateRequest): Promise<ShipperProfile> {
-    const response = await protectedApi.put(`/api/profile/shipper/${this.getUserId()}`, data);
+    const response = await protectedApi.put(`/profile/shipper/${this.getUserId()}`, data);
     return response.data.data;
   }
   
@@ -69,28 +69,28 @@ class ProfileService {
 
 async uploadDocument(data: DocumentUploadRequest): Promise<UserDocument> {
   // Data already contains Cloudinary URLs
-  const response = await protectedApi.post('/api/profile/documents', data);
+  const response = await protectedApi.post('/profile/documents', data);
   return response.data.data;
 }
   
   async getMyDocuments(): Promise<UserDocument[]> {
-    const response = await protectedApi.get('/api/profile/documents');
+    const response = await protectedApi.get('/profile/documents');
     return response.data.data;
   }
   
   async getDocumentById(documentId: number): Promise<UserDocument> {
-    const response = await protectedApi.get(`/api/profile/documents/${documentId}`);
+    const response = await protectedApi.get(`/profile/documents/${documentId}`);
     return response.data.data;
   }
   
   async deleteDocument(documentId: number): Promise<void> {
-    await protectedApi.delete(`/api/profile/documents/${documentId}`);
+    await protectedApi.delete(`/profile/documents/${documentId}`);
   }
   
   // ==================== LOCATION (Driver only) ====================
   
   async updateDriverLocation(data: LocationUpdateRequest): Promise<void> {
-    await protectedApi.post('/api/profile/driver/location', null, {
+    await protectedApi.post('/profile/driver/location', null, {
       params: {
         latitude: data.latitude,
         longitude: data.longitude,
@@ -102,7 +102,7 @@ async uploadDocument(data: DocumentUploadRequest): Promise<UserDocument> {
   // ==================== PROFILE COMPLETION ====================
   
   async getProfileCompletionStatus(): Promise<ProfileCompletionResponse> {
-    const response = await protectedApi.get('/api/profile/completion-status');
+    const response = await protectedApi.get('/profile/completion-status');
     return { isComplete: response.data.data };
   }
 }

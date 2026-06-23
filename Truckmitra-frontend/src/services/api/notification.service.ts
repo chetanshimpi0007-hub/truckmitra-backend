@@ -12,10 +12,10 @@ export interface Notification {
 }
 
 export const notificationService = {
-  getAll: () => protectedApi.get<{ data: Notification[] }>('/api/notifications'),
-  getUnread: () => protectedApi.get<{ data: Notification[] }>('/api/notifications/unread'),
-  getUnreadCount: () => protectedApi.get<{ data: number }>('/api/notifications/unread/count'),
-  markAsRead: (id: number) => protectedApi.patch(`/api/notifications/${id}/read`),
-  markAllAsRead: () => protectedApi.patch('/api/notifications/read-all'),
-  delete: (id: number) => protectedApi.delete(`/api/notifications/${id}`),
+  getAll: () => protectedApi.get<{ data: Notification[] }>('/notifications'),
+  getUnread: () => protectedApi.get<{ data: Notification[] }>('/notifications/unread'),
+  getUnreadCount: () => protectedApi.get<{ data: number }>('/notifications/unread/count'),
+  markAsRead: (id: number) => protectedApi.patch(`/notifications/${id}/read`),
+  markAllAsRead: () => protectedApi.patch('/notifications/read-all'),
+  delete: (id: number) => protectedApi.delete(`/notifications/${id}`),
 };

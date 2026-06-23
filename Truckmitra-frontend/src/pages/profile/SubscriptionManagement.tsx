@@ -25,8 +25,8 @@ const SubscriptionManagement: React.FC = () => {
   const fetchData = async () => {
     try {
       const [plansRes, subRes] = await Promise.all([
-        protectedApi.get('/api/subscriptions/plans'),
-        protectedApi.get('/api/subscriptions/my')
+        protectedApi.get('/subscriptions/plans'),
+        protectedApi.get('/subscriptions/my')
       ]);
       setPlans(plansRes.data);
       setCurrentSub(subRes.data);
@@ -41,7 +41,7 @@ const SubscriptionManagement: React.FC = () => {
   const handleSubscribe = async (planId: number) => {
     setSubscribingId(planId);
     try {
-      const res = await protectedApi.post(`/api/subscriptions/subscribe?planId=${planId}`);
+      const res = await protectedApi.post(`/subscriptions/subscribe?planId=${planId}`);
       setCurrentSub(res.data);
       toast.success('Your subscription has been updated successfully!');
     } catch (error) {

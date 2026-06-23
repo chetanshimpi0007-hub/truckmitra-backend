@@ -35,7 +35,7 @@ const ResetPasswordPage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await publicApi.post('/api/auth/reset-password', { 
+      await publicApi.post('/auth/reset-password', { 
         token, 
         newPassword: password 
       });

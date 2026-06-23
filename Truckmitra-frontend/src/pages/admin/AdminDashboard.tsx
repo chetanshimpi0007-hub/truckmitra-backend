@@ -103,7 +103,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchPlatformAnalytics = async () => {
     try {
-      const res = await protectedApi.get('/api/analytics/admin');
+      const res = await protectedApi.get('/analytics/admin');
       setPlatformAnalytics(res.data);
     } catch (e) { console.error('Failed to fetch platform analytics', e); }
   };
@@ -131,12 +131,12 @@ const AdminDashboard: React.FC = () => {
   const fetchAllTrips = async () => {
     setTripsLoading(true);
     try {
-      const res = await protectedApi.get('/api/trips/admin/all');
+      const res = await protectedApi.get('/trips/admin/all');
       setAllTrips(Array.isArray(res.data) ? res.data : res.data?.content || []);
     } catch {
       try {
         // Fallback: try generic trips endpoint
-        const res = await protectedApi.get('/api/trips');
+        const res = await protectedApi.get('/trips');
         setAllTrips(Array.isArray(res.data) ? res.data : res.data?.content || []);
       } catch { /* silent */ }
     } finally { setTripsLoading(false); }
@@ -144,7 +144,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchActiveTrips = async () => {
     try {
-      const response = await protectedApi.get('/api/tracking/admin/active');
+      const response = await protectedApi.get('/tracking/admin/active');
       setActiveTrips(response.data || []);
     } catch (error) {
       // silent

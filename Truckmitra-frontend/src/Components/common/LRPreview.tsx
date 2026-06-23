@@ -22,7 +22,7 @@ const LRPreview: React.FC<LRPreviewProps> = ({ lr, onClose }) => {
       toast.loading('Generating PDF…', { id: 'pdf-load' });
       const tripId = lr.trip?.id;
       if (!tripId) { toast.error('Trip ID missing', { id: 'pdf-load' }); return; }
-      const res = await protectedApi.get(`/api/lr/trip/${tripId}/pdf`, { responseType: 'blob' });
+      const res = await protectedApi.get(`/lr/trip/${tripId}/pdf`, { responseType: 'blob' });
       const blob = new Blob([res.data], { type: 'application/pdf' });
       const blobUrl = window.URL.createObjectURL(blob);
       toast.dismiss('pdf-load');

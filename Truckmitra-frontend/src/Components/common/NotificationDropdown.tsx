@@ -38,17 +38,17 @@ const NotificationDropdown: React.FC = () => {
     if (!user?.id) return;
     try {
       // Try new endpoint first
-      const res = await protectedApi.get('/api/notifications');
+      const res = await protectedApi.get('/notifications');
       const data: Notification[] = res.data?.data || res.data || [];
       setNotifications(data);
       setUnreadCount(data.filter(n => !n.isRead && !n.readStatus).length);
     } catch {
       try {
         // Fallback to legacy endpoint
-        const res = await protectedApi.get(`/api/notifications/legacy/user/${user.id}`);
+        const res = await protectedApi.get(`/notifications/legacy/user/${user.id}`);
         const data: Notification[] = res.data || [];
         setNotifications(data);
-        const countRes = await protectedApi.get(`/api/notifications/legacy/user/${user.id}/unread-count`);
+        const countRes = await protectedApi.get(`/notifications/legacy/user/${user.id}/unread-count`);
         setUnreadCount(countRes.data || 0);
       } catch { /* silent — notifications are non-critical */ }
     }
@@ -73,7 +73,7 @@ const NotificationDropdown: React.FC = () => {
 
   const markAsRead = async (id: number) => {
     try {
-      await protectedApi.patch(`/api/notifications/${id}/read`);
+      await protectedApi.patch(`/notifications/${id}/read`);
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true, readStatus: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch { /* silent */ }
@@ -81,11 +81,11 @@ const NotificationDropdown: React.FC = () => {
 
   const markAllAsRead = async () => {
     try {
-      await protectedApi.patch('/api/notifications/read-all');
+      await protectedApi.patch('/notifications/read-all');
     } catch {
       try {
         const unread = notifications.filter(n => !n.isRead && !n.readStatus);
-        await Promise.all(unread.map(n => protectedApi.patch(`/api/notifications/legacy/${n.id}/read`)));
+        await Promise.all(unread.map(n => protectedApi.patch(`/notifications/legacy/${n.id}/read`)));
       } catch { /* silent */ }
     }
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true, readStatus: true })));

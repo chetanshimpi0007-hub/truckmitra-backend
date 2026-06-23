@@ -13,22 +13,28 @@ type TabOption = 'summary' | 'lr' | 'pod' | 'pickup_receipt' | 'delivery_receipt
 export default function DeliveryVerificationCenter({ trip, onClose, onDone }: any) {
   const [activeTab, setActiveTab] = useState<TabOption>('summary');
   const [photos, setPhotos] = useState<any[]>([]);
+  const [liveTrip, setLiveTrip] = useState<any>(trip);
   
   const [reason, setReason] = useState('');
   const [reasonError, setReasonError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [zoomedPhoto, setZoomedPhoto] = useState<string | null>(null);
 
-  const podImage   = trip.podImageUrl || trip.receiptVerification?.imageUrl;
-  const signature  = trip.podSignatureUrl || trip.receiptVerification?.signatureUrl;
-  const remarks    = trip.podRemarks || trip.receiptVerification?.remarks;
-  const lrUrl      = trip.lrPdfUrl || null;
-
   useEffect(() => {
-    protectedApi.get(`/api/trips/${trip.id}/photos`)
+    // Fetch live trip to get the latest photo URLs (e.g., if just uploaded)
+    protectedApi.get(`/trips/${trip.id}`)
+      .then(r => setLiveTrip(r.data?.data || r.data || trip))
+      .catch(() => console.warn('Failed to fetch live trip'));
+
+    protectedApi.get(`/trips/${trip.id}/photos`)
       .then(r => setPhotos(Array.isArray(r.data) ? r.data : (r.data?.data || [])))
       .catch(() => setPhotos([]));
-  }, [trip.id]);
+  }, [trip.id, trip]);
+
+  const podImage   = liveTrip.podImageUrl || liveTrip.receiptVerification?.imageUrl || liveTrip.podUrl;
+  const signature  = liveTrip.podSignatureUrl || liveTrip.receiptVerification?.signatureUrl;
+  const remarks    = liveTrip.podRemarks || liveTrip.receiptVerification?.remarks;
+  const lrUrl      = liveTrip.lrPdfUrl || null;
 
   const pickupPhotos      = photos.filter(p => p.photoType === 'PICKUP' || p.type === 'PICKUP');
   const destinationPhotos = photos.filter(p => p.photoType === 'DESTINATION' || p.type === 'DESTINATION');
@@ -36,7 +42,7 @@ export default function DeliveryVerificationCenter({ trip, onClose, onDone }: an
   const handleAccept = async () => {
     setLoading(true);
     try {
-      await protectedApi.post(`/api/trips/${trip.id}/transporter-accept`);
+      await protectedApi.post(`/trips/${trip.id}/transporter-accept`);
       toast.success('✅ Delivery Verified! Final invoice generated & driver notified.');
       onDone(); onClose();
     } catch (e: any) {
@@ -49,7 +55,7 @@ export default function DeliveryVerificationCenter({ trip, onClose, onDone }: an
     setReasonError(false);
     setLoading(true);
     try {
-      await protectedApi.post(`/api/trips/${trip.id}/transporter-reject`, { rejectionReason: reason });
+      await protectedApi.post(`/trips/${trip.id}/transporter-reject`, { rejectionReason: reason });
       toast.success('❌ Delivery rejected. Driver will be notified to re-submit.');
       onDone(); onClose();
     } catch (e: any) {
@@ -157,7 +163,7 @@ export default function DeliveryVerificationCenter({ trip, onClose, onDone }: an
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
           
           {/* SIDEBAR TABS */}
-          <div className="w-full md:w-64 bg-slate-50 dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-700 p-4 space-y-2 overflow-y-auto">
+          <div className="w-full md:w-64 bg-slate-50 dark:bg-slate-800/50 border-r md:border-r-0 md:border-b-0 border-b border-slate-200 dark:border-slate-700 p-3 flex flex-row overflow-x-auto md:flex-col space-x-2 md:space-x-0 md:space-y-1.5 overflow-y-auto scrollbar-hide shrink-0">
             {(['summary', 'lr', 'pod', 'pickup_receipt', 'delivery_receipt', 'pickup', 'destination'] as TabOption[]).map(tab => {
               const labels: Record<string, string> = { summary: 'Trip Summary', lr: 'Digital LR', pod: 'Proof of Delivery', pickup_receipt: 'Pickup Receipt', delivery_receipt: 'Delivery Receipt', pickup: 'Pickup Photos', destination: 'Dest Photos' };
               const icons: Record<string, any> = { summary: <HiInformationCircle/>, lr: <HiDocumentText/>, pod: <HiCheckCircle/>, pickup_receipt: <HiDocumentText/>, delivery_receipt: <HiDocumentText/>, pickup: <HiPhotograph/>, destination: <HiPhotograph/> };
@@ -167,14 +173,14 @@ export default function DeliveryVerificationCenter({ trip, onClose, onDone }: an
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all ${activeTab === tab ? 'bg-slate-900 dark:bg-brand text-white shadow-lg shadow-slate-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold'}`}
+                  className={`flex-shrink-0 md:w-full flex items-center justify-between px-3 md:px-4 py-3 rounded-2xl transition-all ${activeTab === tab ? 'bg-slate-900 dark:bg-brand text-white shadow-lg shadow-slate-900/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold'}`}
                 >
-                  <div className="flex items-center space-x-3">
-                    <span className={`w-5 h-5 ${activeTab === tab ? 'text-white' : 'text-slate-400'}`}>{icons[tab]}</span>
-                    <span className="text-sm font-black tracking-wide">{labels[tab]}</span>
+                  <div className="flex items-center space-x-2.5">
+                    <span className={`w-4 h-4 md:w-5 md:h-5 ${activeTab === tab ? 'text-white' : 'text-slate-400'}`}>{icons[tab]}</span>
+                    <span className="text-xs md:text-sm font-black tracking-wide whitespace-nowrap">{labels[tab]}</span>
                   </div>
                   {counts[tab] !== null && counts[tab] !== undefined && (
-                    <span className={`text-[10px] font-black px-2 py-1 rounded-full ${activeTab === tab ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700'}`}>
+                    <span className={`hidden md:inline-flex text-[10px] font-black px-2 py-1 rounded-full ${activeTab === tab ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700'}`}>
                       {counts[tab]}
                     </span>
                   )}
@@ -230,7 +236,7 @@ export default function DeliveryVerificationCenter({ trip, onClose, onDone }: an
                       <h3 className="text-xl font-black mb-6 text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-4">Personnel & Equipment</h3>
                       <div className="flex items-center space-x-6">
                         <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-600">
-                          {trip.driver?.photoUrl ? <img src={trip.driver.photoUrl} className="w-full h-full object-cover"/> : <div className="w-full h-full flex items-center justify-center"><HiUser className="text-slate-400 w-8 h-8"/></div>}
+                          {trip.driver?.photoUrl ? <img src={trip.driver.photoUrl} alt="Driver" className="w-full h-full object-cover"/> : <div className="w-full h-full flex items-center justify-center"><HiUser className="text-slate-400 w-8 h-8"/></div>}
                         </div>
                         <div>
                           <div className="font-black text-xl text-slate-900 dark:text-white">{trip.driver?.fullName || 'Assigned Driver'}</div>
@@ -382,7 +388,7 @@ export default function DeliveryVerificationCenter({ trip, onClose, onDone }: an
         </div>
 
         {/* BOTTOM ACTION BAR */}
-        {trip.status !== 'COMPLETED' && (
+        {['DELIVERED', 'POD_UPLOADED', 'AWAITING_TRANSPORTER_APPROVAL'].includes(trip.status) && (
           <div className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
             
             <div className="flex-1 w-full flex space-x-4">

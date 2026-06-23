@@ -38,7 +38,7 @@ class ApiService {
         const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
         // Skip token refresh for auth endpoints to avoid loops
-        const isAuthEndpoint = originalRequest.url?.includes('/api/auth/');
+        const isAuthEndpoint = originalRequest.url?.includes('/auth/');
 
         if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
           originalRequest._retry = true;
@@ -71,20 +71,20 @@ class ApiService {
   }
 
   async refreshToken(refreshToken: string): Promise<ApiResponse<AuthResponse>> {
-    const response = await this.api.post('/api/auth/refresh-token', {}, {
+    const response = await this.api.post('/auth/refresh-token', {}, {
       headers: { 'Refresh-Token': refreshToken }
     });
     return response.data;
   }
   async loginWithGoogle(googleToken: string, deviceToken?: string): Promise<ApiResponse<AuthResponse>> {
-    const response = await this.api.post('/api/auth/login/google', null, {
+    const response = await this.api.post('/auth/login/google', null, {
       params: { googleToken, deviceToken }
     });
     return response.data;
   }
 
   async loginWithFacebook(facebookToken: string, deviceToken?: string): Promise<ApiResponse<AuthResponse>> {
-    const response = await this.api.post('/api/auth/login/facebook', null, {
+    const response = await this.api.post('/auth/login/facebook', null, {
       params: { facebookToken, deviceToken }
     });
     return response.data;
@@ -99,7 +99,7 @@ public clearAuth() {
 }
 
   async verifyOtpAndLogin(data: OtpVerificationRequest, deviceToken?: string): Promise<ApiResponse<AuthResponse>> {
-    const response = await this.api.post('/api/auth/otp/verify', data, {
+    const response = await this.api.post('/auth/otp/verify', data, {
       params: { deviceToken }
     });
     return response.data;

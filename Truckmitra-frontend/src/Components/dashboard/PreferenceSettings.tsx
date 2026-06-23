@@ -34,7 +34,7 @@ export const PreferenceSettings: React.FC = () => {
   useEffect(() => {
     const fetchPrefs = async () => {
       try {
-        const response = await protectedApi.get('/api/ai/preferences');
+        const response = await protectedApi.get('/ai/preferences');
         if (response.data) {
           setPrefs({
             preferredPickupCities: response.data.preferredPickupCities || '',
@@ -61,7 +61,7 @@ export const PreferenceSettings: React.FC = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      await protectedApi.put('/api/ai/preferences', prefs);
+      await protectedApi.put('/ai/preferences', prefs);
       toast.success('🎉 Preferences saved successfully!');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to save preferences.');

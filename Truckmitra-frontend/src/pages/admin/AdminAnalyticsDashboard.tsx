@@ -35,14 +35,14 @@ export default function AdminAnalyticsDashboard() {
         setLoading(true);
         try {
             const [overviewRes, usersRes, revenueRes, loadsRes, tripsRes, walletRes, invoicesRes, subscriptionsRes] = await Promise.all([
-                protectedApi.get('/api/admin/analytics/overview').catch(() => ({ data: {} })),
-                protectedApi.get('/api/admin/analytics/users').catch(() => ({ data: {} })),
-                protectedApi.get('/api/admin/analytics/revenue').catch(() => ({ data: {} })),
-                protectedApi.get('/api/admin/analytics/loads').catch(() => ({ data: {} })),
-                protectedApi.get('/api/admin/analytics/trips').catch(() => ({ data: {} })),
-                protectedApi.get('/api/admin/analytics/wallet').catch(() => ({ data: {} })),
-                protectedApi.get('/api/invoices').catch(() => ({ data: { content: [] } })),
-                protectedApi.get('/api/admin/analytics/subscriptions').catch(() => ({ data: {} }))
+                protectedApi.get('/admin/analytics/overview').catch(() => ({ data: {} })),
+                protectedApi.get('/admin/analytics/users').catch(() => ({ data: {} })),
+                protectedApi.get('/admin/analytics/revenue').catch(() => ({ data: {} })),
+                protectedApi.get('/admin/analytics/loads').catch(() => ({ data: {} })),
+                protectedApi.get('/admin/analytics/trips').catch(() => ({ data: {} })),
+                protectedApi.get('/admin/analytics/wallet').catch(() => ({ data: {} })),
+                protectedApi.get('/invoices').catch(() => ({ data: { content: [] } })),
+                protectedApi.get('/admin/analytics/subscriptions').catch(() => ({ data: {} }))
             ]);
             
             setOverview(overviewRes.data);

@@ -17,7 +17,7 @@ const EnterpriseSettings: React.FC = () => {
 
   const fetchSettings = async () => {
     try {
-      const response = await protectedApi.get('/api/billing/details');
+      const response = await protectedApi.get('/billing/details');
       if (response.data.success) {
         const details = response.data.data;
         form.setFieldsValue(details);
@@ -31,7 +31,7 @@ const EnterpriseSettings: React.FC = () => {
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
-      const response = await protectedApi.post('/api/billing/details', {
+      const response = await protectedApi.post('/billing/details', {
         ...values,
         logoUrl
       });
@@ -72,7 +72,7 @@ const EnterpriseSettings: React.FC = () => {
           
           <Form.Item label="Company Logo">
             <Upload 
-              action="/api/upload" 
+              action="/upload" 
               listType="picture"
               maxCount={1}
               onChange={(info) => {

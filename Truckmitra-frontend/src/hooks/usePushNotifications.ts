@@ -23,9 +23,8 @@ export const usePushNotifications = () => {
           title: payload?.notification?.title,
           body: payload?.notification?.body,
         });
-        console.log("Received foreground notification:", payload);
       })
-      .catch((err) => console.log('failed: ', err));
+      .catch(() => {});
   }, []);
 
   const requestPermission = async () => {

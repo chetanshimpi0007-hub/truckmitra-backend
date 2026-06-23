@@ -31,7 +31,7 @@ const AdminTransactions: React.FC = () => {
 
   const fetchTransactions = async () => {
     try {
-      const res = await protectedApi.get('/api/admin/transactions');
+      const res = await protectedApi.get('/admin/transactions');
       setTransactions(res.data.data.content || []);
     } catch (error: any) {
       console.error('Transactions fetch error:', error);

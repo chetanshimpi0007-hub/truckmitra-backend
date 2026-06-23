@@ -11,7 +11,7 @@ const ChatWidget: React.FC<any> = ({ currentUserId, recipient }) => {
     // fetch history from backend (which proxies to socket server)
     (async () => {
       try {
-        const res = await protectedApi.get(`/api/chat/history/${currentUserId}/${recipient.id}`);
+        const res = await protectedApi.get(`/chat/history/${currentUserId}/${recipient.id}`);
         setMessages(res.data || []);
       } catch (err) {
         // silent
@@ -41,7 +41,7 @@ const ChatWidget: React.FC<any> = ({ currentUserId, recipient }) => {
       timestamp: Date.now()
     };
     try {
-      await protectedApi.post('/api/chat', payload);
+      await protectedApi.post('/chat', payload);
     } catch (e) {
       // fallback: emit directly
       socket.emit('chat:message', payload);

@@ -3,61 +3,61 @@ import { protectedApi } from './protectedAndPublicAPI';
 export const tripService = {
   // Transporter
   getTransporterTrips: (transporterId: number) =>
-    protectedApi.get(`/api/trips/transporter/${transporterId}`),
+    protectedApi.get(`/trips/transporter/${transporterId}`),
   assignFleet: (tripId: number, driverId: number, vehicleId: number) =>
-    protectedApi.post('/api/trips/assign-fleet', null, { params: { tripId, driverId, vehicleId } }),
+    protectedApi.post('/trips/assign-fleet', null, { params: { tripId, driverId, vehicleId } }),
   verifyReceipt: (tripId: number) =>
-    protectedApi.patch(`/api/trips/${tripId}/verify-receipt`),
+    protectedApi.patch(`/trips/${tripId}/verify-receipt`),
   rejectReceipt: (tripId: number, reason?: string) =>
-    protectedApi.patch(`/api/trips/${tripId}/reject-receipt`, { reason }),
+    protectedApi.patch(`/trips/${tripId}/reject-receipt`, { reason }),
   downloadTripPdf: (tripId: number) =>
-    protectedApi.get(`/api/trips/${tripId}/pdf`, { responseType: 'blob' }),
+    protectedApi.get(`/trips/${tripId}/pdf`, { responseType: 'blob' }),
 
   // Driver
   getDriverTrips: (driverId: number) =>
-    protectedApi.get(`/api/trips/driver/${driverId}`),
+    protectedApi.get(`/trips/driver/${driverId}`),
   acceptTrip: (tripId: number) =>
-    protectedApi.post(`/api/driver/trips/${tripId}/accept`),
+    protectedApi.post(`/driver/trips/${tripId}/accept`),
   rejectTrip: (tripId: number) =>
-    protectedApi.post(`/api/driver/trips/${tripId}/reject`),
+    protectedApi.post(`/driver/trips/${tripId}/reject`),
   startTrip: (tripId: number) =>
-    protectedApi.post(`/api/driver/trips/${tripId}/start`),
+    protectedApi.post(`/driver/trips/${tripId}/start`),
   pauseTrip: (tripId: number) =>
-    protectedApi.post(`/api/driver/trips/${tripId}/pause`),
+    protectedApi.post(`/driver/trips/${tripId}/pause`),
   resumeTrip: (tripId: number) =>
-    protectedApi.post(`/api/driver/trips/${tripId}/resume`),
+    protectedApi.post(`/driver/trips/${tripId}/resume`),
   uploadPOD: (tripId: number, data: { imageUrl: string; signatureUrl?: string; remarks?: string }) =>
-    protectedApi.post(`/api/driver/trips/${tripId}/pod`, data),
+    protectedApi.post(`/driver/trips/${tripId}/pod`, data),
   markDelivered: (tripId: number) =>
-    protectedApi.post(`/api/driver/trips/${tripId}/deliver`),
+    protectedApi.post(`/driver/trips/${tripId}/deliver`),
 
   // Shipper
-  getShipperLoads: () => protectedApi.get('/api/loads/shipper'),
-  getBidsForLoad: (loadId: number) => protectedApi.get(`/api/bids/load/${loadId}`),
-  acceptBid: (bidId: number) => protectedApi.put(`/api/bids/${bidId}/accept`),
-  rejectBid: (bidId: number) => protectedApi.put(`/api/bids/${bidId}/reject`),
+  getShipperLoads: () => protectedApi.get('/loads/shipper'),
+  getBidsForLoad: (loadId: number) => protectedApi.get(`/bids/load/${loadId}`),
+  acceptBid: (bidId: number) => protectedApi.put(`/bids/${bidId}/accept`),
+  rejectBid: (bidId: number) => protectedApi.put(`/bids/${bidId}/reject`),
 
   // Admin
-  getAllTrips: () => protectedApi.get('/api/trips/admin/all'),
-  getReceiptVerifications: () => protectedApi.get('/api/trips/admin/receipt-verifications'),
-  getActiveTrips: () => protectedApi.get('/api/tracking/admin/active'),
+  getAllTrips: () => protectedApi.get('/trips/admin/all'),
+  getReceiptVerifications: () => protectedApi.get('/trips/admin/receipt-verifications'),
+  getActiveTrips: () => protectedApi.get('/tracking/admin/active'),
   // Photos
   uploadTripPhoto: (tripId: number, photoUrl: string, type: 'PICKUP' | 'DESTINATION') =>
-    protectedApi.post(`/api/trips/${tripId}/photos`, { photoUrl, type }),
+    protectedApi.post(`/trips/${tripId}/photos`, { photoUrl, type }),
   getTripPhotos: (tripId: number) =>
-    protectedApi.get(`/api/trips/${tripId}/photos`),
+    protectedApi.get(`/trips/${tripId}/photos`),
 
   // Workflow
   submitDelivery: (tripId: number, data: { deliveryReceiptUrl: string; podUrl: string }) =>
-    protectedApi.post(`/api/trips/${tripId}/submit-delivery`, data),
+    protectedApi.post(`/trips/${tripId}/submit-delivery`, data),
   driverResubmit: (tripId: number, data: { deliveryReceiptUrl: string; podUrl: string }) =>
-    protectedApi.post(`/api/trips/${tripId}/driver-resubmit`, data),
+    protectedApi.post(`/trips/${tripId}/driver-resubmit`, data),
   transporterAcceptDelivery: (tripId: number) =>
-    protectedApi.post(`/api/trips/${tripId}/transporter-accept`),
+    protectedApi.post(`/trips/${tripId}/transporter-accept`),
   transporterRejectDelivery: (tripId: number, rejectionReason: string) =>
-    protectedApi.post(`/api/trips/${tripId}/transporter-reject`, { rejectionReason }),
+    protectedApi.post(`/trips/${tripId}/transporter-reject`, { rejectionReason }),
   getReturnLoadSuggestions: (tripId: number) =>
-    protectedApi.get(`/api/trips/${tripId}/return-load-suggestions`),
+    protectedApi.get(`/trips/${tripId}/return-load-suggestions`),
 };
 
 export type TripStatus =
