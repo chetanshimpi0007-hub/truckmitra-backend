@@ -35,71 +35,71 @@ public class Wallet extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "userid", nullable = false)
     private Long userId; // User ki ID (Driver, Shipper, Transporter)
 
-    @Column(name = "user_role", nullable = false, length = 20)
+    @Column(name = "userrole", nullable = false, length = 20)
     private String userRole; // DRIVER, SHIPPER, TRANSPORTER
 
-    @Column(name = "wallet_number", nullable = false, unique = true, length = 20)
+    @Column(name = "walletnumber", nullable = false, unique = true, length = 20)
     private String walletNumber; // Unique wallet number (e.g., WAL-2024-00001)
 
     @Builder.Default
-    @Column(name = "current_balance", nullable = false, precision = 15, scale = 2)
+    @Column(name = "currentbalance", nullable = false, precision = 15, scale = 2)
     private BigDecimal currentBalance = BigDecimal.ZERO; // Available balance
 
     @Builder.Default
-    @Column(name = "escrow_balance", nullable = false, precision = 15, scale = 2)
+    @Column(name = "escrowbalance", nullable = false, precision = 15, scale = 2)
     private BigDecimal escrowBalance = BigDecimal.ZERO; // Held balance (for ongoing trips)
 
     @Builder.Default
-    @Column(name = "lifetime_deposit", nullable = false, precision = 15, scale = 2)
+    @Column(name = "lifetimedeposit", nullable = false, precision = 15, scale = 2)
     private BigDecimal lifetimeDeposit = BigDecimal.ZERO; // Total money added
 
     @Builder.Default
-    @Column(name = "lifetime_withdrawal", nullable = false, precision = 15, scale = 2)
+    @Column(name = "lifetimewithdrawal", nullable = false, precision = 15, scale = 2)
     private BigDecimal lifetimeWithdrawal = BigDecimal.ZERO; // Total money withdrawn
 
     @Builder.Default
-    @Column(name = "lifetime_earnings", nullable = false, precision = 15, scale = 2)
+    @Column(name = "lifetimeearnings", nullable = false, precision = 15, scale = 2)
     private BigDecimal lifetimeEarnings = BigDecimal.ZERO; // Total trip earnings
 
     @Builder.Default
-    @Column(name = "lifetime_spent", nullable = false, precision = 15, scale = 2)
+    @Column(name = "lifetimespent", nullable = false, precision = 15, scale = 2)
     private BigDecimal lifetimeSpent = BigDecimal.ZERO; // Total money spent
 
     @Builder.Default
-    @Column(name = "wallet_status", nullable = false, length = 20)
+    @Column(name = "walletstatus", nullable = false, length = 20)
     private String walletStatus = "ACTIVE"; // ACTIVE, FROZEN, CLOSED
 
-    @Column(name = "last_transaction_at")
+    @Column(name = "lasttransactionat")
     private LocalDateTime lastTransactionAt;
 
-    @Column(name = "daily_transaction_count")
+    @Column(name = "dailytransactioncount")
     @Builder.Default
     private Integer dailyTransactionCount = 0;
 
-    @Column(name = "daily_transaction_limit")
+    @Column(name = "dailytransactionlimit")
     @Builder.Default
     private BigDecimal dailyTransactionLimit = new BigDecimal("100000"); // ₹1,00,000 default
 
-    @Column(name = "per_transaction_limit")
+    @Column(name = "pertransactionlimit")
     @Builder.Default
     private BigDecimal perTransactionLimit = new BigDecimal("50000"); // ₹50,000 default
 
     // Security fields
-    @Column(name = "wallet_pin")
+    @Column(name = "walletpin")
     private String walletPin; // For transactions (encrypted)
 
-    @Column(name = "is_pin_set")
+    @Column(name = "ispinset")
     @Builder.Default
     private Boolean isPinSet = false;
 
-    @Column(name = "failed_pin_attempts")
+    @Column(name = "failedpinattempts")
     @Builder.Default
     private Integer failedPinAttempts = 0;
 
-    @Column(name = "pin_lock_until")
+    @Column(name = "pinlockuntil")
     private LocalDateTime pinLockUntil;
 
     @Column(length = 500)

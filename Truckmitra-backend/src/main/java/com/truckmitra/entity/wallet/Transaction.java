@@ -35,26 +35,26 @@ public class Transaction extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "transaction_id", nullable = false, unique = true, length = 30)
+    @Column(name = "transactionid", nullable = false, unique = true, length = 30)
     private String transactionId; // Format: TXN-YYYYMMDD-XXXXXXXX
 
-    @Column(name = "wallet_id", nullable = false)
+    @Column(name = "walletid", nullable = false)
     private Long walletId;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "userid", nullable = false)
     private Long userId;
 
-    @Column(name = "user_role", length = 20)
+    @Column(name = "userrole", length = 20)
     private String userRole;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "transaction_type", nullable = false, length = 30)
+    @Column(name = "transactiontype", nullable = false, length = 30)
     private TransactionType transactionType;
 
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
-    @Column(name = "current_balance", nullable = false, precision = 15, scale = 2)
+    @Column(name = "currentbalance", nullable = false, precision = 15, scale = 2)
     private BigDecimal currentBalance; // Balance after transaction
 
     @Column(nullable = false, length = 10)
@@ -63,46 +63,46 @@ public class Transaction extends BaseEntity {
     @Column(nullable = false, length = 20)
     private String status = "PENDING"; // PENDING, SUCCESS, FAILED, REVERSED
 
-    @Column(name = "transaction_date", nullable = false)
+    @Column(name = "transactiondate", nullable = false)
     private LocalDateTime transactionDate;
 
     // Payment method details
-    @Column(name = "payment_method")
+    @Column(name = "paymentmethod")
     private String paymentMethod; // UPI, CARD, NET_BANKING, WALLET, BANK_TRANSFER
 
-    @Column(name = "payment_gateway")
+    @Column(name = "paymentgateway")
     private String paymentGateway; // RAZORPAY, STRIPE, CASHFREE, etc.
 
-    @Column(name = "gateway_transaction_id")
+    @Column(name = "gatewaytransactionid")
     private String gatewayTransactionId; // Reference from payment gateway
 
-    @Column(name = "bank_reference_number")
+    @Column(name = "bankreferencenumber")
     private String bankReferenceNumber;
 
-    @Column(name = "upi_transaction_id")
+    @Column(name = "upitransactionid")
     private String upiTransactionId;
 
     // For internal transfers
-    @Column(name = "from_wallet_id")
+    @Column(name = "fromwalletid")
     private Long fromWalletId;
 
-    @Column(name = "to_wallet_id")
+    @Column(name = "towalletid")
     private Long toWalletId;
 
-    @Column(name = "from_user_id")
+    @Column(name = "fromuserid")
     private Long fromUserId;
 
-    @Column(name = "to_user_id")
+    @Column(name = "touserid")
     private Long toUserId;
 
     // Trip related
-    @Column(name = "trip_id")
+    @Column(name = "tripid")
     private Long tripId;
 
-    @Column(name = "load_id")
+    @Column(name = "loadid")
     private Long loadId;
 
-    @Column(name = "bid_id")
+    @Column(name = "bidid")
     private Long bidId;
 
     // Additional details
@@ -112,43 +112,43 @@ public class Transaction extends BaseEntity {
     private String remarks;
 
     // Failure handling
-    @Column(name = "failure_reason")
+    @Column(name = "failurereason")
     private String failureReason;
 
-    @Column(name = "retry_count")
+    @Column(name = "retrycount")
     private Integer retryCount = 0;
 
-    @Column(name = "settled_at")
+    @Column(name = "settledat")
     private LocalDateTime settledAt;
 
     // For reversals
-    @Column(name = "reversed_transaction_id")
+    @Column(name = "reversedtransactionid")
     private Long reversedTransactionId;
 
-    @Column(name = "reversal_reason")
+    @Column(name = "reversalreason")
     private String reversalReason;
 
     // Audit
-    @Column(name = "initiated_by")
+    @Column(name = "initiatedby")
     private String initiatedBy; // USER, SYSTEM, ADMIN
 
-    @Column(name = "approved_by")
+    @Column(name = "approvedby")
     private Long approvedBy; // Admin ID if manual approval
 
-    @Column(name = "approved_at")
+    @Column(name = "approvedat")
     private LocalDateTime approvedAt;
 
     // Metadata
-    @Column(name = "ip_address")
+    @Column(name = "ipaddress")
     private String ipAddress;
 
-    @Column(name = "user_agent")
+    @Column(name = "useragent")
     private String userAgent;
 
-    @Column(name = "request_payload", length = 1000)
+    @Column(name = "requestpayload", length = 1000)
     private String requestPayload; // For debugging
 
-    @Column(name = "response_payload", length = 1000)
+    @Column(name = "responsepayload", length = 1000)
     private String responsePayload; // From payment gateway
 
     // Business methods

@@ -32,38 +32,38 @@ public class NotificationLog extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "userid", nullable = false)
     private Long userId;
     
-    @Column(name = "recipient_address", nullable = false)
+    @Column(name = "recipientaddress", nullable = false)
     private String recipientAddress; // Email ya Phone number
     
     @Enumerated(EnumType.STRING)
-    @Column(name = "channel_type", nullable = false)
+    @Column(name = "channeltype", nullable = false)
     private ChannelType channelType;
     
     @Column(nullable = false)
     private String subject;
     
-    @Column(name = "content_body", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "contentbody", columnDefinition = "TEXT", nullable = false)
     private String contentBody;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NotificationStatus status;
     
-    @Column(name = "error_message")
+    @Column(name = "errormessage")
     private String errorMessage;
     
-    @Column(name = "retry_count")
+    @Column(name = "retrycount")
     private Integer retryCount;
     
-    @Column(name = "sent_at")
+    @Column(name = "sentat")
     private LocalDateTime sentAt;
     
-    @Column(name = "delivered_at")
+    @Column(name = "deliveredat")
     private LocalDateTime deliveredAt;
     
-    @Column(name = "template_name", nullable = false)
+    @Column(name = "templatename", nullable = false)
     private String templateName;
 }
